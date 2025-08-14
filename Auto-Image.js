@@ -57,107 +57,155 @@
 
   const getCurrentTheme = () => CONFIG.THEMES[CONFIG.currentTheme]
 
+  const switchTheme = (themeName) => {
+    if (CONFIG.THEMES[themeName]) {
+      CONFIG.currentTheme = themeName
+      saveThemePreference()
+
+      // Remove existing theme styles
+      const existingStyle = document.querySelector('style[data-wplace-theme="true"]')
+      if (existingStyle) {
+        existingStyle.remove()
+      }
+
+      // Recreate UI with new theme
+      const existingContainer = document.getElementById("wplace-image-bot-container")
+      const existingStats = document.getElementById("wplace-stats-container")
+      if (existingContainer) existingContainer.remove()
+      if (existingStats) existingStats.remove()
+
+      createUI()
+    }
+  }
+
+  const saveThemePreference = () => {
+    try {
+      localStorage.setItem("wplace-theme", CONFIG.currentTheme)
+    } catch (e) {
+      console.warn("Could not save theme preference:", e)
+    }
+  }
+
+  const loadThemePreference = () => {
+    try {
+      const saved = localStorage.getItem("wplace-theme")
+      if (saved && CONFIG.THEMES[saved]) {
+        CONFIG.currentTheme = saved
+      }
+    } catch (e) {
+      console.warn("Could not load theme preference:", e)
+    }
+  }
+
   // BILINGUAL TEXT STRINGS
-  const TEXTS = {
-    pt: {
-      title: "WPlace Auto-Image",
-      initBot: "Iniciar Auto-BOT",
-      uploadImage: "Upload da Imagem",
-      resizeImage: "Redimensionar Imagem",
-      selectPosition: "Selecionar Posição",
-      startPainting: "Iniciar Pintura",
-      stopPainting: "Parar Pintura",
-      checkingColors: "🔍 Verificando cores disponíveis...",
-      noColorsFound: "❌ Abra a paleta de cores no site e tente novamente!",
-      colorsFound: "✅ {count} cores disponíveis encontradas",
-      loadingImage: "🖼️ Carregando imagem...",
-      imageLoaded: "✅ Imagem carregada com {count} pixels válidos",
-      imageError: "❌ Erro ao carregar imagem",
-      selectPositionAlert: "Pinte o primeiro pixel na localização onde deseja que a arte comece!",
-      waitingPosition: "👆 Aguardando você pintar o pixel de referência...",
-      positionSet: "✅ Posição definida com sucesso!",
-      positionTimeout: "❌ Tempo esgotado para selecionar posição",
-      startPaintingMsg: "🎨 Iniciando pintura...",
-      paintingProgress: "🧱 Progresso: {painted}/{total} pixels...",
-      noCharges: "⌛ Sem cargas. Aguardando {time}...",
-      paintingStopped: "⏹️ Pintura interrompida pelo usuário",
-      paintingComplete: "✅ Pintura concluída! {count} pixels pintados.",
-      paintingError: "❌ Erro durante a pintura",
-      missingRequirements: "❌ Carregue uma imagem e selecione uma posição primeiro",
-      progress: "Progresso",
-      pixels: "Pixels",
-      charges: "Cargas",
-      estimatedTime: "Tempo estimado",
-      initMessage: "Clique em 'Iniciar Auto-BOT' para começar",
-      waitingInit: "Aguardando inicialização...",
-      resizeSuccess: "✅ Imagem redimensionada para {width}x{height}",
-      paintingPaused: "⏸️ Pintura pausada na posição X: {x}, Y: {y}",
-      captchaNeeded: "❗ Token CAPTCHA necessário. Pinte um pixel manualmente para continuar.",
-      saveData: "Salvar Progresso",
-      loadData: "Carregar Progresso",
-      saveToFile: "Salvar em Arquivo",
-      loadFromFile: "Carregar de Arquivo",
-      dataManager: "Dados",
-      autoSaved: "✅ Progresso salvo automaticamente",
-      dataLoaded: "✅ Progresso carregado com sucesso",
-      fileSaved: "✅ Salvo em arquivo com sucesso",
-      fileLoaded: "✅ Carregado de arquivo com sucesso",
-      noSavedData: "❌ Nenhum progresso salvo encontrado",
-      savedDataFound: "✅ Progresso salvo encontrado! Carregar para continuar?",
-      savedDate: "Salvo em: {date}",
-      clickLoadToContinue: "Clique em 'Carregar Progresso' para continuar.",
-      fileError: "❌ Erro ao processar arquivo",
-      invalidFileFormat: "❌ Formato de arquivo inválido",
-    },
+  const TEXT = {
     en: {
-      title: "WPlace Auto-Image",
-      initBot: "Start Auto-BOT",
+      title: "WPlace Image Bot",
+      initBot: "Initialize Bot",
       uploadImage: "Upload Image",
       resizeImage: "Resize Image",
       selectPosition: "Select Position",
       startPainting: "Start Painting",
       stopPainting: "Stop Painting",
-      checkingColors: "🔍 Checking available colors...",
-      noColorsFound: "❌ Open the color palette on the site and try again!",
-      colorsFound: "✅ {count} available colors found",
-      loadingImage: "🖼️ Loading image...",
-      imageLoaded: "✅ Image loaded with {count} valid pixels",
-      imageError: "❌ Error loading image",
-      selectPositionAlert: "Paint the first pixel at the location where you want the art to start!",
-      waitingPosition: "👆 Waiting for you to paint the reference pixel...",
-      positionSet: "✅ Position set successfully!",
-      positionTimeout: "❌ Timeout for position selection",
-      startPaintingMsg: "🎨 Starting painting...",
-      paintingProgress: "🧱 Progress: {painted}/{total} pixels...",
-      noCharges: "⌛ No charges. Waiting {time}...",
-      paintingStopped: "⏹️ Painting stopped by user",
-      paintingComplete: "✅ Painting complete! {count} pixels painted.",
-      paintingError: "❌ Error during painting",
-      missingRequirements: "❌ Load an image and select a position first",
+      saveData: "Save Progress",
+      loadData: "Load Progress",
+      saveToFile: "Export Data",
+      loadFromFile: "Import Data",
+      minimize: "Minimize",
+      waitingInit: "Click 'Initialize Bot' to start",
+      checkingColors: "Checking available colors...",
+      colorsFound: "Found {count} available colors",
+      noColorsFound: "No colors available. Please refresh the page.",
+      loadingImage: "Loading image...",
+      imageLoaded: "Image loaded! {count} pixels to paint",
+      imageError: "Error loading image",
+      waitingPosition: "Click on the canvas to set starting position",
+      positionSet: "Starting position set successfully",
+      positionTimeout: "Position selection timed out",
+      missingRequirements: "Please upload image and select position first",
+      startPaintingMsg: "Starting painting process...",
+      paintingProgress: "Painting... {painted}/{total} pixels",
+      paintingComplete: "Painting completed! {count} pixels painted",
+      paintingStopped: "Painting stopped by user",
+      paintingPaused: "Painting paused at position ({x}, {y})",
+      paintingError: "Error during painting process",
+      noCharges: "No charges available. Waiting {time}...",
+      captchaNeeded: "CAPTCHA token needed. Please paint a pixel manually first.",
+      autoSaved: "Progress automatically saved",
+      dataLoaded: "Progress loaded successfully",
+      noSavedData: "No saved progress found",
+      savedDataFound: "Saved progress found!",
+      clickLoadToContinue: "Click 'Load Progress' to continue",
+      fileSaved: "Data exported to file successfully",
+      fileLoaded: "Data imported from file successfully",
+      fileError: "Error with file operation",
+      invalidFileFormat: "Invalid file format",
+      resizeSuccess: "Image resized to {width}x{height}",
+      selectPositionAlert: "Click on the canvas where you want to start painting",
       progress: "Progress",
       pixels: "Pixels",
       charges: "Charges",
-      estimatedTime: "Estimated time",
-      initMessage: "Click 'Start Auto-BOT' to begin",
-      waitingInit: "Waiting for initialization...",
-      resizeSuccess: "✅ Image resized to {width}x{height}",
-      paintingPaused: "⏸️ Painting paused at position X: {x}, Y: {y}",
-      captchaNeeded: "❗ CAPTCHA token needed. Paint one pixel manually to continue.",
-      saveData: "Save Progress",
-      loadData: "Load Progress",
-      saveToFile: "Save to File",
-      loadFromFile: "Load from File",
-      dataManager: "Data Manager",
-      autoSaved: "✅ Progress saved automatically",
-      dataLoaded: "✅ Progress loaded successfully",
-      fileSaved: "✅ Progress saved to file successfully",
-      fileLoaded: "✅ Progress loaded from file successfully",
-      noSavedData: "❌ No saved progress found",
-      savedDataFound: "✅ Saved progress found! Load to continue?",
-      savedDate: "Saved on: {date}",
-      clickLoadToContinue: "Click 'Load Progress' to continue.",
-      fileError: "❌ Error processing file",
-      invalidFileFormat: "❌ Invalid file format",
+      estimatedTime: "Est. Time",
+      width: "Width",
+      height: "Height",
+      keepAspect: "Keep Aspect Ratio",
+      apply: "Apply",
+      cancel: "Cancel",
+      initMessage: "Initialize the bot to see statistics",
+    },
+    pt: {
+      title: "WPlace Bot de Imagem",
+      initBot: "Inicializar Bot",
+      uploadImage: "Enviar Imagem",
+      resizeImage: "Redimensionar",
+      selectPosition: "Selecionar Posição",
+      startPainting: "Iniciar Pintura",
+      stopPainting: "Parar Pintura",
+      saveData: "Salvar Progresso",
+      loadData: "Carregar Progresso",
+      saveToFile: "Exportar Dados",
+      loadFromFile: "Importar Dados",
+      minimize: "Minimizar",
+      waitingInit: "Clique em 'Inicializar Bot' para começar",
+      checkingColors: "Verificando cores disponíveis...",
+      colorsFound: "Encontradas {count} cores disponíveis",
+      noColorsFound: "Nenhuma cor disponível. Atualize a página.",
+      loadingImage: "Carregando imagem...",
+      imageLoaded: "Imagem carregada! {count} pixels para pintar",
+      imageError: "Erro ao carregar imagem",
+      waitingPosition: "Clique no canvas para definir posição inicial",
+      positionSet: "Posição inicial definida com sucesso",
+      positionTimeout: "Tempo limite para seleção de posição",
+      missingRequirements: "Por favor, envie uma imagem e selecione a posição primeiro",
+      startPaintingMsg: "Iniciando processo de pintura...",
+      paintingProgress: "Pintando... {painted}/{total} pixels",
+      paintingComplete: "Pintura concluída! {count} pixels pintados",
+      paintingStopped: "Pintura interrompida pelo usuário",
+      paintingPaused: "Pintura pausada na posição ({x}, {y})",
+      paintingError: "Erro durante o processo de pintura",
+      noCharges: "Sem cargas disponíveis. Aguardando {time}...",
+      captchaNeeded: "Token CAPTCHA necessário. Pinte um pixel manualmente primeiro.",
+      autoSaved: "Progresso salvo automaticamente",
+      dataLoaded: "Progresso carregado com sucesso",
+      noSavedData: "Nenhum progresso salvo encontrado",
+      savedDataFound: "Progresso salvo encontrado!",
+      clickLoadToContinue: "Clique em 'Carregar Progresso' para continuar",
+      fileSaved: "Dados exportados para arquivo com sucesso",
+      fileLoaded: "Dados importados do arquivo com sucesso",
+      fileError: "Erro na operação de arquivo",
+      invalidFileFormat: "Formato de arquivo inválido",
+      resizeSuccess: "Imagem redimensionada para {width}x{height}",
+      selectPositionAlert: "Clique no canvas onde deseja começar a pintar",
+      progress: "Progresso",
+      pixels: "Pixels",
+      charges: "Cargas",
+      estimatedTime: "Tempo Est.",
+      width: "Largura",
+      height: "Altura",
+      keepAspect: "Manter Proporção",
+      apply: "Aplicar",
+      cancel: "Cancelar",
+      initMessage: "Inicialize o bot para ver as estatísticas",
     },
   }
 
@@ -182,10 +230,6 @@
     estimatedTime: 0,
     language: "en",
   }
-
-  let updateUI = () => {}
-  let updateStats = () => {}
-  let updateDataButtons = () => {}
 
   // Global variable to store the captured CAPTCHA token.
   let capturedCaptchaToken = null
@@ -219,13 +263,16 @@
     return originalFetch(url, options)
   }
 
+  // LANGUAGE DETECTION
   async function detectLanguage() {
     try {
-      const response = await fetch("https://ipapi.co/json/")
+      const response = await fetch("https://backend.wplace.live/me", {
+        credentials: "include",
+      })
       const data = await response.json()
-      state.language = data.country === "BR" ? "pt" : "en"
+      state.language = data.language === "pt" ? "pt" : "en"
     } catch {
-      state.language = "en"
+      state.language = navigator.language.startsWith("pt") ? "pt" : "en"
     }
   }
 
@@ -233,7 +280,67 @@
   const Utils = {
     sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
 
+    t: (key, params = {}) => {
+      let text = TEXT[state.language]?.[key] || TEXT.en[key] || key
+      Object.keys(params).forEach((param) => {
+        text = text.replace(`{${param}}`, params[param])
+      })
+      return text
+    },
+
+    showAlert: (message, type = "info") => {
+      const alertDiv = document.createElement("div")
+      alertDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        z-index: 10001;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        animation: slideDown 0.3s ease-out;
+        font-family: 'Segoe UI', sans-serif;
+      `
+
+      const colors = {
+        info: "background: linear-gradient(135deg, #3498db, #2980b9);",
+        success: "background: linear-gradient(135deg, #27ae60, #229954);",
+        warning: "background: linear-gradient(135deg, #f39c12, #e67e22);",
+        error: "background: linear-gradient(135deg, #e74c3c, #c0392b);",
+      }
+
+      alertDiv.style.cssText += colors[type] || colors.info
+
+      const style = document.createElement("style")
+      style.textContent = `
+        @keyframes slideDown {
+          from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+          to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+      `
+      document.head.appendChild(style)
+
+      alertDiv.textContent = message
+      document.body.appendChild(alertDiv)
+
+      setTimeout(() => {
+        alertDiv.style.animation = "slideDown 0.3s ease-out reverse"
+        setTimeout(() => {
+          document.body.removeChild(alertDiv)
+          document.head.removeChild(style)
+        }, 300)
+      }, 4000)
+    },
+
     colorDistance: (a, b) => Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2) + Math.pow(a[2] - b[2], 2)),
+
+    isWhitePixel: (r, g, b) =>
+      r >= CONFIG.WHITE_THRESHOLD && g >= CONFIG.WHITE_THRESHOLD && b >= CONFIG.WHITE_THRESHOLD,
 
     createImageUploader: () =>
       new Promise((resolve) => {
@@ -317,365 +424,210 @@
       return result
     },
 
+    calculateEstimatedTime: (remainingPixels, charges, cooldown) => {
+      if (remainingPixels <= 0) return 0
+      const cyclesNeeded = Math.ceil(remainingPixels / Math.max(charges, 1))
+      return cyclesNeeded * cooldown
+    },
+
     // Save/Load Progress Functions
     saveProgress: () => {
       try {
         const progressData = {
-          version: "1.0",
           timestamp: Date.now(),
           state: {
-            imageLoaded: state.imageLoaded,
             totalPixels: state.totalPixels,
             paintedPixels: state.paintedPixels,
             lastPosition: state.lastPosition,
             startPosition: state.startPosition,
             region: state.region,
-            paintedMap: state.paintedMap,
-            imageData: state.imageData,
-            availableColors: state.availableColors,
+            imageLoaded: state.imageLoaded,
             colorsChecked: state.colorsChecked,
-            language: state.language,
-          },
-        }
-
-        localStorage.setItem("wplace-auto-image-progress", JSON.stringify(progressData))
-        console.log("✅ Progress saved successfully")
-        return true
-      } catch (error) {
-        console.error("❌ Error saving progress:", error)
-        return false
-      }
-    },
-
-    saveProgressToFile: () => {
-      try {
-        const progressData = {
-          timestamp: Date.now(),
-          version: "1.0",
-          appName: "WPlace Auto-Image",
-          state: {
-            imageLoaded: state.imageLoaded,
-            totalPixels: state.totalPixels,
-            paintedPixels: state.paintedPixels,
-            lastPosition: state.lastPosition,
-            startPosition: state.startPosition,
-            region: state.region,
-            paintedMap: state.paintedMap,
-            imageData: state.imageData,
             availableColors: state.availableColors,
-            language: state.language,
           },
+          imageData: state.imageData
+            ? {
+                width: state.imageData.width,
+                height: state.imageData.height,
+                pixels: Array.from(state.imageData.pixels),
+                totalPixels: state.imageData.totalPixels,
+              }
+            : null,
+          paintedMap: state.paintedMap ? state.paintedMap.map((row) => Array.from(row)) : null,
         }
 
-        const filename = `wplace-progress-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.json`
-        const dataString = JSON.stringify(progressData, null, 2)
-        Utils.createFileDownloader(dataString, filename)
-
-        console.log("✅ Progress saved to file")
+        localStorage.setItem("wplace-bot-progress", JSON.stringify(progressData))
         return true
       } catch (error) {
-        console.error("❌ Error saving progress to file:", error)
+        console.error("Error saving progress:", error)
         return false
       }
     },
 
     loadProgress: () => {
       try {
-        const savedData = localStorage.getItem("wplace-auto-image-progress")
-        if (!savedData) {
-          return null
-        }
-
-        const progressData = JSON.parse(savedData)
-
-        // Validate data structure
-        if (!progressData.version || !progressData.state) {
-          return null
-        }
-
-        return progressData
+        const saved = localStorage.getItem("wplace-bot-progress")
+        return saved ? JSON.parse(saved) : null
       } catch (error) {
-        console.error("❌ Error loading progress:", error)
+        console.error("Error loading progress:", error)
         return null
-      }
-    },
-
-    restoreProgress: (progressData) => {
-      try {
-        const savedState = progressData.state
-
-        // Restore state
-        state.imageLoaded = savedState.imageLoaded
-        state.totalPixels = savedState.totalPixels
-        state.paintedPixels = savedState.paintedPixels
-        state.lastPosition = savedState.lastPosition || { x: 0, y: 0 }
-        state.startPosition = savedState.startPosition
-        state.region = savedState.region
-        state.paintedMap = savedState.paintedMap
-        state.imageData = savedState.imageData
-        state.availableColors = savedState.availableColors
-        state.language = savedState.language
-        state.colorsChecked = savedState.availableColors && savedState.availableColors.length > 0
-
-        // Update UI to reflect restored state
-        if (state.imageLoaded) {
-          const initBotBtn = document.querySelector("#initBotBtn")
-          const uploadBtn = document.querySelector("#uploadBtn")
-          const resizeBtn = document.querySelector("#resizeBtn")
-          const selectPosBtn = document.querySelector("#selectPosBtn")
-          const startBtn = document.querySelector("#startBtn")
-          const saveBtn = document.querySelector("#saveBtn")
-          const progressBar = document.querySelector("#progressBar")
-
-          // Show/hide appropriate buttons based on state
-          if (state.colorsChecked) {
-            initBotBtn.style.display = "none"
-            uploadBtn.disabled = false
-            selectPosBtn.disabled = false
-          } else {
-            initBotBtn.style.display = "block"
-            uploadBtn.disabled = true
-            selectPosBtn.disabled = true
-          }
-
-          resizeBtn.disabled = false
-          saveBtn.disabled = false
-
-          if (state.startPosition && state.region) {
-            selectPosBtn.disabled = false
-            startBtn.disabled = false
-          }
-
-          // Update progress bar
-          const progress = state.totalPixels > 0 ? Math.round((state.paintedPixels / state.totalPixels) * 100) : 0
-          progressBar.style.width = `${progress}%`
-
-          // Update status message based on progress
-          if (state.paintedPixels > 0) {
-            if (state.lastPosition.x > 0 || state.lastPosition.y > 0) {
-              updateUI("paintingPaused", "warning", {
-                x: state.lastPosition.x,
-                y: state.lastPosition.y,
-              })
-            } else {
-              updateUI("paintingProgress", "default", {
-                painted: state.paintedPixels,
-                total: state.totalPixels,
-              })
-            }
-          } else {
-            updateUI("imageLoaded", "success", { count: state.totalPixels })
-          }
-        }
-
-        // Update stats to show current progress
-        updateStats()
-        updateDataButtons()
-        return true
-      } catch (error) {
-        console.error("❌ Error restoring progress:", error)
-        return false
       }
     },
 
     clearProgress: () => {
       try {
-        localStorage.removeItem("wplace-auto-image-progress")
-        console.log("✅ Progress data cleared")
+        localStorage.removeItem("wplace-bot-progress")
         return true
       } catch (error) {
-        console.error("❌ Error clearing progress:", error)
+        console.error("Error clearing progress:", error)
         return false
       }
     },
 
-    hasSavedProgress: () => {
-      return localStorage.getItem("wplace-auto-image-progress") !== null
+    restoreProgress: (savedData) => {
+      try {
+        // Restore state
+        Object.assign(state, savedData.state)
+
+        // Restore image data
+        if (savedData.imageData) {
+          state.imageData = {
+            ...savedData.imageData,
+            pixels: new Uint8ClampedArray(savedData.imageData.pixels),
+          }
+        }
+
+        // Restore painted map
+        if (savedData.paintedMap) {
+          state.paintedMap = savedData.paintedMap.map((row) => Array.from(row))
+        }
+
+        return true
+      } catch (error) {
+        console.error("Error restoring progress:", error)
+        return false
+      }
     },
 
     saveProgressToFile: () => {
       try {
-        updateUI("default", "default", {})
-
         const progressData = {
           timestamp: Date.now(),
           version: "1.0",
-          appName: "WPlace Auto-Image",
           state: {
-            imageLoaded: state.imageLoaded,
             totalPixels: state.totalPixels,
             paintedPixels: state.paintedPixels,
             lastPosition: state.lastPosition,
             startPosition: state.startPosition,
             region: state.region,
-            paintedMap: state.paintedMap,
-            imageData: state.imageData,
+            imageLoaded: state.imageLoaded,
+            colorsChecked: state.colorsChecked,
             availableColors: state.availableColors,
-            language: state.language,
           },
+          imageData: state.imageData
+            ? {
+                width: state.imageData.width,
+                height: state.imageData.height,
+                pixels: Array.from(state.imageData.pixels),
+                totalPixels: state.imageData.totalPixels,
+              }
+            : null,
+          paintedMap: state.paintedMap ? state.paintedMap.map((row) => Array.from(row)) : null,
         }
 
-        const filename = `wplace-progress-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.json`
-        const dataString = JSON.stringify(progressData, null, 2)
-        Utils.createFileDownloader(dataString, filename)
-
-        console.log("✅ Progress saved to file")
+        const filename = `wplace-bot-progress-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.json`
+        Utils.createFileDownloader(JSON.stringify(progressData, null, 2), filename)
         return true
       } catch (error) {
-        console.error("❌ Error saving progress to file:", error)
+        console.error("Error saving to file:", error)
         return false
       }
     },
 
     loadProgressFromFile: async () => {
       try {
-        updateUI("default", "default", {})
+        const data = await Utils.createFileUploader()
 
-        const fileData = await Utils.createFileUploader()
-
-        // Validate file format
-        if (!fileData.state || !fileData.timestamp) {
-          throw new Error("Invalid file format - missing required fields")
+        if (!data.version || !data.state) {
+          throw new Error("Invalid file format")
         }
 
-        if (!fileData.appName || fileData.appName !== "WPlace Auto-Image") {
-          throw new Error("Invalid file format - not a WPlace Auto-Image file")
-        }
-
-        const savedState = fileData.state
-
-        // Restore state
-        state.imageLoaded = savedState.imageLoaded
-        state.totalPixels = savedState.totalPixels
-        state.paintedPixels = savedState.paintedPixels
-        state.lastPosition = savedState.lastPosition || { x: 0, y: 0 }
-        state.startPosition = savedState.startPosition
-        state.region = savedState.region
-        state.paintedMap = savedState.paintedMap
-        state.imageData = savedState.imageData
-        state.availableColors = savedState.availableColors
-        state.language = savedState.language
-        state.colorsChecked = savedState.availableColors && savedState.availableColors.length > 0
-
-        // Update UI to reflect restored state
-        if (state.imageLoaded) {
-          const initBotBtn = document.querySelector("#initBotBtn")
-          const uploadBtn = document.querySelector("#uploadBtn")
-          const resizeBtn = document.querySelector("#resizeBtn")
-          const selectPosBtn = document.querySelector("#selectPosBtn")
-          const startBtn = document.querySelector("#startBtn")
-          const saveBtn = document.querySelector("#saveBtn")
-          const progressBar = document.querySelector("#progressBar")
-
-          // Show/hide appropriate buttons based on state
-          if (state.colorsChecked) {
-            initBotBtn.style.display = "none"
-            uploadBtn.disabled = false
-            selectPosBtn.disabled = false
-          } else {
-            initBotBtn.style.display = "block"
-            uploadBtn.disabled = true
-            selectPosBtn.disabled = true
-          }
-
-          resizeBtn.disabled = false
-          saveBtn.disabled = false
-
-          if (state.startPosition && state.region) {
-            selectPosBtn.disabled = false
-            startBtn.disabled = false
-          }
-
-          // Update progress bar
-          const progress = state.totalPixels > 0 ? Math.round((state.paintedPixels / state.totalPixels) * 100) : 0
-          progressBar.style.width = `${progress}%`
-
-          // Update status message based on progress
-          if (state.paintedPixels > 0) {
-            if (state.lastPosition.x > 0 || state.lastPosition.y > 0) {
-              updateUI("paintingPaused", "warning", {
-                x: state.lastPosition.x,
-                y: state.lastPosition.y,
-              })
-            } else {
-              updateUI("paintingProgress", "default", {
-                painted: state.paintedPixels,
-                total: state.totalPixels,
-              })
-            }
-          } else {
-            updateUI("imageLoaded", "success", { count: state.totalPixels })
-          }
-        }
-
-        // Update stats to show current progress
-        updateStats()
-        updateDataButtons()
-        console.log("✅ Progress loaded from file")
-        return true
+        const success = Utils.restoreProgress(data)
+        return success
       } catch (error) {
-        if (error.message === "Invalid JSON file") {
-          Utils.showAlert(Utils.t("invalidFileFormat"), "error")
-        } else {
-          Utils.showAlert(Utils.t("fileError"), "error")
+        console.error("Error loading from file:", error)
+        throw error
+      }
+    },
+  }
+
+  // IMAGE PROCESSOR CLASS
+  class ImageProcessor {
+    constructor(imageSrc) {
+      this.imageSrc = imageSrc
+      this.img = null
+      this.canvas = null
+      this.ctx = null
+    }
+
+    async load() {
+      return new Promise((resolve, reject) => {
+        this.img = new Image()
+        this.img.crossOrigin = "anonymous"
+        this.img.onload = () => {
+          this.canvas = document.createElement("canvas")
+          this.ctx = this.canvas.getContext("2d")
+          this.canvas.width = this.img.width
+          this.canvas.height = this.img.height
+          this.ctx.drawImage(this.img, 0, 0)
+          resolve()
         }
+        this.img.onerror = reject
+        this.img.src = this.imageSrc
+      })
+    }
+
+    getDimensions() {
+      return {
+        width: this.canvas.width,
+        height: this.canvas.height,
       }
-    },
+    }
 
-    showAlert: (message, type = "info") => {
-      const alert = document.createElement("div")
-      alert.style.position = "fixed"
-      alert.style.top = "20px"
-      alert.style.left = "50%"
-      alert.style.transform = "translateX(-50%)"
-      alert.style.padding = "15px 20px"
-      alert.style.background = CONFIG.THEME[type] || CONFIG.THEME.accent
-      alert.style.color = CONFIG.THEME.text
-      alert.style.borderRadius = "5px"
-      alert.style.zIndex = "10000"
-      alert.style.boxShadow = "0 3px 10px rgba(0,0,0,0.3)"
-      alert.style.display = "flex"
-      alert.style.alignItems = "center"
-      alert.style.gap = "10px"
+    getPixelData() {
+      return this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height).data
+    }
 
-      const icons = {
-        error: "exclamation-circle",
-        success: "check-circle",
-        warning: "exclamation-triangle",
-        info: "info-circle",
-      }
+    resize(newWidth, newHeight) {
+      const tempCanvas = document.createElement("canvas")
+      const tempCtx = tempCanvas.getContext("2d")
 
-      alert.innerHTML = `
-        <i class="fas fa-${icons[type] || "info-circle"}"></i>
-        <span>${message}</span>
-      `
+      tempCanvas.width = newWidth
+      tempCanvas.height = newHeight
 
-      document.body.appendChild(alert)
+      tempCtx.imageSmoothingEnabled = false
+      tempCtx.drawImage(this.canvas, 0, 0, newWidth, newHeight)
 
-      setTimeout(() => {
-        alert.style.opacity = "0"
-        alert.style.transition = "opacity 0.5s"
-        setTimeout(() => alert.remove(), 500)
-      }, 3000)
-    },
+      this.canvas.width = newWidth
+      this.canvas.height = newHeight
+      this.ctx.imageSmoothingEnabled = false
+      this.ctx.drawImage(tempCanvas, 0, 0)
 
-    calculateEstimatedTime: (remainingPixels, currentCharges, cooldown) => {
-      const pixelsPerCharge = currentCharges > 0 ? currentCharges : 0
-      const fullCycles = Math.ceil((remainingPixels - pixelsPerCharge) / Math.max(currentCharges, 1))
-      return fullCycles * cooldown + (remainingPixels - 1) * 100
-    },
+      return this.ctx.getImageData(0, 0, newWidth, newHeight).data
+    }
 
-    isWhitePixel: (r, g, b) => {
-      return r >= CONFIG.WHITE_THRESHOLD && g >= CONFIG.WHITE_THRESHOLD && b >= CONFIG.WHITE_THRESHOLD
-    },
+    generatePreview(width, height) {
+      const previewCanvas = document.createElement("canvas")
+      const previewCtx = previewCanvas.getContext("2d")
 
-    t: (key, params = {}) => {
-      let text = TEXTS[state.language][key] || TEXTS.en[key] || key
-      for (const [k, v] of Object.entries(params)) {
-        text = text.replace(`{${k}}`, v)
-      }
-      return text
-    },
+      previewCanvas.width = width
+      previewCanvas.height = height
+
+      previewCtx.imageSmoothingEnabled = false
+      previewCtx.drawImage(this.img, 0, 0, width, height)
+
+      return previewCanvas.toDataURL()
+    }
   }
 
   // WPLACE API SERVICE
@@ -718,115 +670,38 @@
         const data = await res.json()
         return {
           charges: data.charges?.count || 0,
-          cooldown: data.charges?.cooldownMs || CONFIG.COOLDOWN_DEFAULT,
+          cooldown: data.charges?.next || CONFIG.COOLDOWN_DEFAULT,
         }
-      } catch {
-        return { charges: 0, cooldown: CONFIG.COOLDOWN_DEFAULT }
+      } catch (e) {
+        console.error("Failed to get charges:", e)
+        return {
+          charges: 0,
+          cooldown: CONFIG.COOLDOWN_DEFAULT,
+        }
       }
     },
   }
 
-  class ImageProcessor {
-    constructor(imageSrc) {
-      this.imageSrc = imageSrc
-      this.img = new Image()
-      this.canvas = document.createElement("canvas")
-      this.ctx = this.canvas.getContext("2d")
-      this.previewCanvas = document.createElement("canvas")
-      this.previewCtx = this.previewCanvas.getContext("2d")
-    }
+  // COLOR MATCHING FUNCTION
+  function findClosestColor(targetRgb, availableColors) {
+    let minDistance = Number.POSITIVE_INFINITY
+    let closestColorId = availableColors[0]?.id || 1
 
-    async load() {
-      return new Promise((resolve, reject) => {
-        this.img.onload = () => {
-          this.canvas.width = this.img.width
-          this.canvas.height = this.img.height
-          this.ctx.drawImage(this.img, 0, 0)
-          resolve()
-        }
-        this.img.onerror = reject
-        this.img.src = this.imageSrc
-      })
-    }
-
-    getPixelData() {
-      return this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height).data
-    }
-
-    getDimensions() {
-      return { width: this.canvas.width, height: this.canvas.height }
-    }
-
-    resize(newWidth, newHeight) {
-      const tempCanvas = document.createElement("canvas")
-      tempCanvas.width = newWidth
-      tempCanvas.height = newHeight
-      const tempCtx = tempCanvas.getContext("2d")
-
-      tempCtx.drawImage(this.img, 0, 0, newWidth, newHeight)
-
-      this.canvas.width = newWidth
-      this.canvas.height = newHeight
-      this.ctx.drawImage(tempCanvas, 0, 0)
-
-      return this.getPixelData()
-    }
-
-    generatePreview(newWidth, newHeight) {
-      this.previewCanvas.width = newWidth
-      this.previewCanvas.height = newHeight
-      this.previewCtx.imageSmoothingEnabled = false
-      this.previewCtx.drawImage(this.img, 0, 0, newWidth, newHeight)
-      return this.previewCanvas.toDataURL()
-    }
-  }
-
-  function findClosestColor(rgb, palette) {
-    return palette.reduce(
-      (closest, current) => {
-        const currentDistance = Utils.colorDistance(rgb, current.rgb)
-        return currentDistance < closest.distance ? { color: current, distance: currentDistance } : closest
-      },
-      { color: palette[0], distance: Utils.colorDistance(rgb, palette[0].rgb) },
-    ).color.id
-  }
-
-  function switchTheme(themeName) {
-    if (!CONFIG.THEMES[themeName]) return
-
-    CONFIG.currentTheme = themeName
-
-    // Save theme preference
-    try {
-      localStorage.setItem("wplace-theme", themeName)
-    } catch (e) {
-      console.warn("Could not save theme preference:", e)
-    }
-
-    // Recreate UI with new theme
-    const existingContainer = document.getElementById("wplace-image-bot-container")
-    const existingStats = document.getElementById("wplace-stats-container")
-
-    if (existingContainer) existingContainer.remove()
-    if (existingStats) existingStats.remove()
-
-    // Remove existing styles
-    const existingStyle = document.querySelector("style[data-wplace-theme]")
-    if (existingStyle) existingStyle.remove()
-
-    createUI()
-  }
-
-  function loadThemePreference() {
-    try {
-      const savedTheme = localStorage.getItem("wplace-theme")
-      if (savedTheme && CONFIG.THEMES[savedTheme]) {
-        CONFIG.currentTheme = savedTheme
+    for (const color of availableColors) {
+      const distance = Utils.colorDistance(targetRgb, color.rgb)
+      if (distance < minDistance) {
+        minDistance = distance
+        closestColorId = color.id
       }
-    } catch (e) {
-      console.warn("Could not load theme preference:", e)
     }
+
+    return closestColorId
   }
+
+  // UI UPDATE FUNCTIONS (declared early to avoid reference errors)
+  let updateUI = () => {}
+  let updateStats = () => {}
+  let updateDataButtons = () => {}
 
   async function createUI() {
     await detectLanguage()
