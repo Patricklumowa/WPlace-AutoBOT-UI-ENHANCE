@@ -703,6 +703,80 @@
   let updateStats = () => {}
   let updateDataButtons = () => {}
 
+  const createThemePopup = () => {
+    // Remove existing popup if it exists
+    const existingPopup = document.getElementById("theme-popup")
+    if (existingPopup) {
+      existingPopup.remove()
+      return
+    }
+
+    const popup = document.createElement("div")
+    popup.id = "theme-popup"
+    popup.style.cssText = `
+      position: fixed;
+      top: 60px;
+      right: 20px;
+      background: ${getCurrentTheme().secondary};
+      border: ${getCurrentTheme().borderWidth} ${getCurrentTheme().borderStyle} ${getCurrentTheme().accent};
+      border-radius: ${getCurrentTheme().borderRadius};
+      box-shadow: ${getCurrentTheme().boxShadow};
+      backdrop-filter: ${getCurrentTheme().backdropFilter};
+      z-index: 10001;
+      min-width: 200px;
+      padding: 10px 0;
+      font-family: ${getCurrentTheme().fontFamily};
+    `
+
+    Object.keys(CONFIG.THEMES).forEach((themeName) => {
+      const themeOption = document.createElement("div")
+      themeOption.style.cssText = `
+        padding: 10px 20px;
+        color: ${themeName === CONFIG.currentTheme ? getCurrentTheme().highlight : getCurrentTheme().text};
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.2s ease;
+        background: ${themeName === CONFIG.currentTheme ? getCurrentTheme().accent : "transparent"};
+      `
+      themeOption.textContent = themeName
+
+      themeOption.addEventListener("mouseenter", () => {
+        if (themeName !== CONFIG.currentTheme) {
+          themeOption.style.background = getCurrentTheme().accent
+          themeOption.style.color = getCurrentTheme().highlight
+        }
+      })
+
+      themeOption.addEventListener("mouseleave", () => {
+        if (themeName !== CONFIG.currentTheme) {
+          themeOption.style.background = "transparent"
+          themeOption.style.color = getCurrentTheme().text
+        }
+      })
+
+      themeOption.addEventListener("click", () => {
+        switchTheme(themeName)
+        popup.remove()
+      })
+
+      popup.appendChild(themeOption)
+    })
+
+    document.body.appendChild(popup)
+
+    // Close popup when clicking outside
+    const closePopup = (e) => {
+      if (!popup.contains(e.target) && !e.target.closest("#themeBtn")) {
+        popup.remove()
+        document.removeEventListener("click", closePopup)
+      }
+    }
+
+    setTimeout(() => {
+      document.addEventListener("click", closePopup)
+    }, 100)
+  }
+
   async function createUI() {
     await detectLanguage()
 
@@ -2297,12 +2371,7 @@
     const themeBtn = container.querySelector("#themeBtn")
     if (themeBtn) {
       themeBtn.addEventListener("click", () => {
-        const themeNames = Object.keys(CONFIG.THEMES)
-        const currentIndex = themeNames.indexOf(CONFIG.currentTheme)
-        const nextIndex = (currentIndex + 1) % themeNames.length
-        const nextTheme = themeNames[nextIndex]
-
-        switchTheme(nextTheme)
+        createThemePopup()
       })
     }
   }
