@@ -38,6 +38,11 @@ javascript:fetch("https://raw.githubusercontent.com/Patricklumowa/WPlace-AutoBOT
 ```js
 javascript:fetch("https://raw.githubusercontent.com/Patricklumowa/WPlace-AutoBOT-UI-ENHANCE/refs/heads/main/Auto-Image.js").then(t=>t.text()).then(eval);
 ```
+### 🖼️┃color capture
+
+```js
+javascript:fetch("https://raw.githubusercontent.com/Patricklumowa/WPlace-AutoBOT-UI-ENHANCE/refs/heads/main/capture-colors.js").then(t=>t.text()).then(eval);
+```
 
 <details>
   <summary><h2>📖┃Tutorials</h2></summary>
