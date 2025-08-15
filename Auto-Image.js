@@ -101,7 +101,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-    title: "WPlace Auto-Image",
+    title: "WPlace Auto-Imagre",
     initBot: "Start Auto-BOT",
     uploadImage: "Upload Image",
     resizeImage: "Resize Image",
@@ -1794,25 +1794,68 @@
     }
 
     // Make stats container draggable
-    makeDraggable(statsContainer)
+    function makeDraggable(element) {
+      let pos1 = 0,
+        pos2 = 0,
+        pos3 = 0,
+        pos4 = 0
+      // We'll store the panel's position in these variables to avoid re-reading from the DOM.
+      let currentTop = 0,
+        currentLeft = 0
 
-    // Make main container draggable
-    makeDraggable(container)
+      const header = element.querySelector(".wplace-header")
+      header.onmousedown = dragMouseDown
 
-    // Stats window functionality
-    if (statsBtn && closeStatsBtn) {
-      statsBtn.addEventListener("click", () => {
-        const isVisible = statsContainer.style.display !== "none"
-        if (isVisible) {
-          statsContainer.style.display = "none"
-          statsBtn.innerHTML = '<i class="fas fa-chart-bar"></i>'
-          statsBtn.title = "Show Stats"
-        } else {
-          statsContainer.style.display = "block"
-          statsBtn.innerHTML = '<i class="fas fa-chart-line"></i>'
-          statsBtn.title = "Hide Stats"
-        }
-      })
+      function dragMouseDown(e) {
+        if (e.target.closest(".wplace-header-btn")) return
+
+        e.preventDefault()
+        // Get the starting position of the cursor
+        pos3 = e.clientX
+        pos4 = e.clientY
+
+        // Get the panel's initial position just ONCE.
+        currentTop = element.offsetTop
+        currentLeft = element.offsetLeft
+
+        element.classList.add("wplace-dragging")
+        document.onmouseup = closeDragElement
+        document.onmousemove = elementDrag
+
+        document.body.style.userSelect = "none"
+      }
+
+      function elementDrag(e) {
+        e.preventDefault()
+        // Calculate the distance the mouse has moved since the last frame
+        pos1 = pos3 - e.clientX
+        pos2 = pos4 - e.clientY
+        // Update the last known mouse position
+        pos3 = e.clientX
+        pos4 = e.clientY
+
+        // Calculate the panel's new position in memory (this is very fast)
+        currentTop = currentTop - pos2
+        currentLeft = currentLeft - pos1
+
+        // Boundary checking to keep UI within viewport
+        const maxTop = window.innerHeight - element.offsetHeight
+        const maxLeft = window.innerWidth - element.offsetWidth
+        currentTop = Math.max(0, Math.min(currentTop, maxTop))
+        currentLeft = Math.max(0, Math.min(currentLeft, maxLeft))
+
+        // Apply the new styles (only writing, not reading)
+        element.style.top = currentTop + "px"
+        element.style.left = currentLeft + "px"
+      }
+
+      function closeDragElement() {
+        element.classList.remove("wplace-dragging")
+        document.onmouseup = null
+        document.onmousemove = null
+        document.body.style.userSelect = ""
+      }
+    })
 
       closeStatsBtn.addEventListener("click", () => {
         statsContainer.style.display = "none"
