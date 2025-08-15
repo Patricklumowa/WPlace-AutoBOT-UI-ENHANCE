@@ -1,4 +1,3 @@
-
 ;(async () => {
   // CONFIGURATION CONSTANTS
   const CONFIG = {
@@ -6,7 +5,7 @@
     TRANSPARENCY_THRESHOLD: 100,
     WHITE_THRESHOLD: 250,
     LOG_INTERVAL: 10,
-    THEMES: {  
+    THEMES: {
       "Classic Autobot": {
         primary: "#000000",
         secondary: "#111111",
@@ -101,104 +100,104 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-    title: "WPlace Auto-Imagre",
-    initBot: "Start Auto-BOT",
-    uploadImage: "Upload Image",
-    resizeImage: "Resize Image",
-    selectPosition: "Select Position",
-    startPainting: "Start Painting",
-    stopPainting: "Stop Painting",
-    checkingColors: "🔍 Checking available colors...",
-    noColorsFound: "❌ Open the color palette on the site and try again!",
-    colorsFound: "✅ {count} available colors found",
-    loadingImage: "🖼️ Loading image...",
-    imageLoaded: "✅ Image loaded with {count} valid pixels",
-    imageError: "❌ Error loading image",
-    selectPositionAlert: "Paint the first pixel at the location where you want the art to start!",
-    waitingPosition: "👆 Waiting for you to paint the reference pixel...",
-    positionSet: "✅ Position set successfully!",
-    positionTimeout: "❌ Timeout for position selection",
-    startPaintingMsg: "🎨 Starting painting...",
-    paintingProgress: "🧱 Progress: {painted}/{total} pixels...",
-    noCharges: "⌛ No charges. Waiting {time}...",
-    paintingStopped: "⏹️ Painting stopped by user",
-    paintingComplete: "✅ Painting complete! {count} pixels painted.",
-    paintingError: "❌ Error during painting",
-    missingRequirements: "❌ Load an image and select a position first",
-    progress: "Progress",
-    pixels: "Pixels",
-    charges: "Charges",
-    estimatedTime: "Estimated time",
-    initMessage: "Click 'Start Auto-BOT' to begin",
-    waitingInit: "Waiting for initialization...",
-    resizeSuccess: "✅ Image resized to {width}x{height}",
-    paintingPaused: "⏸️ Painting paused at position X: {x}, Y: {y}",
-    captchaNeeded: "❗ CAPTCHA token needed. Paint one pixel manually to continue.",
-    saveData: "Save Progress",
-    loadData: "Load Progress",
-    saveToFile: "Save to File",
-    loadFromFile: "Load from File",
-    dataManager: "Data Manager",
-    autoSaved: "✅ Progress saved automatically", 
-    dataLoaded: "✅ Progress loaded successfully",
-    fileSaved: "✅ Progress saved to file successfully",
-    fileLoaded: "✅ Progress loaded from file successfully",
-    noSavedData: "❌ No saved progress found",
-    savedDataFound: "✅ Saved progress found! Load to continue?",
-    savedDate: "Saved on: {date}",
-    clickLoadToContinue: "Click 'Load Progress' to continue.",
-    fileError: "❌ Error processing file",
-    invalidFileFormat: "❌ Invalid file format",
-  },
-  pt: {
-    title: "WPlace Auto-Image",
-    initBot: "Iniciar Auto-BOT",
-    uploadImage: "Upload da Imagem",
-    resizeImage: "Redimensionar Imagem",
-    selectPosition: "Selecionar Posição",
-    startPainting: "Iniciar Pintura",
-    stopPainting: "Parar Pintura",
-    checkingColors: "🔍 Verificando cores disponíveis...",
-    noColorsFound: "❌ Abra a paleta de cores no site e tente novamente!",
-    colorsFound: "✅ {count} cores disponíveis encontradas",
-    loadingImage: "🖼️ Carregando imagem...",
-    imageLoaded: "✅ Imagem carregada com {count} pixels válidos",
-    imageError: "❌ Erro ao carregar imagem",
-    selectPositionAlert: "Pinte o primeiro pixel na localização onde deseja que a arte comece!",
-    waitingPosition: "👆 Aguardando você pintar o pixel de referência...",
-    positionSet: "✅ Posição definida com sucesso!",
-    positionTimeout: "❌ Tempo esgotado para selecionar posição",
-    startPaintingMsg: "🎨 Iniciando pintura...",
-    paintingProgress: "🧱 Progresso: {painted}/{total} pixels...",
-    noCharges: "⌛ Sem cargas. Aguardando {time}...",
-    paintingStopped: "⏹️ Pintura interrompida pelo usuário",
-    paintingComplete: "✅ Pintura concluída! {count} pixels pintados.",
-    paintingError: "❌ Erro durante a pintura",
-    missingRequirements: "❌ Carregue uma imagem e selecione uma posição primeiro",
-    progress: "Progresso",
-    pixels: "Pixels",
-    charges: "Cargas",
-    estimatedTime: "Tempo estimado",
-    initMessage: "Clique em 'Iniciar Auto-BOT' para começar",
-    waitingInit: "Aguardando inicialização...",
-    resizeSuccess: "✅ Imagem redimensionada para {width}x{height}",
-    paintingPaused: "⏸️ Pintura pausada na posição X: {x}, Y: {y}",
-    captchaNeeded: "❗ Token CAPTCHA necessário. Pinte um pixel manualmente para continuar.",
-    saveData: "Salvar Progresso",
-    loadData: "Carregar Progresso",
-    saveToFile: "Salvar em Arquivo",
-    loadFromFile: "Carregar de Arquivo", 
-    dataManager: "Dados",
-    autoSaved: "✅ Progresso salvo automaticamente",
-    dataLoaded: "✅ Progresso carregado com sucesso",
-    fileSaved: "✅ Salvo em arquivo com sucesso",
-    fileLoaded: "✅ Carregado de arquivo com sucesso",
-    noSavedData: "❌ Nenhum progresso salvo encontrado",
-    savedDataFound: "✅ Progresso salvo encontrado! Carregar para continuar?",
-    savedDate: "Salvo em: {date}",
-    clickLoadToContinue: "Clique em 'Carregar Progresso' para continuar.",
-    fileError: "❌ Erro ao processar arquivo",
-    invalidFileFormat: "❌ Formato de arquivo inválido",
+      title: "WPlace Auto-Image",
+      initBot: "Start Auto-BOT",
+      uploadImage: "Upload Image",
+      resizeImage: "Resize Image",
+      selectPosition: "Select Position",
+      startPainting: "Start Painting",
+      stopPainting: "Stop Painting",
+      checkingColors: "🔍 Checking available colors...",
+      noColorsFound: "❌ Open the color palette on the site and try again!",
+      colorsFound: "✅ {count} available colors found",
+      loadingImage: "🖼️ Loading image...",
+      imageLoaded: "✅ Image loaded with {count} valid pixels",
+      imageError: "❌ Error loading image",
+      selectPositionAlert: "Paint the first pixel at the location where you want the art to start!",
+      waitingPosition: "👆 Waiting for you to paint the reference pixel...",
+      positionSet: "✅ Position set successfully!",
+      positionTimeout: "❌ Timeout for position selection",
+      startPaintingMsg: "🎨 Starting painting...",
+      paintingProgress: "🧱 Progress: {painted}/{total} pixels...",
+      noCharges: "⌛ No charges. Waiting {time}...",
+      paintingStopped: "⏹️ Painting stopped by user",
+      paintingComplete: "✅ Painting complete! {count} pixels painted.",
+      paintingError: "❌ Error during painting",
+      missingRequirements: "❌ Load an image and select a position first",
+      progress: "Progress",
+      pixels: "Pixels",
+      charges: "Charges",
+      estimatedTime: "Estimated time",
+      initMessage: "Click 'Start Auto-BOT' to begin",
+      waitingInit: "Waiting for initialization...",
+      resizeSuccess: "✅ Image resized to {width}x{height}",
+      paintingPaused: "⏸️ Painting paused at position X: {x}, Y: {y}",
+      captchaNeeded: "❗ CAPTCHA token needed. Paint one pixel manually to continue.",
+      saveData: "Save Progress",
+      loadData: "Load Progress",
+      saveToFile: "Save to File",
+      loadFromFile: "Load from File",
+      dataManager: "Data Manager",
+      autoSaved: "✅ Progress saved automatically",
+      dataLoaded: "✅ Progress loaded successfully",
+      fileSaved: "✅ Progress saved to file successfully",
+      fileLoaded: "✅ Progress loaded from file successfully",
+      noSavedData: "❌ No saved progress found",
+      savedDataFound: "✅ Saved progress found! Load to continue?",
+      savedDate: "Saved on: {date}",
+      clickLoadToContinue: "Click 'Load Progress' to continue.",
+      fileError: "❌ Error processing file",
+      invalidFileFormat: "❌ Invalid file format",
+    },
+    pt: {
+      title: "WPlace Auto-Image",
+      initBot: "Iniciar Auto-BOT",
+      uploadImage: "Upload da Imagem",
+      resizeImage: "Redimensionar Imagem",
+      selectPosition: "Selecionar Posição",
+      startPainting: "Iniciar Pintura",
+      stopPainting: "Parar Pintura",
+      checkingColors: "🔍 Verificando cores disponíveis...",
+      noColorsFound: "❌ Abra a paleta de cores no site e tente novamente!",
+      colorsFound: "✅ {count} cores disponíveis encontradas",
+      loadingImage: "🖼️ Carregando imagem...",
+      imageLoaded: "✅ Imagem carregada com {count} pixels válidos",
+      imageError: "❌ Erro ao carregar imagem",
+      selectPositionAlert: "Pinte o primeiro pixel na localização onde deseja que a arte comece!",
+      waitingPosition: "👆 Aguardando você pintar o pixel de referência...",
+      positionSet: "✅ Posição definida com sucesso!",
+      positionTimeout: "❌ Tempo esgotado para selecionar posição",
+      startPaintingMsg: "🎨 Iniciando pintura...",
+      paintingProgress: "🧱 Progresso: {painted}/{total} pixels...",
+      noCharges: "⌛ Sem cargas. Aguardando {time}...",
+      paintingStopped: "⏹️ Pintura interrompida pelo usuário",
+      paintingComplete: "✅ Pintura concluída! {count} pixels pintados.",
+      paintingError: "❌ Erro durante a pintura",
+      missingRequirements: "❌ Carregue uma imagem e selecione uma posição primeiro",
+      progress: "Progresso",
+      pixels: "Pixels",
+      charges: "Cargas",
+      estimatedTime: "Tempo estimado",
+      initMessage: "Clique em 'Iniciar Auto-BOT' para começar",
+      waitingInit: "Aguardando inicialização...",
+      resizeSuccess: "✅ Imagem redimensionada para {width}x{height}",
+      paintingPaused: "⏸️ Pintura pausada na posição X: {x}, Y: {y}",
+      captchaNeeded: "❗ Token CAPTCHA necessário. Pinte um pixel manualmente para continuar.",
+      saveData: "Salvar Progresso",
+      loadData: "Carregar Progresso",
+      saveToFile: "Salvar em Arquivo",
+      loadFromFile: "Carregar de Arquivo",
+      dataManager: "Dados",
+      autoSaved: "✅ Progresso salvo automaticamente",
+      dataLoaded: "✅ Progresso carregado com sucesso",
+      fileSaved: "✅ Salvo em arquivo com sucesso",
+      fileLoaded: "✅ Carregado de arquivo com sucesso",
+      noSavedData: "❌ Nenhum progresso salvo encontrado",
+      savedDataFound: "✅ Progresso salvo encontrado! Carregar para continuar?",
+      savedDate: "Salvo em: {date}",
+      clickLoadToContinue: "Clique em 'Carregar Progresso' para continuar.",
+      fileError: "❌ Erro ao processar arquivo",
+      invalidFileFormat: "❌ Formato de arquivo inválido",
     },
   }
 
@@ -264,7 +263,7 @@
       })
       const data = await response.json()
       state.language = data.language === "pt" ? "pt" : "en"
-    } catch {
+    } catch (error) {
       state.language = navigator.language.startsWith("pt") ? "pt" : "en"
     }
   }
@@ -1489,13 +1488,12 @@
           <button id="compactBtn" class="wplace-header-btn" title="Compact Mode">
             <i class="fas fa-compress"></i>
           </button>
-          <button id="minimizeBtn" class="wplace-header-btn" title="${Utils.t("minimize")}">
+          <button id="minimizeBtn" class="wplace-header-btn" title="Minimize">
             <i class="fas fa-minus"></i>
           </button>
         </div>
       </div>
       <div class="wplace-content">
-        <!-- Status Section - Always visible -->
         <div class="wplace-status-section">
           <div id="statusText" class="wplace-status status-default">
             ${Utils.t("waitingInit")}
@@ -1505,7 +1503,6 @@
           </div>
         </div>
 
-        <!-- Setup Section -->
         <div class="wplace-section">
           <div class="wplace-section-title">🤖 Bot Setup</div>
           <div class="wplace-controls">
@@ -1516,7 +1513,6 @@
           </div>
         </div>
 
-        <!-- Image Section -->
         <div class="wplace-section">
           <div class="wplace-section-title">🖼️ Image Management</div>
           <div class="wplace-controls">
@@ -1539,7 +1535,6 @@
           </div>
         </div>
 
-        <!-- Control Section -->
         <div class="wplace-section">
           <div class="wplace-section-title">🎮 Painting Control</div>
           <div class="wplace-controls">
@@ -1556,7 +1551,6 @@
           </div>
         </div>
 
-        <!-- Data Section -->
         <div class="wplace-section">
           <div class="wplace-section-title">💾 Data Management</div>
           <div class="wplace-controls">
@@ -1618,26 +1612,26 @@
       <h3 style="margin-top: 0; color: ${theme.text}">${Utils.t("resizeImage")}</h3>
       <div class="resize-controls">
         <label style="color: ${theme.text}">
-          ${Utils.t("width")}: <span id="widthValue">0</span>px
+          Width: <span id="widthValue">0</span>px
           <input type="range" id="widthSlider" class="resize-slider" min="10" max="500" value="100">
         </label>
         <label style="color: ${theme.text}">
-          ${Utils.t("height")}: <span id="heightValue">0</span>px
+          Height: <span id="heightValue">0</span>px
           <input type="range" id="heightSlider" class="resize-slider" min="10" max="500" value="100">
         </label>
         <label style="color: ${theme.text}">
           <input type="checkbox" id="keepAspect" checked>
-          ${Utils.t("keepAspect")}
+          Keep Aspect Ratio
         </label>
-        <img id="resizePreview" class="resize-preview" src="/placeholder.svg">
+        <img id="resizePreview" class="resize-preview" src="">
         <div class="resize-buttons">
           <button id="confirmResize" class="wplace-btn wplace-btn-primary">
             <i class="fas fa-check"></i>
-            <span>${Utils.t("apply")}</span>
+            <span>Apply</span>
           </button>
           <button id="cancelResize" class="wplace-btn wplace-btn-stop">
             <i class="fas fa-times"></i>
-            <span>${Utils.t("cancel")}</span>
+            <span>Cancel</span>
           </button>
         </div>
       </div>
@@ -1690,99 +1684,62 @@
       })
     }
 
-    const header = container.querySelector(".wplace-header")
-    let pos1 = 0,
-      pos2 = 0,
-      pos3 = 0,
-      pos4 = 0
-
-    header.onmousedown = dragMouseDown
-
-    function dragMouseDown(e) {
-      if (e.target.closest(".wplace-header-btn")) return
-
-      e.preventDefault()
-      pos3 = e.clientX
-      pos4 = e.clientY
-      container.classList.add("wplace-dragging")
-      document.onmouseup = closeDragElement
-      document.onmousemove = elementDrag
-
-      // Prevent text selection during drag
-      document.body.style.userSelect = "none"
-    }
-
-    function elementDrag(e) {
-      e.preventDefault()
-      pos1 = pos3 - e.clientX
-      pos2 = pos4 - e.clientY
-      pos3 = e.clientX
-      pos4 = e.clientY
-
-      let newTop = container.offsetTop - pos2
-      let newLeft = container.offsetLeft - pos1
-
-      // Boundary checking to keep UI within viewport
-      const rect = container.getBoundingClientRect()
-      const maxTop = window.innerHeight - rect.height
-      const maxLeft = window.innerWidth - rect.width
-
-      newTop = Math.max(0, Math.min(newTop, maxTop))
-      newLeft = Math.max(0, Math.min(newLeft, maxLeft))
-
-      container.style.top = newTop + "px"
-      container.style.left = newLeft + "px"
-    }
-
-    function closeDragElement() {
-      container.classList.remove("wplace-dragging")
-      document.onmouseup = null
-      document.onmousemove = null
-      document.body.style.userSelect = ""
-    }
-
+    // A single, optimized function to make elements draggable
     function makeDraggable(element) {
       let pos1 = 0,
         pos2 = 0,
         pos3 = 0,
         pos4 = 0
+      // We'll store the panel's position in these variables to avoid re-reading from the DOM.
+      let currentTop = 0,
+        currentLeft = 0
+
       const header = element.querySelector(".wplace-header")
-      header.onmousedown = dragMouseDown
+      if (header) {
+        header.onmousedown = dragMouseDown
+      }
 
       function dragMouseDown(e) {
         if (e.target.closest(".wplace-header-btn")) return
 
         e.preventDefault()
+        // Get the starting position of the cursor
         pos3 = e.clientX
         pos4 = e.clientY
+
+        // Get the panel's initial position just ONCE.
+        currentTop = element.offsetTop
+        currentLeft = element.offsetLeft
+
         element.classList.add("wplace-dragging")
         document.onmouseup = closeDragElement
         document.onmousemove = elementDrag
 
-        // Prevent text selection during drag
         document.body.style.userSelect = "none"
       }
 
       function elementDrag(e) {
         e.preventDefault()
+        // Calculate the distance the mouse has moved since the last frame
         pos1 = pos3 - e.clientX
         pos2 = pos4 - e.clientY
+        // Update the last known mouse position
         pos3 = e.clientX
         pos4 = e.clientY
 
-        let newTop = element.offsetTop - pos2
-        let newLeft = element.offsetLeft - pos1
+        // Calculate the panel's new position in memory (this is very fast)
+        currentTop = currentTop - pos2
+        currentLeft = currentLeft - pos1
 
         // Boundary checking to keep UI within viewport
-        const rect = element.getBoundingClientRect()
-        const maxTop = window.innerHeight - rect.height
-        const maxLeft = window.innerWidth - rect.width
+        const maxTop = window.innerHeight - element.offsetHeight
+        const maxLeft = window.innerWidth - element.offsetWidth
+        currentTop = Math.max(0, Math.min(currentTop, maxTop))
+        currentLeft = Math.max(0, Math.min(currentLeft, maxLeft))
 
-        newTop = Math.max(0, Math.min(newTop, maxTop))
-        newLeft = Math.max(0, Math.min(newLeft, maxLeft))
-
-        element.style.top = newTop + "px"
-        element.style.left = newLeft + "px"
+        // Apply the new styles (only writing, not reading)
+        element.style.top = currentTop + "px"
+        element.style.left = currentLeft + "px"
       }
 
       function closeDragElement() {
@@ -1794,68 +1751,25 @@
     }
 
     // Make stats container draggable
-    function makeDraggable(element) {
-      let pos1 = 0,
-        pos2 = 0,
-        pos3 = 0,
-        pos4 = 0
-      // We'll store the panel's position in these variables to avoid re-reading from the DOM.
-      let currentTop = 0,
-        currentLeft = 0
+    makeDraggable(statsContainer)
 
-      const header = element.querySelector(".wplace-header")
-      header.onmousedown = dragMouseDown
+    // Make main container draggable
+    makeDraggable(container)
 
-      function dragMouseDown(e) {
-        if (e.target.closest(".wplace-header-btn")) return
-
-        e.preventDefault()
-        // Get the starting position of the cursor
-        pos3 = e.clientX
-        pos4 = e.clientY
-
-        // Get the panel's initial position just ONCE.
-        currentTop = element.offsetTop
-        currentLeft = element.offsetLeft
-
-        element.classList.add("wplace-dragging")
-        document.onmouseup = closeDragElement
-        document.onmousemove = elementDrag
-
-        document.body.style.userSelect = "none"
-      }
-
-      function elementDrag(e) {
-        e.preventDefault()
-        // Calculate the distance the mouse has moved since the last frame
-        pos1 = pos3 - e.clientX
-        pos2 = pos4 - e.clientY
-        // Update the last known mouse position
-        pos3 = e.clientX
-        pos4 = e.clientY
-
-        // Calculate the panel's new position in memory (this is very fast)
-        currentTop = currentTop - pos2
-        currentLeft = currentLeft - pos1
-
-        // Boundary checking to keep UI within viewport
-        const maxTop = window.innerHeight - element.offsetHeight
-        const maxLeft = window.innerWidth - element.offsetWidth
-        currentTop = Math.max(0, Math.min(currentTop, maxTop))
-        currentLeft = Math.max(0, Math.min(currentLeft, maxLeft))
-
-        // Apply the new styles (only writing, not reading)
-        element.style.top = currentTop + "px"
-        element.style.left = currentLeft + "px"
-      }
-
-      function closeDragElement() {
-        element.classList.remove("wplace-dragging")
-        document.onmouseup = null
-        document.onmousemove = null
-        document.body.style.userSelect = ""
-      }
-    })
+    // Stats window functionality
+    if (statsBtn && closeStatsBtn) {
+      statsBtn.addEventListener("click", () => {
+        const isVisible = statsContainer.style.display !== "none"
+        if (isVisible) {
+          statsContainer.style.display = "none"
+          statsBtn.innerHTML = '<i class="fas fa-chart-bar"></i>'
+          statsBtn.title = "Show Stats"
+        } else {
+          statsContainer.style.display = "block"
+          statsBtn.innerHTML = '<i class="fas fa-chart-line"></i>'
+          statsBtn.title = "Hide Stats"
+        }
+      })
 
       closeStatsBtn.addEventListener("click", () => {
         statsContainer.style.display = "none"
@@ -1920,7 +1834,7 @@
           updateUI("autoSaved", "success")
           Utils.showAlert(Utils.t("autoSaved"), "success")
         } else {
-          Utils.showAlert("❌ Erro ao salvar progresso", "error")
+          Utils.showAlert("Error saving progress", "error")
         }
       })
     }
@@ -1957,7 +1871,7 @@
               startBtn.disabled = false
             }
           } else {
-            Utils.showAlert("❌ Erro ao carregar progresso", "error")
+            Utils.showAlert("Error loading progress", "error")
           }
         }
       })
@@ -2092,23 +2006,23 @@
         resizePreview.src = processor.generatePreview(newWidth, newHeight)
       }
 
-      widthSlider.addEventListener("input", () => {
+      widthSlider.oninput = () => {
         if (keepAspect.checked) {
           const newWidth = Number.parseInt(widthSlider.value)
           const newHeight = Math.round(newWidth / aspectRatio)
           heightSlider.value = newHeight
         }
         updatePreview()
-      })
+      }
 
-      heightSlider.addEventListener("input", () => {
+      heightSlider.oninput = () => {
         if (keepAspect.checked) {
           const newHeight = Number.parseInt(heightSlider.value)
           const newWidth = Math.round(newHeight * aspectRatio)
           widthSlider.value = newWidth
         }
         updatePreview()
-      })
+      }
 
       confirmResize.onclick = () => {
         const newWidth = Number.parseInt(widthSlider.value)
@@ -2178,7 +2092,7 @@
             count: state.availableColors.length,
           })
           updateStats()
-        } catch {
+        } catch (error) {
           updateUI("imageError", "error")
         }
       })
@@ -2235,7 +2149,7 @@
           updateStats()
           updateDataButtons()
           updateUI("imageLoaded", "success", { count: totalValidPixels })
-        } catch {
+        } catch (error) {
           updateUI("imageError", "error")
         }
       })
@@ -2302,7 +2216,7 @@
               }
 
               return response
-            } catch {
+            } catch (error) {
               return originalFetch(url, options)
             }
           }
@@ -2346,7 +2260,7 @@
       try {
         await processImage()
         return true
-      } catch {
+      } catch (error) {
         updateUI("paintingError", "error")
         return false
       } finally {
