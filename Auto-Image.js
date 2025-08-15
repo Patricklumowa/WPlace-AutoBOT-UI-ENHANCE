@@ -147,7 +147,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-    title: "WPlace Auto-Imager",
+    title: "WPlace Auto-Imagre",
     initBot: "Start Auto-BOT",
     uploadImage: "Upload Image",
     resizeImage: "Resize Image",
@@ -180,7 +180,7 @@
     waitingInit: "Waiting for initialization...",
     resizeSuccess: "✅ Image resized to {width}x{height}",
     paintingPaused: "⏸️ Painting paused at position X: {x}, Y: {y}",
-    captchaNeeded: "❗ CAPTCHA token needed. Paint one pixel manually to continue.",
+    captchaNeeded: "❗ CAPTCHA token needed. Paint one pixel manually to continue,Then Open color palette again before start painting!.",
     saveData: "Save Progress",
     loadData: "Load Progress",
     saveToFile: "Save to File",
@@ -197,6 +197,7 @@
     fileError: "❌ Error processing file",
     invalidFileFormat: "❌ Invalid file format",
     paintingSpeed: "Painting Speed",
+    enableSpeedControl: "Enable Speed Control",
     pixelsPerSecond: "pixels/second",
     speedSetting: "Speed: {speed} pixels/sec",
     settings: "Settings",
@@ -262,6 +263,7 @@
     fileError: "❌ Erro ao processar arquivo",
     invalidFileFormat: "❌ Formato de arquivo inválido",
     paintingSpeed: "Velocidade de Pintura",
+    enableSpeedControl: "Ativar Controle de Velocidade",
     pixelsPerSecond: "pixels/segundo",
     speedSetting: "Velocidade: {speed} pixels/seg",
     settings: "Configurações",
@@ -327,6 +329,7 @@
     fileError: "❌ Lỗi khi xử lý tệp",
     invalidFileFormat: "❌ Định dạng tệp không hợp lệ",
     paintingSpeed: "Tốc độ vẽ",
+    enableSpeedControl: "Bật điều khiển tốc độ",
     pixelsPerSecond: "pixel/giây",
     speedSetting: "Tốc độ: {speed} pixel/giây",
     settings: "Cài đặt",
@@ -392,6 +395,7 @@
     fileError: "❌ Erreur lors du traitement du fichier",
     invalidFileFormat: "❌ Format de fichier invalide",
     paintingSpeed: "Vitesse de peinture",
+    enableSpeedControl: "Activer le contrôle de vitesse",
     pixelsPerSecond: "pixels/seconde",
     speedSetting: "Vitesse: {speed} pixels/sec",
     settings: "Paramètres",
@@ -450,7 +454,7 @@
 
           // Notify the user that the token is captured and they can start the bot.
           if (document.querySelector("#statusText")?.textContent.includes("CAPTCHA")) {
-            Utils.showAlert("Token captured successfully! You can start the bot now.", "success")
+            Utils.showAlert("Token captured successfully! Make sure you open the COLOR PALETTE FIRST before start painting.", "success")
             updateUI("colorsFound", "success", {
               count: state.availableColors.length,
             })
@@ -1235,6 +1239,8 @@
         color: ${theme.text};
         animation: slideIn 0.4s ease-out;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
         ${theme.backdropFilter ? `backdrop-filter: ${theme.backdropFilter};` : ""}
         transition: all 0.3s ease;
         user-select: none;
@@ -1387,6 +1393,8 @@
         display: block;
         position: relative;
         z-index: 2;
+        overflow-y: auto;
+        flex-grow: 1;
       }
       .wplace-content.wplace-hidden {
         display: none;
@@ -2323,8 +2331,9 @@
       padding: 0;
       z-index: 10002;
       display: none;
-      min-width: 380px;
-      max-width: 420px;
+      width: 720px;
+      max-width: 90vw;
+      max-height: 85vh;
       color: white;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1);
@@ -2358,243 +2367,224 @@
         </div>
       </div>
       
-      <div style="padding: 25px;">
-        <!-- Speed Control Section -->
-        <div style="margin-bottom: 25px;">
-          <label style="display: block; margin-bottom: 12px; color: white; font-weight: 500; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-tachometer-alt" style="color: #4facfe; font-size: 16px;"></i>
-            ${Utils.t("paintingSpeed")}
-          </label>
-          <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 18px; border: 1px solid rgba(255,255,255,0.1);">
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
-              <input type="range" id="speedSlider" min="${CONFIG.PAINTING_SPEED.MIN}" max="${CONFIG.PAINTING_SPEED.MAX}" value="${CONFIG.PAINTING_SPEED.DEFAULT}" 
-                style="
-                  flex: 1; 
-                  height: 8px;
-                  background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
-                  border-radius: 4px;
-                  outline: none;
-                  -webkit-appearance: none;
-                  cursor: pointer;
-                ">
-              <div id="speedValue" style="
-                min-width: 70px; 
-                text-align: center; 
-                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
-                padding: 8px 12px; 
-                border-radius: 8px; 
-                color: white;
-                font-weight: bold;
-                font-size: 13px;
-                box-shadow: 0 3px 10px rgba(79, 172, 254, 0.3);
-                border: 1px solid rgba(255,255,255,0.2);
-              ">${CONFIG.PAINTING_SPEED.DEFAULT} px/s</div>
-            </div>
-            <div style="display: flex; justify-content: space-between; color: rgba(255,255,255,0.7); font-size: 11px; margin-top: 8px;">
-              <span><i class="fas fa-turtle"></i> ${CONFIG.PAINTING_SPEED.MIN}</span>
-              <span><i class="fas fa-rabbit"></i> ${CONFIG.PAINTING_SPEED.MAX}</span>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Painting Speed Enable Toggle -->
-        <div style="margin-bottom: 25px;">
-          <label style="display: flex; align-items: center; gap: 8px; color: white;">
-            <input type="checkbox" id="enableSpeedToggle" ${CONFIG.PAINTING_SPEED_ENABLED ? 'checked' : ''} style="cursor: pointer;"/>
-            <span>Enable painting speed</span>
-          </label>
-        </div>
-        
-        <!-- Theme Selection Section -->
-        <div style="margin-bottom: 25px;">
-          <label style="display: block; margin-bottom: 12px; color: white; font-weight: 500; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-palette" style="color: #f093fb; font-size: 16px;"></i>
-            ${Utils.t("themeSettings")}
-          </label>
-          <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 18px; border: 1px solid rgba(255,255,255,0.1);">
-            <select id="themeSelect" style="
-              width: 100%; 
-              padding: 12px 16px; 
-              background: rgba(255,255,255,0.15); 
-              color: white; 
-              border: 1px solid rgba(255,255,255,0.2); 
-              border-radius: 8px;
-              font-size: 14px;
-              outline: none;
-              cursor: pointer;
-              transition: all 0.3s ease;
-              font-family: inherit;
-              box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            ">
-              ${Object.keys(CONFIG.THEMES).map(themeName => 
-                `<option value="${themeName}" ${CONFIG.currentTheme === themeName ? 'selected' : ''} style="background: #2d3748; color: white; padding: 10px;">${themeName}</option>`
-              ).join('')}
-            </select>
-          </div>
-        </div>
-        
-        <!-- Skip Correct Pixels Section -->
-        <div style="margin-bottom: 25px;">
-          <label style="display: block; margin-bottom: 12px; color: white; font-weight: 500; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-eye-slash" style="color: #fd79a8; font-size: 16px;"></i>
-            ${Utils.t("skipCorrectPixels")}
-          </label>
-          <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 18px; border: 1px solid rgba(255,255,255,0.1);">
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 12px;">
-              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;">
-                <input type="checkbox" id="skipCorrectPixelsToggle" ${CONFIG.SKIP_CORRECT_PIXELS ? 'checked' : ''} style="
-                  width: 18px; 
-                  height: 18px; 
-                  accent-color: #fd79a8;
-                  cursor: pointer;
-                ">
-                <span style="color: white; font-size: 14px; font-weight: 500;">
-                  ${Utils.t("skipCorrectPixels")}
-                </span>
+      <div style="padding: 20px; overflow-y: auto; max-height: calc(85vh - 80px);">
+        <!-- Grid Layout for Settings -->
+        <div class="grid-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+          
+          <!-- Left Column -->
+          <div>
+            <!-- Speed Control Section -->
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; margin-bottom: 8px; color: white; font-weight: 500; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-tachometer-alt" style="color: #4facfe; font-size: 14px;"></i>
+                ${Utils.t("paintingSpeed")}
               </label>
+              <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                <!-- Enable/Disable Toggle -->
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
+                    <input type="checkbox" id="enableSpeedToggle" ${CONFIG.PAINTING_SPEED_ENABLED ? 'checked' : ''} style="
+                      width: 16px; 
+                      height: 16px; 
+                      accent-color: #4facfe;
+                      cursor: pointer;
+                    ">
+                    <span style="color: white; font-size: 13px; font-weight: 500;">
+                      ${Utils.t("enableSpeedControl")}
+                    </span>
+                  </label>
+                </div>
+                
+                <!-- Speed Slider -->
+                <div id="speedControls" style="opacity: ${CONFIG.PAINTING_SPEED_ENABLED ? '1' : '0.5'}; pointer-events: ${CONFIG.PAINTING_SPEED_ENABLED ? 'auto' : 'none'}; transition: all 0.3s ease;">
+                  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <input type="range" id="speedSlider" min="${CONFIG.PAINTING_SPEED.MIN}" max="${CONFIG.PAINTING_SPEED.MAX}" value="${CONFIG.PAINTING_SPEED.DEFAULT}" 
+                      style="flex: 1; height: 4px; background: rgba(255,255,255,0.2); outline: none; border-radius: 2px; accent-color: #4facfe;">
+                    <span id="speedValue" style="color: #4facfe; font-weight: 600; min-width: 40px; text-align: right; font-size: 14px;">${CONFIG.PAINTING_SPEED.DEFAULT}</span>
+                  </div>
+                </div>
+                
+                <div style="color: rgba(255,255,255,0.7); font-size: 11px; line-height: 1.3;">
+                  ${Utils.t("speedSettingDesc", {min: CONFIG.PAINTING_SPEED.MIN, max: CONFIG.PAINTING_SPEED.MAX})}
+                </div>
+              </div>
             </div>
-            <div style="color: rgba(255,255,255,0.8); font-size: 13px; line-height: 1.4; font-style: italic;">
-              ${Utils.t("skipCorrectPixelsDesc")}
+
+            <!-- Language Section -->
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; margin-bottom: 8px; color: white; font-weight: 500; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-globe" style="color: #00cec9; font-size: 14px;"></i>
+                ${Utils.t("language")}
+              </label>
+              <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                <select id="languageSelect" style="
+                  width: 100%;
+                  padding: 8px 12px;
+                  border: 1px solid rgba(255,255,255,0.2);
+                  border-radius: 8px;
+                  background: rgba(255,255,255,0.1);
+                  color: white;
+                  font-size: 13px;
+                  font-family: inherit;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                ">
+                  <option value="en" ${state.language === 'en' ? 'selected' : ''} style="background: #2d3748; color: white;">🇺🇸 English</option>
+                  <option value="vi" ${state.language === 'vi' ? 'selected' : ''} style="background: #2d3748; color: white;">🇻🇳 Tiếng Việt</option>
+                  <option value="pt" ${state.language === 'pt' ? 'selected' : ''} style="background: #2d3748; color: white;">🇧🇷 Português</option>
+                  <option value="fr" ${state.language === 'fr' ? 'selected' : ''} style="background: #2d3748; color: white;">🇫🇷 Français</option>
+                </select>
+                <div style="color: rgba(255,255,255,0.7); font-size: 11px; line-height: 1.3; margin-top: 6px;">
+                  ${Utils.t("languageSelectDesc")}
+                </div>
+              </div>
             </div>
-            <button id="testCanvasBtn" style="
-              margin-top: 12px;
-              padding: 8px 16px;
-              background: linear-gradient(45deg, #fd79a8, #fdcb6e);
-              border: none;
-              border-radius: 8px;
-              color: white;
-              font-size: 12px;
-              cursor: pointer;
-              font-weight: 500;
-            ">Test Canvas Access</button>
           </div>
-        </div>
-        
-        <!-- Language Selection Section -->
-        <div style="margin-bottom: 15px;">
-          <label style="display: block; margin-bottom: 12px; color: white; font-weight: 500; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-globe" style="color: #ffeaa7; font-size: 16px;"></i>
-            ${Utils.t("language")}
-          </label>
-          <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 18px; border: 1px solid rgba(255,255,255,0.1);">
-            <select id="languageSelect" style="
-              width: 100%; 
-              padding: 12px 16px; 
-              background: rgba(255,255,255,0.15); 
-              color: white; 
-              border: 1px solid rgba(255,255,255,0.2); 
-              border-radius: 8px;
-              font-size: 14px;
-              outline: none;
-              cursor: pointer;
-              transition: all 0.3s ease;
-              font-family: inherit;
-              box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            ">
-              <option value="vi" ${state.language === 'vi' ? 'selected' : ''} style="background: #2d3748; color: white;">🇻🇳 Tiếng Việt</option>
-              <option value="en" ${state.language === 'en' ? 'selected' : ''} style="background: #2d3748; color: white;">🇺🇸 English</option>
-              <option value="pt" ${state.language === 'pt' ? 'selected' : ''} style="background: #2d3748; color: white;">🇧🇷 Português</option>
-              <option value="fr" ${state.language === 'fr' ? 'selected' : ''} style="background: #2d3748; color: white;">🇫🇷 Français</option>
-            </select>
+
+          <!-- Right Column -->
+          <div>
+            <!-- Theme Settings Section -->
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; margin-bottom: 8px; color: white; font-weight: 500; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-palette" style="color: #a29bfe; font-size: 14px;"></i>
+                ${Utils.t("themeSettings")}
+              </label>
+              <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                <select id="themeSelect" style="
+                  width: 100%;
+                  padding: 8px 12px;
+                  border: 1px solid rgba(255,255,255,0.2);
+                  border-radius: 8px;
+                  background: rgba(255,255,255,0.1);
+                  color: white;
+                  font-size: 13px;
+                  font-family: inherit;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                ">
+                  ${Object.keys(CONFIG.THEMES).map(themeName => 
+                    `<option value="${themeName}" ${CONFIG.currentTheme === themeName ? 'selected' : ''} style="background: #2d3748; color: white;">${themeName}</option>`
+                  ).join('')}
+                </select>
+                <div style="color: rgba(255,255,255,0.7); font-size: 11px; line-height: 1.3; margin-top: 6px;">
+                  ${Utils.t("themeSettingsDesc")}
+                </div>
+              </div>
+            </div>
+
+            <!-- Skip Correct Pixels Section -->
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; margin-bottom: 8px; color: white; font-weight: 500; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-eye-slash" style="color: #fd79a8; font-size: 14px;"></i>
+                ${Utils.t("skipCorrectPixels")}
+              </label>
+              <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; flex: 1;">
+                    <input type="checkbox" id="skipCorrectPixelsToggle" ${CONFIG.SKIP_CORRECT_PIXELS ? 'checked' : ''} style="
+                      width: 16px; 
+                      height: 16px; 
+                      accent-color: #fd79a8;
+                      cursor: pointer;
+                    ">
+                    <span style="color: white; font-size: 13px; font-weight: 500;">
+                      ${Utils.t("skipCorrectPixels")}
+                    </span>
+                  </label>
+                  <button id="testCanvasBtn" style="
+                    padding: 4px 8px;
+                    background: linear-gradient(45deg, #fd79a8, #fdcb6e);
+                    border: none;
+                    border-radius: 6px;
+                    color: white;
+                    font-size: 10px;
+                    cursor: pointer;
+                    font-weight: 500;
+                  ">Test</button>
+                </div>
+                <div style="color: rgba(255,255,255,0.7); font-size: 11px; line-height: 1.3;">
+                  ${Utils.t("skipCorrectPixelsDesc")}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      
-      <style>
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        @keyframes settingsSlideIn {
-          from { 
-            opacity: 0; 
-            transform: translate(-50%, -50%) scale(0.9);
-          }
-          to { 
-            opacity: 1; 
-            transform: translate(-50%, -50%) scale(1);
-          }
-        }
-        
-        @keyframes settingsFadeOut {
-          from { 
-            opacity: 1; 
-            transform: translate(-50%, -50%) scale(1);
-          }
-          to { 
-            opacity: 0; 
-            transform: translate(-50%, -50%) scale(0.9);
-          }
-        }
-        
-        #speedSlider::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          background: white;
-          box-shadow: 0 3px 6px rgba(0,0,0,0.3), 0 0 0 2px #4facfe;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-        
-        #speedSlider::-webkit-slider-thumb:hover {
-          transform: scale(1.2);
-          box-shadow: 0 4px 8px rgba(0,0,0,0.4), 0 0 0 3px #4facfe;
-        }
-        
-        #speedSlider::-moz-range-thumb {
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          background: white;
-          box-shadow: 0 3px 6px rgba(0,0,0,0.3), 0 0 0 2px #4facfe;
-          cursor: pointer;
-          border: none;
-          transition: all 0.2s ease;
-        }
-        
-        #themeSelect:hover, #languageSelect:hover {
-          border-color: rgba(255,255,255,0.4);
-          background: rgba(255,255,255,0.2);
-          transform: translateY(-1px);
-          box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-        }
-        
-        #themeSelect:focus, #languageSelect:focus {
-          border-color: #4facfe;
-          box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.3);
-        }
-        
-        #themeSelect option, #languageSelect option {
-          background: #2d3748;
-          color: white;
-          padding: 10px;
-          border-radius: 6px;
-        }
-        
-        #themeSelect option:hover, #languageSelect option:hover {
-          background: #4a5568;
-        }
-        
-        /* Dragging state styles */
-        .wplace-dragging {
-          opacity: 0.9;
-          box-shadow: 0 30px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.2);
-          transition: none;
-        }
-        
-        .wplace-settings-header:hover {
-          background: rgba(255,255,255,0.15) !important;
-        }
-        
-        .wplace-settings-header:active {
-          background: rgba(255,255,255,0.2) !important;
-        }
-      </style>
     `
 
+    // Add responsive CSS styles for settings
+    const settingsStyles = document.createElement('style')
+    settingsStyles.textContent = `
+      @keyframes settingsSlideIn {
+        from { 
+          opacity: 0; 
+          transform: translate(-50%, -50%) scale(0.9);
+        }
+        to { 
+          opacity: 1; 
+          transform: translate(-50%, -50%) scale(1);
+        }
+      }
+      
+      @keyframes settingsFadeOut {
+        from { 
+          opacity: 1; 
+          transform: translate(-50%, -50%) scale(1);
+        }
+        to { 
+          opacity: 0; 
+          transform: translate(-50%, -50%) scale(0.9);
+        }
+      }
+
+      /* Responsive settings */
+      @media (max-width: 768px) {
+        #wplace-settings-container {
+          width: 95vw !important;
+          max-width: none !important;
+        }
+        
+        #wplace-settings-container .grid-container {
+          grid-template-columns: 1fr !important;
+          gap: 15px !important;
+        }
+      }
+
+      /* Settings hover effects */
+      #wplace-settings-container input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3), 0 0 0 2px #4facfe;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      #wplace-settings-container input[type="range"]::-webkit-slider-thumb:hover {
+        transform: scale(1.1);
+        box-shadow: 0 3px 6px rgba(0,0,0,0.4), 0 0 0 3px #4facfe;
+      }
+
+      #wplace-settings-container select:hover {
+        border-color: rgba(255,255,255,0.4);
+        background: rgba(255,255,255,0.2);
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+      }
+
+      #wplace-settings-container select:focus {
+        border-color: #4facfe;
+        box-shadow: 0 0 0 2px rgba(79, 172, 254, 0.3);
+        outline: none;
+      }
+
+      .wplace-settings-header:hover {
+        background: rgba(255,255,255,0.15) !important;
+      }
+    `
+    document.head.appendChild(settingsStyles)
+
+    // Resize Dialog Container
     const resizeContainer = document.createElement("div")
     resizeContainer.className = "resize-container"
     resizeContainer.innerHTML = `
@@ -2753,8 +2743,7 @@
       }
     }
 
-    // Make stats container draggable
-    makeDraggable(statsContainer)
+    
 
     // Make main container draggable
     makeDraggable(container)
@@ -2768,7 +2757,8 @@
           statsBtn.innerHTML = '<i class="fas fa-chart-bar"></i>'
           statsBtn.title = "Show Stats"
         } else {
-          statsContainer.style.display = "block"
+                    statsContainer.style.display = "block"
+          makeDraggable(statsContainer)
           statsBtn.innerHTML = '<i class="fas fa-chart-line"></i>'
           statsBtn.title = "Hide Stats"
         }
@@ -3579,15 +3569,24 @@
 
     // Painting speed toggle
     const enableSpeedToggle = settingsContainer.querySelector("#enableSpeedToggle")
+    const speedControls = settingsContainer.querySelector("#speedControls")
     if (enableSpeedToggle) {
-      // Initialize speed slider disabled state
-      const speedSliderToggle = settingsContainer.querySelector("#speedSlider")
-      if (speedSliderToggle) speedSliderToggle.disabled = !CONFIG.PAINTING_SPEED_ENABLED
+      // Initialize visual state
       enableSpeedToggle.checked = CONFIG.PAINTING_SPEED_ENABLED
+      if (speedControls) {
+        speedControls.style.opacity = CONFIG.PAINTING_SPEED_ENABLED ? '1' : '0.5'
+        speedControls.style.pointerEvents = CONFIG.PAINTING_SPEED_ENABLED ? 'auto' : 'none'
+      }
+      
       enableSpeedToggle.addEventListener("change", (e) => {
         CONFIG.PAINTING_SPEED_ENABLED = e.target.checked
-        // Toggle speed slider
-        if (speedSliderToggle) speedSliderToggle.disabled = !CONFIG.PAINTING_SPEED_ENABLED
+        
+        // Update visual state
+        if (speedControls) {
+          speedControls.style.opacity = CONFIG.PAINTING_SPEED_ENABLED ? '1' : '0.5'
+          speedControls.style.pointerEvents = CONFIG.PAINTING_SPEED_ENABLED ? 'auto' : 'none'
+        }
+        
         // Save preference to localStorage
         try {
           localStorage.setItem("wplace-painting-speed-enabled", CONFIG.PAINTING_SPEED_ENABLED.toString())
@@ -3595,13 +3594,17 @@
           console.warn("Could not save painting speed enabled preference:", error)
         }
       })
+      
       // Load saved preference
       try {
         const savedEnabled = localStorage.getItem("wplace-painting-speed-enabled")
         if (savedEnabled !== null) {
           CONFIG.PAINTING_SPEED_ENABLED = savedEnabled === "true"
           enableSpeedToggle.checked = CONFIG.PAINTING_SPEED_ENABLED
-          if (speedSliderToggle) speedSliderToggle.disabled = !CONFIG.PAINTING_SPEED_ENABLED
+          if (speedControls) {
+            speedControls.style.opacity = CONFIG.PAINTING_SPEED_ENABLED ? '1' : '0.5'
+            speedControls.style.pointerEvents = CONFIG.PAINTING_SPEED_ENABLED ? 'auto' : 'none'
+          }
         }
       } catch (error) {
         console.warn("Could not load painting speed enabled preference:", error)
