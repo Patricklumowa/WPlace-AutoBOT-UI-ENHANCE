@@ -147,7 +147,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-    title: "WPlace Auto-Imagre",
+    title: "WPlace Auto-Image",
     initBot: "Start Auto-BOT",
     uploadImage: "Upload Image",
     resizeImage: "Resize Image",
@@ -2757,8 +2757,11 @@
           statsBtn.innerHTML = '<i class="fas fa-chart-bar"></i>'
           statsBtn.title = "Show Stats"
         } else {
-                    statsContainer.style.display = "block"
-          makeDraggable(statsContainer)
+          statsContainer.style.display = "block"
+          if (!statsContainer.dataset.draggable) {
+            makeDraggable(statsContainer)
+            statsContainer.dataset.draggable = "true"
+          }
           statsBtn.innerHTML = '<i class="fas fa-chart-line"></i>'
           statsBtn.title = "Hide Stats"
         }
