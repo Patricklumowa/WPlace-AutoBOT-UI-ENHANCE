@@ -147,7 +147,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-    title: "WPlace Auto-Image",
+    title: "WPlace Auto-Imagre",
     initBot: "Start Auto-BOT",
     uploadImage: "Upload Image",
     resizeImage: "Resize Image",
@@ -1294,6 +1294,12 @@
         box-shadow: 0 12px 40px rgba(0,0,0,0.8), 0 0 0 2px rgba(255,255,255,0.2);
         transform: scale(1.02);
         z-index: 9999;
+      }
+      #wplace-stats-container.wplace-dragging {
+        transition: none !important;
+      }
+      #wplace-settings-container.wplace-dragging {
+        transition: none !important;
       }
       #wplace-image-bot-container.wplace-minimized {
         width: 200px;
