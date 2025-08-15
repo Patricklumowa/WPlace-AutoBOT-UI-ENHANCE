@@ -147,7 +147,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-    title: "WPlace Auto-Imagre",
+    title: "WPlace Auto-Image",
     initBot: "Start Auto-BOT",
     uploadImage: "Upload Image",
     resizeImage: "Resize Image",
@@ -790,7 +790,7 @@
         input.click()
       }),
 
-    extractAvailableColors: () => {
+    AvailableColors: () => {
       const colorElements = document.querySelectorAll('[id^="color-"]')
       return Array.from(colorElements)
         .filter((el) => !el.querySelector("svg"))
