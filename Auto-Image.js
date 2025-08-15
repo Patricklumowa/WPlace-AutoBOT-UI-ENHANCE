@@ -939,7 +939,7 @@
         border-radius: ${theme.borderRadius};
         padding: 0;
         box-shadow: ${theme.boxShadow};
-        z-index: 9997;
+        z-index: 10000;
         font-family: ${theme.fontFamily};
         color: ${theme.text};
         animation: slideIn 0.4s ease-out;
