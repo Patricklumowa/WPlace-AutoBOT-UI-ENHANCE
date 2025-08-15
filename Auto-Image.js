@@ -85,6 +85,8 @@
     currentTheme: "Classic Autobot",
   }
 
+  const pallete = { "0,0,0": 1, "60,60,60": 2, "120,120,120": 3, "210,210,210": 4, "255,255,255": 5, "96,0,24": 6, "237,28,36": 7, "255,127,39": 8, "246,170,9": 9, "249,221,59": 10, "255,250,188": 11, "14,185,104": 12, "19,230,123": 13, "135,255,94": 14, "12,129,110": 15, "16,174,166": 16, "19,225,190": 17, "40,80,158": 18, "64,147,228": 19, "96,247,242": 20, "107,80,246": 21, "153,177,251": 22, "120,12,153": 23, "170,56,185": 24, "224,159,249": 25, "203,0,122": 26, "236,31,128": 27, "243,141,169": 28, "104,70,52": 29, "149,104,42": 30, "248,178,119": 31, "170,170,170": 32, "165,14,30": 33, "250,128,114": 34, "228,92,26": 35, "214,181,148": 36, "156,132,49": 37, "197,173,49": 38, "232,212,95": 39, "74,107,58": 40, "90,148,74": 41, "132,197,115": 42, "15,121,159": 43, "187,250,242": 44, "125,199,255": 45, "77,49,184": 46, "74,66,132": 47, "122,113,196": 48, "181,174,241": 49, "219,164,99": 50, "209,128,81": 51, "255,197,165": 52, "155,82,73": 53, "209,128,120": 54, "250,182,164": 55, "123,99,82": 56, "156,132,107": 57, "51,57,65": 58, "109,117,141": 59, "179,185,209": 60, "109,100,63": 61, "148,140,107": 62, "205,197,158": 63 };
+
   const getCurrentTheme = () => CONFIG.THEMES[CONFIG.currentTheme]
 
   const switchTheme = (themeName) => {
@@ -434,6 +436,8 @@
     estimatedTime: 0,
     language: "en",
     paintingSpeed: CONFIG.PAINTING_SPEED.DEFAULT, // pixels per second
+    colorPaletteLimiterEnabled: false,
+    limitedColorPalette: [],
   }
 
   // Global variable to store the captured CAPTCHA token.
@@ -790,7 +794,7 @@
         input.click()
       }),
 
-    AvailableColors: () => {
+    extractAvailableColors: () => {
       const colorElements = document.querySelectorAll('[id^="color-"]')
       return Array.from(colorElements)
         .filter((el) => !el.querySelector("svg"))
@@ -1100,12 +1104,17 @@
       return colorCache.get(cacheKey)
     }
 
+    let colorsToUse = availableColors
+    if (state.colorPaletteLimiterEnabled && state.limitedColorPalette.length > 0) {
+      colorsToUse = availableColors.filter((color) => state.limitedColorPalette.includes(color.id))
+    }
+
     let minDistance = Number.POSITIVE_INFINITY
-    let closestColorId = availableColors[0]?.id || 1
+    let closestColorId = colorsToUse[0]?.id || 1
 
     // Use optimized loop for better performance
-    for (let i = 0; i < availableColors.length; i++) {
-      const color = availableColors[i]
+    for (let i = 0; i < colorsToUse.length; i++) {
+      const color = colorsToUse[i]
       const distance = Utils.colorDistance(targetRgb, color.rgb)
       if (distance < minDistance) {
         minDistance = distance
@@ -2511,6 +2520,46 @@
                 </div>
               </div>
             </div>
+
+            <!-- Color Palette Limiter Section -->
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; margin-bottom: 8px; color: white; font-weight: 500; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                <i class="fas fa-palette" style="color: #a29bfe; font-size: 14px;"></i>
+                Color Palette Limiter
+              </label>
+              <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; flex: 1;">
+                    <input type="checkbox" id="colorPaletteLimiterToggle" ${state.colorPaletteLimiterEnabled ? 'checked' : ''} style="
+                      width: 16px; 
+                      height: 16px; 
+                      accent-color: #a29bfe;
+                      cursor: pointer;
+                    ">
+                    <span style="color: white; font-size: 13px; font-weight: 500;">
+                      Enable Color Palette Limiter
+                    </span>
+                  </label>
+                </div>
+                <div id="colorPaletteLimiter" style="display: ${state.colorPaletteLimiterEnabled ? 'block' : 'none'};">
+                  <div id="colorPalette" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; max-height: 200px; overflow-y: auto;">
+                    <!-- Color options will be populated here -->
+                  </div>
+                  <button id="applyColorPalette" style="
+                    width: 100%;
+                    padding: 8px 12px;
+                    border: 1px solid rgba(255,255,255,0.2);
+                    border-radius: 8px;
+                    background: rgba(255,255,255,0.1);
+                    color: white;
+                    font-size: 13px;
+                    font-family: inherit;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    margin-top: 10px;
+                  ">Apply</button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -2884,6 +2933,82 @@
         themeSelect.addEventListener("change", (e) => {
           const newTheme = e.target.value
           switchTheme(newTheme)
+        })
+      }
+
+      // Color Palette Limiter functionality
+      const colorPaletteLimiterToggle = settingsContainer.querySelector("#colorPaletteLimiterToggle")
+      if (colorPaletteLimiterToggle) {
+        colorPaletteLimiterToggle.addEventListener("change", (e) => {
+          state.colorPaletteLimiterEnabled = e.target.checked
+          const colorPaletteLimiter = settingsContainer.querySelector("#colorPaletteLimiter")
+          if (colorPaletteLimiter) {
+            colorPaletteLimiter.style.display = state.colorPaletteLimiterEnabled ? "block" : "none"
+          }
+        })
+      }
+
+      const colorPalette = settingsContainer.querySelector("#colorPalette")
+      if (colorPalette) {
+        const pallete = { "0,0,0": 1, "60,60,60": 2, "120,120,120": 3, "210,210,210": 4, "255,255,255": 5, "96,0,24": 6, "237,28,36": 7, "255,127,39": 8, "246,170,9": 9, "249,221,59": 10, "255,250,188": 11, "14,185,104": 12, "19,230,123": 13, "135,255,94": 14, "12,129,110": 15, "16,174,166": 16, "19,225,190": 17, "40,80,158": 18, "64,147,228": 19, "96,247,242": 20, "107,80,246": 21, "153,177,251": 22, "120,12,153": 23, "170,56,185": 24, "224,159,249": 25, "203,0,122": 26, "236,31,128": 27, "243,141,169": 28, "104,70,52": 29, "149,104,42": 30, "248,178,119": 31, "170,170,170": 32, "165,14,30": 33, "250,128,114": 34, "228,92,26": 35, "214,181,148": 36, "156,132,49": 37, "197,173,49": 38, "232,212,95": 39, "74,107,58": 40, "90,148,74": 41, "132,197,115": 42, "15,121,159": 43, "187,250,242": 44, "125,199,255": 45, "77,49,184": 46, "74,66,132": 47, "122,113,196": 48, "181,174,241": 49, "219,164,99": 50, "209,128,81": 51, "255,197,165": 52, "155,82,73": 53, "209,128,120": 54, "250,182,164": 55, "123,99,82": 56, "156,132,107": 57, "51,57,65": 58, "109,117,141": 59, "179,185,209": 60, "109,100,63": 61, "148,140,107": 62, "205,197,158": 63 };
+        colorPalette.innerHTML = Object.entries(pallete)
+          .map(([rgb, id]) => {
+            const isChecked = state.limitedColorPalette.length === 0 || state.limitedColorPalette.includes(id);
+            return `
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
+                <input type="checkbox" class="color-palette-checkbox" value="${id}" ${isChecked ? 'checked' : ''}>
+                <div style="width: 20px; height: 20px; background-color: rgb(${rgb}); border-radius: 4px;"></div>
+                <span style="color: white; font-size: 12px;">${id}</span>
+              </label>
+            `;
+          })
+          .join("")
+      }
+
+      const applyColorPalette = settingsContainer.querySelector("#applyColorPalette")
+      if (applyColorPalette) {
+        applyColorPalette.addEventListener("click", () => {
+          const checkboxes = settingsContainer.querySelectorAll(".color-palette-checkbox:checked")
+          state.limitedColorPalette = Array.from(checkboxes).map((checkbox) => parseInt(checkbox.value))
+          Utils.showAlert("Color palette updated!", "success")
+        })
+      }
+
+      // Color Palette Limiter functionality
+      const colorPaletteLimiterToggle = settingsContainer.querySelector("#colorPaletteLimiterToggle")
+      if (colorPaletteLimiterToggle) {
+        colorPaletteLimiterToggle.addEventListener("change", (e) => {
+          state.colorPaletteLimiterEnabled = e.target.checked
+          const colorPaletteLimiter = settingsContainer.querySelector("#colorPaletteLimiter")
+          if (colorPaletteLimiter) {
+            colorPaletteLimiter.style.display = state.colorPaletteLimiterEnabled ? "block" : "none"
+          }
+        })
+      }
+
+      const colorPalette = settingsContainer.querySelector("#colorPalette")
+      if (colorPalette) {
+        const pallete = { "0,0,0": 1, "60,60,60": 2, "120,120,120": 3, "210,210,210": 4, "255,255,255": 5, "96,0,24": 6, "237,28,36": 7, "255,127,39": 8, "246,170,9": 9, "249,221,59": 10, "255,250,188": 11, "14,185,104": 12, "19,230,123": 13, "135,255,94": 14, "12,129,110": 15, "16,174,166": 16, "19,225,190": 17, "40,80,158": 18, "64,147,228": 19, "96,247,242": 20, "107,80,246": 21, "153,177,251": 22, "120,12,153": 23, "170,56,185": 24, "224,159,249": 25, "203,0,122": 26, "236,31,128": 27, "243,141,169": 28, "104,70,52": 29, "149,104,42": 30, "248,178,119": 31, "170,170,170": 32, "165,14,30": 33, "250,128,114": 34, "228,92,26": 35, "214,181,148": 36, "156,132,49": 37, "197,173,49": 38, "232,212,95": 39, "74,107,58": 40, "90,148,74": 41, "132,197,115": 42, "15,121,159": 43, "187,250,242": 44, "125,199,255": 45, "77,49,184": 46, "74,66,132": 47, "122,113,196": 48, "181,174,241": 49, "219,164,99": 50, "209,128,81": 51, "255,197,165": 52, "155,82,73": 53, "209,128,120": 54, "250,182,164": 55, "123,99,82": 56, "156,132,107": 57, "51,57,65": 58, "109,117,141": 59, "179,185,209": 60, "109,100,63": 61, "148,140,107": 62, "205,197,158": 63 };
+        colorPalette.innerHTML = Object.entries(pallete)
+          .map(([rgb, id]) => {
+            const isChecked = state.limitedColorPalette.length === 0 || state.limitedColorPalette.includes(id);
+            return `
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
+                <input type="checkbox" class="color-palette-checkbox" value="${id}" ${isChecked ? 'checked' : ''}>
+                <div style="width: 20px; height: 20px; background-color: rgb(${rgb}); border-radius: 4px;"></div>
+                <span style="color: white; font-size: 12px;">${id}</span>
+              </label>
+            `;
+          })
+          .join("")
+      }
+
+      const applyColorPalette = settingsContainer.querySelector("#applyColorPalette")
+      if (applyColorPalette) {
+        applyColorPalette.addEventListener("click", () => {
+          const checkboxes = settingsContainer.querySelectorAll(".color-palette-checkbox:checked")
+          state.limitedColorPalette = Array.from(checkboxes).map((checkbox) => parseInt(checkbox.value))
+          Utils.showAlert("Color palette updated!", "success")
         })
       }
       
