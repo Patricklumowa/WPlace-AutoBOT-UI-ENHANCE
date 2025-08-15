@@ -147,7 +147,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-    title: "WPlace Auto-Image",
+    title: "WPlace Auto-Imager",
     initBot: "Start Auto-BOT",
     uploadImage: "Upload Image",
     resizeImage: "Resize Image",
