@@ -1,147 +1,15 @@
-// Auto-Image.ts
-
-// Type Definitions
-type RGBColor = [number, number, number];
-
-interface Theme {
-  primary: string;
-  secondary: string;
-  accent: string;
-  text: string;
-  highlight: string;
-  success: string;
-  error: string;
-  warning: string;
-  fontFamily: string;
-  borderRadius: string;
-  borderStyle: string;
-  borderWidth: string;
-  boxShadow: string;
-  backdropFilter: string;
-  animations: {
-    glow: boolean;
-    scanline: boolean;
-    pixelBlink: boolean;
-  };
-  // For Neon Retro theme
-  neon?: string;
-  purple?: string;
-  pink?: string;
-}
-
-interface Config {
-  COOLDOWN_DEFAULT: number;
-  TRANSPARENCY_THRESHOLD: number;
-  WHITE_THRESHOLD: number;
-  LOG_INTERVAL: number;
-  PAINTING_SPEED: {
-    MIN: number;
-    MAX: number;
-    DEFAULT: number;
-  };
-  PAINTING_SPEED_ENABLED: boolean;
-  COLOR_PALETTE: RGBColor[];
-  COLOR_NAMES: Record<string, string>;
-  PAID_COLORS: Set<string>;
-  CSS_CLASSES: Record<string, string>;
-  THEMES: Record<string, Theme>;
-  currentTheme: string;
-}
-
-interface Position {
-  x: number;
-  y: number;
-}
-
-interface Region {
-  x: number;
-  y: number;
-}
-
-interface AvailableColor {
-  id: number;
-  rgb: RGBColor;
-}
-
-interface ImageDataState {
-  width: number;
-  height: number;
-  pixels: Uint8ClampedArray;
-  totalPixels: number;
-  processor: ImageProcessor;
-}
-
-interface State {
-  running: boolean;
-  imageLoaded: boolean;
-  processing: boolean;
-  totalPixels: number;
-  paintedPixels: number;
-  availableColors: AvailableColor[];
-  activeColorPalette: RGBColor[];
-  paintWhitePixels: boolean;
-  currentCharges: number;
-  cooldown: number;
-  imageData: ImageDataState | null;
-  stopFlag: boolean;
-  colorsChecked: boolean;
-  startPosition: Position | null;
-  selectingPosition: boolean;
-  region: Region | null;
-  minimized: boolean;
-  lastPosition: Position;
-  estimatedTime: number;
-  language: "en" | "ru" | "pt" | "vi" | "fr";
-  paintingSpeed: number;
-  paintedMap?: boolean[][];
-}
-
-interface SavedProgressState {
-  totalPixels: number;
-  paintedPixels: number;
-  lastPosition: Position;
-  startPosition: Position | null;
-  region: Region | null;
-  imageLoaded: boolean;
-  colorsChecked: boolean;
-  availableColors: AvailableColor[];
-}
-
-interface SavedImageData {
-    width: number;
-    height: number;
-    pixels: number[];
-    totalPixels: number;
-}
-
-interface SavedProgress {
-    timestamp: number;
-    version?: string;
-    state: SavedProgressState;
-    imageData: SavedImageData | null;
-    paintedMap: boolean[][] | null;
-}
-
-// Extend the Window interface for custom properties
-declare global {
-  interface Window {
-    fetch: typeof fetch;
-    _chargesInterval?: number;
-  }
-}
-
-(async () => {
+;(async () => {
   // CONFIGURATION CONSTANTS
-  const CONFIG: Config = {
+  const CONFIG = {
     COOLDOWN_DEFAULT: 31000,
     TRANSPARENCY_THRESHOLD: 100,
     WHITE_THRESHOLD: 250,
     LOG_INTERVAL: 10,
-    PAINTING_SPEED: {
-      MIN: 1, // Minimum 1 pixel per second
-      MAX: 1000, // Maximum 1000 pixels per second
-      DEFAULT: 5, // Default 5 pixels per second
-    },
+  PAINTING_SPEED: {
+      MIN: 1,          // Minimum 1 pixel per second
+      MAX: 1000,       // Maximum 1000 pixels per second
+      DEFAULT: 5,      // Default 5 pixels per second
+  },
     PAINTING_SPEED_ENABLED: false,
     // --- START: Color data from colour-converter.js ---
     COLOR_PALETTE: [
@@ -254,54 +122,54 @@ declare global {
     currentTheme: "Classic Autobot",
   }
 
-  const getCurrentTheme = (): Theme => CONFIG.THEMES[CONFIG.currentTheme];
+  const getCurrentTheme = () => CONFIG.THEMES[CONFIG.currentTheme]
 
-  const switchTheme = (themeName: string): void => {
+  const switchTheme = (themeName) => {
     if (CONFIG.THEMES[themeName]) {
-      CONFIG.currentTheme = themeName;
-      saveThemePreference();
+      CONFIG.currentTheme = themeName
+      saveThemePreference()
 
       // Remove existing theme styles
-      const existingStyle = document.querySelector('style[data-wplace-theme="true"]');
+      const existingStyle = document.querySelector('style[data-wplace-theme="true"]')
       if (existingStyle) {
-        existingStyle.remove();
+        existingStyle.remove()
       }
 
       // Recreate UI with new theme (cleanup is handled in createUI)
-      createUI();
+      createUI()
     }
   }
 
-  const saveThemePreference = (): void => {
+  const saveThemePreference = () => {
     try {
-      localStorage.setItem("wplace-theme", CONFIG.currentTheme);
+      localStorage.setItem("wplace-theme", CONFIG.currentTheme)
     } catch (e) {
-      console.warn("Could not save theme preference:", e);
+      console.warn("Could not save theme preference:", e)
     }
   }
 
-  const loadThemePreference = (): void => {
+  const loadThemePreference = () => {
     try {
-      const saved = localStorage.getItem("wplace-theme");
+      const saved = localStorage.getItem("wplace-theme")
       if (saved && CONFIG.THEMES[saved]) {
-        CONFIG.currentTheme = saved;
+        CONFIG.currentTheme = saved
       }
     } catch (e) {
-      console.warn("Could not load theme preference:", e);
+      console.warn("Could not load theme preference:", e)
     }
   }
-  
-  const loadLanguagePreference = (): void => {
-      try {
-          const saved = localStorage.getItem("wplace_language");
-          if (saved && TEXT[saved as keyof typeof TEXT]) {
-              state.language = saved as keyof typeof TEXT;
-          }
-      } catch (e) {
-          console.warn("Could not load language preference:", e);
+
+  const loadLanguagePreference = () => {
+    try {
+      const saved = localStorage.getItem("wplace_language")
+      if (saved && TEXT[saved]) {
+        state.language = saved
       }
-  };
-  
+    } catch (e) {
+      console.warn("Could not load language preference:", e)
+    }
+  }
+
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
@@ -604,10 +472,10 @@ declare global {
     themeSettingsDesc: "Choisissez votre thème de couleurs préféré pour l'interface.",
     languageSelectDesc: "Sélectionnez votre langue préférée. Les changements prendront effet immédiatement.",
     },
-  };
+  }
 
   // GLOBAL STATE
-  const state: State = {
+  const state = {
     running: false,
     imageLoaded: false,
     processing: false,
@@ -629,180 +497,176 @@ declare global {
     estimatedTime: 0,
     language: "en",
     paintingSpeed: CONFIG.PAINTING_SPEED.DEFAULT, // pixels per second
-  };
+  }
 
   // Placeholder for the resize preview update function
-  let _updateResizePreview: () => void = () => {};
+  let _updateResizePreview = () => {};
 
-  // Turnstile token handling (promise-based)
-  let turnstileToken: string | null = null;
-  let _resolveToken: ((value: string | PromiseLike<string>) => void) | null = null;
-  let tokenPromise = new Promise<string>((resolve) => {
-    _resolveToken = resolve;
-  });
+  // Turnstile token handling (promise-based) inspired by external logic
+  let turnstileToken = null
+  let _resolveToken = null
+  let tokenPromise = new Promise((resolve) => { _resolveToken = resolve })
 
-  function setTurnstileToken(t: string): void {
+  function setTurnstileToken(t) {
     if (_resolveToken) {
-      _resolveToken(t);
-      _resolveToken = null;
+      _resolveToken(t)
+      _resolveToken = null
     }
-    turnstileToken = t;
+    turnstileToken = t
   }
 
-  async function ensureToken(): Promise<string | null> {
+  async function ensureToken() {
     if (!turnstileToken) {
-      updateUI("captchaNeeded", "error");
-      Utils.showAlert(Utils.t("captchaNeeded"), "error");
-      try {
-        await tokenPromise;
-      } catch (_) {}
+      updateUI("captchaNeeded", "error")
+      Utils.showAlert(Utils.t("captchaNeeded"), "error")
+      try { await tokenPromise } catch (_) {}
     }
-    return turnstileToken;
+    return turnstileToken
   }
 
-  // Intercept fetch to capture Turnstile token
-  const originalFetch = window.fetch;
-  window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-    if (typeof input === "string" && input.includes("https://backend.wplace.live/s0/pixel/")) {
+  // Intercept fetch to capture Turnstile token from pixel placement requests
+  const originalFetch = window.fetch
+  window.fetch = async (url, options) => {
+    if (typeof url === "string" && url.includes("https://backend.wplace.live/s0/pixel/")) {
       try {
-        if (init?.body && typeof init.body === 'string') {
-            const payload = JSON.parse(init.body);
-            if (payload.t) {
-                console.log("✅ Turnstile Token Captured:", payload.t);
-                setTurnstileToken(payload.t);
-                const statusTextEl = document.querySelector("#statusText");
-                if (statusTextEl?.textContent?.includes("CAPTCHA")) {
-                    Utils.showAlert("Token captured successfully! You can start the bot now.", "success");
-                    updateUI("colorsFound", "success", { count: state.availableColors.length });
-                }
-            }
+        const payload = JSON.parse(options.body)
+        if (payload.t) {
+          console.log("✅ Turnstile Token Captured:", payload.t)
+          setTurnstileToken(payload.t)
+          if (document.querySelector("#statusText")?.textContent.includes("CAPTCHA")) {
+            Utils.showAlert("Token captured successfully! You can start the bot now.", "success")
+            updateUI("colorsFound", "success", { count: state.availableColors.length })
+          }
         }
-      } catch (_) {
-        /* ignore */
-      }
+      } catch (_) { /* ignore */ }
     }
-    return originalFetch(input, init);
-  };
+    return originalFetch(url, options)
+  }
 
   // LANGUAGE DETECTION
-  async function detectLanguage(): Promise<void> {
+  async function detectLanguage() {
     try {
       const response = await fetch("https://backend.wplace.live/me", {
         credentials: "include",
-      });
-      const data = await response.json();
-      state.language = data.language === "pt" ? "pt" : "en";
+      })
+      const data = await response.json()
+      state.language = data.language === "pt" ? "pt" : "en"
     } catch {
-      state.language = navigator.language.startsWith("pt") ? "pt" : "en";
+      state.language = navigator.language.startsWith("pt") ? "pt" : "en"
     }
   }
 
   // UTILITY FUNCTIONS
   const Utils = {
-    sleep: (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms)),
+    sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
 
-    createElement: <K extends keyof HTMLElementTagNameMap>(
-        tag: K,
-        props: Record<string, any> = {},
-        children: (Node | string)[] | string = []
-      ): HTMLElementTagNameMap[K] => {
-        const element = document.createElement(tag);
+    // Optimized DOM creation helpers
+    createElement: (tag, props = {}, children = []) => {
+      const element = document.createElement(tag)
 
-        Object.entries(props).forEach(([key, value]) => {
-            if (key === 'style' && typeof value === 'object') {
-                Object.assign(element.style, value);
-            } else if (key === 'className') {
-                element.className = value;
-            } else if (key === 'innerHTML') {
-                element.innerHTML = value;
-            } else {
-                element.setAttribute(key, value);
-            }
-        });
-        
-        if (typeof children === 'string') {
-            element.textContent = children;
-        } else if (Array.isArray(children)) {
-            children.forEach(child => {
-                if (typeof child === 'string') {
-                    element.appendChild(document.createTextNode(child));
-                } else {
-                    element.appendChild(child);
-                }
-            });
+      // Set properties efficiently
+      Object.entries(props).forEach(([key, value]) => {
+        if (key === 'style' && typeof value === 'object') {
+          Object.assign(element.style, value)
+        } else if (key === 'className') {
+          element.className = value
+        } else if (key === 'innerHTML') {
+          element.innerHTML = value
+        } else {
+          element.setAttribute(key, value)
         }
+      })
 
-        return element;
+      // Append children efficiently
+      if (typeof children === 'string') {
+        element.textContent = children
+      } else if (Array.isArray(children)) {
+        children.forEach(child => {
+          if (typeof child === 'string') {
+            element.appendChild(document.createTextNode(child))
+          } else {
+            element.appendChild(child)
+          }
+        })
+      }
+
+      return element
     },
 
-    createButton: (
-      id: string,
-      text: string,
-      icon: string | null,
-      onClick?: (event: MouseEvent) => void,
-      style: string = CONFIG.CSS_CLASSES.BUTTON_PRIMARY
-    ): HTMLButtonElement => {
+    // Create button with common styling
+    createButton: (id, text, icon, onClick, style = CONFIG.CSS_CLASSES.BUTTON_PRIMARY) => {
       const button = Utils.createElement('button', {
         id: id,
         style: style,
         innerHTML: `${icon ? `<i class="${icon}"></i>` : ''}<span>${text}</span>`
-      });
-      if (onClick) button.addEventListener('click', onClick);
-      return button;
-    },
-    
-    t: (key: string, params: Record<string, any> = {}): string => {
-        let text = TEXT[state.language]?.[key as keyof typeof TEXT['en']] || TEXT.en[key as keyof typeof TEXT['en']] || key;
-        Object.keys(params).forEach((param) => {
-            text = text.replace(`{${param}}`, String(params[param]));
-        });
-        return text;
+      })
+      if (onClick) button.addEventListener('click', onClick)
+      return button
     },
 
-    showAlert: (message: string, type: "info" | "success" | "warning" | "error" = "info"): void => {
-        const alertDiv = document.createElement("div");
-        alertDiv.style.cssText = `
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            padding: 12px 20px; border-radius: 8px; color: white;
-            font-weight: 600; z-index: 10001; max-width: 400px;
-            text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            animation: slideDown 0.3s ease-out; font-family: 'Segoe UI', sans-serif;
-        `;
+    t: (key, params = {}) => {
+      let text = TEXT[state.language]?.[key] || TEXT.en[key] || key
+      Object.keys(params).forEach((param) => {
+        text = text.replace(`{${param}}`, params[param])
+      })
+      return text
+    },
 
-        const colors = {
-            info: "background: linear-gradient(135deg, #3498db, #2980b9);",
-            success: "background: linear-gradient(135deg, #27ae60, #229954);",
-            warning: "background: linear-gradient(135deg, #f39c12, #e67e22);",
-            error: "background: linear-gradient(135deg, #e74c3c, #c0392b);",
-        };
-        alertDiv.style.cssText += colors[type];
+    showAlert: (message, type = "info") => {
+      const alertDiv = document.createElement("div")
+      alertDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        z-index: 10001;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        animation: slideDown 0.3s ease-out;
+        font-family: 'Segoe UI', sans-serif;
+      `
 
-        const style = document.createElement("style");
-        style.textContent = `
-            @keyframes slideDown {
-                from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
-                to { transform: translateX(-50%) translateY(0); opacity: 1; }
-            }
-        `;
-        document.head.appendChild(style);
+      const colors = {
+        info: "background: linear-gradient(135deg, #3498db, #2980b9);",
+        success: "background: linear-gradient(135deg, #27ae60, #229954);",
+        warning: "background: linear-gradient(135deg, #f39c12, #e67e22);",
+        error: "background: linear-gradient(135deg, #e74c3c, #c0392b);",
+      }
 
-        alertDiv.textContent = message;
-        document.body.appendChild(alertDiv);
+      alertDiv.style.cssText += colors[type] || colors.info
 
+      const style = document.createElement("style")
+      style.textContent = `
+        @keyframes slideDown {
+          from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+          to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+      `
+      document.head.appendChild(style)
+
+      alertDiv.textContent = message
+      document.body.appendChild(alertDiv)
+
+      setTimeout(() => {
+        alertDiv.style.animation = "slideDown 0.3s ease-out reverse"
         setTimeout(() => {
-            alertDiv.style.animation = "slideDown 0.3s ease-out reverse";
-            setTimeout(() => {
-                if (document.body.contains(alertDiv)) document.body.removeChild(alertDiv);
-                if (document.head.contains(style)) document.head.removeChild(style);
-            }, 300);
-        }, 4000);
+          document.body.removeChild(alertDiv)
+          document.head.removeChild(style)
+        }, 300)
+      }, 4000)
     },
 
-    colorDistance: (a: RGBColor, b: RGBColor): number => Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2) + Math.pow(a[2] - b[2], 2)),
+    colorDistance: (a, b) => Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2) + Math.pow(a[2] - b[2], 2)),
 
-    findClosestPaletteColor: (r: number, g: number, b: number, palette: RGBColor[]): RGBColor => {
+    // The color metric from colour-converter.js for higher accuracy
+    findClosestPaletteColor: (r, g, b, palette) => {
         let menorDist = Infinity;
-        let cor: RGBColor = [0, 0, 0];
+        let cor = [0, 0, 0];
         if (!palette || palette.length === 0) return cor;
 
         for (let i = 0; i < palette.length; i++) {
@@ -820,108 +684,110 @@ declare global {
         return cor;
     },
 
-    isWhitePixel: (r: number, g: number, b: number): boolean =>
+    isWhitePixel: (r, g, b) =>
       r >= CONFIG.WHITE_THRESHOLD && g >= CONFIG.WHITE_THRESHOLD && b >= CONFIG.WHITE_THRESHOLD,
 
-    createImageUploader: (): Promise<string> =>
+    createImageUploader: () =>
       new Promise((resolve) => {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = "image/png,image/jpeg";
+        const input = document.createElement("input")
+        input.type = "file"
+        input.accept = "image/png,image/jpeg"
         input.onchange = () => {
-          if (input.files && input.files[0]) {
-            const fr = new FileReader();
-            fr.onload = () => resolve(fr.result as string);
-            fr.readAsDataURL(input.files[0]);
-          }
-        };
-        input.click();
-      }),
-      
-    createFileDownloader: (data: string, filename: string): void => {
-        const blob = new Blob([data], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    },
-    
-    createFileUploader: (): Promise<SavedProgress> =>
-      new Promise((resolve, reject) => {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = ".json";
-        input.onchange = (e) => {
-          const file = (e.target as HTMLInputElement).files?.[0];
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = () => {
-              try {
-                const data = JSON.parse(reader.result as string) as SavedProgress;
-                resolve(data);
-              } catch (error) {
-                reject(new Error("Invalid JSON file"));
-              }
-            };
-            reader.onerror = () => reject(new Error("File reading error"));
-            reader.readAsText(file);
-          } else {
-            reject(new Error("No file selected"));
-          }
-        };
-        input.click();
+          const fr = new FileReader()
+          fr.onload = () => resolve(fr.result)
+          fr.readAsDataURL(input.files[0])
+        }
+        input.click()
       }),
 
-    extractAvailableColors: (): AvailableColor[] => {
-      const colorElements = document.querySelectorAll<HTMLElement>('[id^="color-"]');
+    createFileDownloader: (data, filename) => {
+      const blob = new Blob([data], { type: "application/json" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    },
+
+    createFileUploader: () =>
+      new Promise((resolve, reject) => {
+        const input = document.createElement("input")
+        input.type = "file"
+        input.accept = ".json"
+        input.onchange = (e) => {
+          const file = e.target.files[0]
+          if (file) {
+            const reader = new FileReader()
+            reader.onload = () => {
+              try {
+                const data = JSON.parse(reader.result)
+                resolve(data)
+              } catch (error) {
+                reject(new Error("Invalid JSON file"))
+              }
+            }
+            reader.onerror = () => reject(new Error("File reading error"))
+            reader.readAsText(file)
+          } else {
+            reject(new Error("No file selected"))
+          }
+        }
+        input.click()
+      }),
+
+    extractAvailableColors: () => {
+      const colorElements = document.querySelectorAll('[id^="color-"]')
       return Array.from(colorElements)
         .filter((el) => !el.querySelector("svg"))
         .filter((el) => {
-          const id = Number.parseInt(el.id.replace("color-", ""), 10);
-          return id !== 0 && id !== 5;
+          const id = Number.parseInt(el.id.replace("color-", ""))
+          return id !== 0 && id !== 5
         })
         .map((el) => {
-          const id = Number.parseInt(el.id.replace("color-", ""), 10);
-          const rgbStr = el.style.backgroundColor.match(/\d+/g);
-          const rgb = (rgbStr ? rgbStr.map(Number) : [0, 0, 0]) as RGBColor;
-          return { id, rgb };
-        });
+          const id = Number.parseInt(el.id.replace("color-", ""))
+          const rgbStr = el.style.backgroundColor.match(/\d+/g)
+          const rgb = rgbStr ? rgbStr.map(Number) : [0, 0, 0]
+          return { id, rgb }
+        })
     },
 
-    formatTime: (ms: number): string => {
-        const seconds = Math.floor((ms / 1000) % 60);
-        const minutes = Math.floor((ms / (1000 * 60)) % 60);
-        const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
-        const days = Math.floor(ms / (1000 * 60 * 60 * 24));
-    
-        let result = "";
-        if (days > 0) result += `${days}d `;
-        if (hours > 0 || days > 0) result += `${hours}h `;
-        if (minutes > 0 || hours > 0 || days > 0) result += `${minutes}m `;
-        result += `${seconds}s`;
-    
-        return result.trim();
+    formatTime: (ms) => {
+      const seconds = Math.floor((ms / 1000) % 60)
+      const minutes = Math.floor((ms / (1000 * 60)) % 60)
+      const hours = Math.floor((ms / (1000 * 60 * 60)) % 24)
+      const days = Math.floor(ms / (1000 * 60 * 60 * 24))
+
+      let result = ""
+      if (days > 0) result += `${days}d `
+      if (hours > 0 || days > 0) result += `${hours}h `
+      if (minutes > 0 || hours > 0 || days > 0) result += `${minutes}m `
+      result += `${seconds}s`
+
+      return result
     },
 
-    calculateEstimatedTime: (remainingPixels: number, charges: number, cooldown: number): number => {
-        if (remainingPixels <= 0) return 0;
+    calculateEstimatedTime: (remainingPixels, charges, cooldown) => {
+      if (remainingPixels <= 0) return 0
 
-        const paintingSpeedDelay = state.paintingSpeed > 0 ? (1000 / state.paintingSpeed) : 1000;
-        const timeFromSpeed = remainingPixels * paintingSpeedDelay;
+      // Calculate time based on painting speed (pixels per second)
+      const paintingSpeedDelay = state.paintingSpeed > 0 ? (1000 / state.paintingSpeed) : 1000
+      const timeFromSpeed = remainingPixels * paintingSpeedDelay // ms
 
-        const cyclesNeeded = Math.ceil(remainingPixels / Math.max(charges, 1));
-        const timeFromCharges = cyclesNeeded * cooldown;
+      // Calculate time based on charges and cooldown
+      const cyclesNeeded = Math.ceil(remainingPixels / Math.max(charges, 1))
+      const timeFromCharges = cyclesNeeded * cooldown // ms
 
-        return Math.max(timeFromSpeed, timeFromCharges);
+      // Return the maximum of both calculations (the limiting factor)
+      return Math.max(timeFromSpeed, timeFromCharges)
     },
-    
-    saveProgress: (): boolean => {
+
+    // Save/Load Progress Functions
+    saveProgress: () => {
       try {
-        const progressData: SavedProgress = {
+        const progressData = {
           timestamp: Date.now(),
           state: {
             totalPixels: state.totalPixels,
@@ -933,7 +799,8 @@ declare global {
             colorsChecked: state.colorsChecked,
             availableColors: state.availableColors,
           },
-          imageData: state.imageData ? {
+          imageData: state.imageData
+            ? {
                 width: state.imageData.width,
                 height: state.imageData.height,
                 pixels: Array.from(state.imageData.pixels),
@@ -941,290 +808,311 @@ declare global {
               }
             : null,
           paintedMap: state.paintedMap ? state.paintedMap.map((row) => Array.from(row)) : null,
-        };
-        localStorage.setItem("wplace-bot-progress", JSON.stringify(progressData));
-        return true;
-      } catch (error) {
-        console.error("Error saving progress:", error);
-        return false;
-      }
-    },
-
-    loadProgress: (): SavedProgress | null => {
-      try {
-        const saved = localStorage.getItem("wplace-bot-progress");
-        return saved ? JSON.parse(saved) as SavedProgress : null;
-      } catch (error) {
-        console.error("Error loading progress:", error);
-        return null;
-      }
-    },
-    
-    clearProgress: (): boolean => {
-        try {
-            localStorage.removeItem("wplace-bot-progress");
-            return true;
-        } catch (error) {
-            console.error("Error clearing progress:", error);
-            return false;
         }
+
+        localStorage.setItem("wplace-bot-progress", JSON.stringify(progressData))
+        return true
+      } catch (error) {
+        console.error("Error saving progress:", error)
+        return false
+      }
     },
 
-    restoreProgress: (savedData: SavedProgress): boolean => {
+    loadProgress: () => {
       try {
-        Object.assign(state, savedData.state);
+        const saved = localStorage.getItem("wplace-bot-progress")
+        return saved ? JSON.parse(saved) : null
+      } catch (error) {
+        console.error("Error loading progress:", error)
+        return null
+      }
+    },
 
+    clearProgress: () => {
+      try {
+        localStorage.removeItem("wplace-bot-progress")
+        return true
+      } catch (error) {
+        console.error("Error clearing progress:", error)
+        return false
+      }
+    },
+
+    restoreProgress: (savedData) => {
+      try {
+        // Restore state
+        Object.assign(state, savedData.state)
+
+        // Restore image data
         if (savedData.imageData) {
-          // We can't restore the 'processor' object, this needs to be handled
-          // by re-uploading or storing the image source. For now, we restore data.
           state.imageData = {
             ...savedData.imageData,
             pixels: new Uint8ClampedArray(savedData.imageData.pixels),
-            processor: null as any, // Processor cannot be serialized
-          };
+          }
         }
 
+        // Restore painted map
         if (savedData.paintedMap) {
-          state.paintedMap = savedData.paintedMap.map((row) => Array.from(row));
+          state.paintedMap = savedData.paintedMap.map((row) => Array.from(row))
         }
 
-        return true;
+        return true
       } catch (error) {
-        console.error("Error restoring progress:", error);
-        return false;
+        console.error("Error restoring progress:", error)
+        return false
       }
     },
-    
-    saveProgressToFile: (): boolean => {
-        try {
-            const progressData: SavedProgress = {
-                timestamp: Date.now(),
-                version: "1.0",
-                state: {
-                    totalPixels: state.totalPixels,
-                    paintedPixels: state.paintedPixels,
-                    lastPosition: state.lastPosition,
-                    startPosition: state.startPosition,
-                    region: state.region,
-                    imageLoaded: state.imageLoaded,
-                    colorsChecked: state.colorsChecked,
-                    availableColors: state.availableColors,
-                },
-                imageData: state.imageData ? {
-                        width: state.imageData.width,
-                        height: state.imageData.height,
-                        pixels: Array.from(state.imageData.pixels),
-                        totalPixels: state.imageData.totalPixels,
-                    } : null,
-                paintedMap: state.paintedMap ? state.paintedMap.map(row => Array.from(row)) : null
-            };
-            const filename = `wplace-bot-progress-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.json`;
-            Utils.createFileDownloader(JSON.stringify(progressData, null, 2), filename);
-            return true;
-        } catch (error) {
-            console.error("Error saving to file:", error);
-            return false;
+
+    saveProgressToFile: () => {
+      try {
+        const progressData = {
+          timestamp: Date.now(),
+          version: "1.0",
+          state: {
+            totalPixels: state.totalPixels,
+            paintedPixels: state.paintedPixels,
+            lastPosition: state.lastPosition,
+            startPosition: state.startPosition,
+            region: state.region,
+            imageLoaded: state.imageLoaded,
+            colorsChecked: state.colorsChecked,
+            availableColors: state.availableColors,
+          },
+          imageData: state.imageData
+            ? {
+                width: state.imageData.width,
+                height: state.imageData.height,
+                pixels: Array.from(state.imageData.pixels),
+                totalPixels: state.imageData.totalPixels,
+              }
+            : null,
+          paintedMap: state.paintedMap ? state.paintedMap.map((row) => Array.from(row)) : null,
         }
+
+        const filename = `wplace-bot-progress-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.json`
+        Utils.createFileDownloader(JSON.stringify(progressData, null, 2), filename)
+        return true
+      } catch (error) {
+        console.error("Error saving to file:", error)
+        return false
+      }
     },
 
-    loadProgressFromFile: async (): Promise<boolean> => {
-        try {
-            const data = await Utils.createFileUploader();
-            if (!data.version || !data.state) {
-                throw new Error("Invalid file format");
-            }
-            return Utils.restoreProgress(data);
-        } catch (error) {
-            console.error("Error loading from file:", error);
-            throw error;
+    loadProgressFromFile: async () => {
+      try {
+        const data = await Utils.createFileUploader()
+
+        if (!data.version || !data.state) {
+          throw new Error("Invalid file format")
         }
-    }
-  };
+
+        const success = Utils.restoreProgress(data)
+        return success
+      } catch (error) {
+        console.error("Error loading from file:", error)
+        throw error
+      }
+    },
+  }
 
   // IMAGE PROCESSOR CLASS
   class ImageProcessor {
-    imageSrc: string;
-    img: HTMLImageElement | null = null;
-    canvas: HTMLCanvasElement | null = null;
-    ctx: CanvasRenderingContext2D | null = null;
-
-    constructor(imageSrc: string) {
-      this.imageSrc = imageSrc;
+    constructor(imageSrc) {
+      this.imageSrc = imageSrc
+      this.img = null
+      this.canvas = null
+      this.ctx = null
     }
 
-    async load(): Promise<void> {
+    async load() {
       return new Promise((resolve, reject) => {
-        this.img = new Image();
-        this.img.crossOrigin = "anonymous";
+        this.img = new Image()
+        this.img.crossOrigin = "anonymous"
         this.img.onload = () => {
-          this.canvas = document.createElement("canvas");
-          this.ctx = this.canvas.getContext("2d");
-          if (!this.img || !this.ctx) return reject("Canvas context not available");
-          this.canvas.width = this.img.width;
-          this.canvas.height = this.img.height;
-          this.ctx.drawImage(this.img, 0, 0);
-          resolve();
-        };
-        this.img.onerror = reject;
-        this.img.src = this.imageSrc;
-      });
+          this.canvas = document.createElement("canvas")
+          this.ctx = this.canvas.getContext("2d")
+          this.canvas.width = this.img.width
+          this.canvas.height = this.img.height
+          this.ctx.drawImage(this.img, 0, 0)
+          resolve()
+        }
+        this.img.onerror = reject
+        this.img.src = this.imageSrc
+      })
     }
 
-    getDimensions(): { width: number; height: number } {
-      if (!this.canvas) return { width: 0, height: 0 };
-      return { width: this.canvas.width, height: this.canvas.height };
+    getDimensions() {
+      return {
+        width: this.canvas.width,
+        height: this.canvas.height,
+      }
     }
 
-    getPixelData(): Uint8ClampedArray {
-        if (!this.ctx || !this.canvas) return new Uint8ClampedArray();
-        return this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height).data;
+    getPixelData() {
+      return this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height).data
     }
 
-    resize(newWidth: number, newHeight: number): Uint8ClampedArray {
-        if (!this.ctx || !this.canvas) return new Uint8ClampedArray();
+    resize(newWidth, newHeight) {
+      const tempCanvas = document.createElement("canvas")
+      const tempCtx = tempCanvas.getContext("2d")
 
-        const tempCanvas = document.createElement("canvas");
-        const tempCtx = tempCanvas.getContext("2d");
-        if (!tempCtx) return new Uint8ClampedArray();
+      tempCanvas.width = newWidth
+      tempCanvas.height = newHeight
 
-        tempCanvas.width = newWidth;
-        tempCanvas.height = newHeight;
-        tempCtx.imageSmoothingEnabled = false;
-        tempCtx.drawImage(this.canvas, 0, 0, newWidth, newHeight);
+      tempCtx.imageSmoothingEnabled = false
+      tempCtx.drawImage(this.canvas, 0, 0, newWidth, newHeight)
 
-        this.canvas.width = newWidth;
-        this.canvas.height = newHeight;
-        this.ctx.imageSmoothingEnabled = false;
-        this.ctx.drawImage(tempCanvas, 0, 0);
+      this.canvas.width = newWidth
+      this.canvas.height = newHeight
+      this.ctx.imageSmoothingEnabled = false
+      this.ctx.drawImage(tempCanvas, 0, 0)
 
-        return this.ctx.getImageData(0, 0, newWidth, newHeight).data;
+      return this.ctx.getImageData(0, 0, newWidth, newHeight).data
     }
 
-    generatePreview(width: number, height: number): string {
-        if (!this.img) return "";
-        const previewCanvas = document.createElement("canvas");
-        const previewCtx = previewCanvas.getContext("2d");
-        if (!previewCtx) return "";
+    generatePreview(width, height) {
+      const previewCanvas = document.createElement("canvas")
+      const previewCtx = previewCanvas.getContext("2d")
 
-        previewCanvas.width = width;
-        previewCanvas.height = height;
-        previewCtx.imageSmoothingEnabled = false;
-        previewCtx.drawImage(this.img, 0, 0, width, height);
+      previewCanvas.width = width
+      previewCanvas.height = height
 
-        return previewCanvas.toDataURL();
+      previewCtx.imageSmoothingEnabled = false
+      previewCtx.drawImage(this.img, 0, 0, width, height)
+
+      return previewCanvas.toDataURL()
     }
   }
 
   // WPLACE API SERVICE
   const WPlaceService = {
-    async paintPixelInRegion(regionX: number, regionY: number, pixelX: number, pixelY: number, color: number): Promise<boolean | "token_error"> {
-        try {
-            await ensureToken();
-            if (!turnstileToken) return "token_error";
-            const payload = { coords: [pixelX, pixelY], colors: [color], t: turnstileToken };
-            const res = await fetch(`https://backend.wplace.live/s0/pixel/${regionX}/${regionY}`, {
-                method: "POST",
-                headers: { "Content-Type": "text/plain;charset=UTF-8" },
-                credentials: "include",
-                body: JSON.stringify(payload),
-            });
-            if (res.status === 403) {
-                console.error("❌ 403 Forbidden. Turnstile token might be invalid or expired.");
-                turnstileToken = null;
-                tokenPromise = new Promise((resolve) => { _resolveToken = resolve; });
-                return "token_error";
-            }
-            const data = await res.json();
-            return data?.painted === 1;
-        } catch (e) {
-            console.error("Paint request failed:", e);
-            return false;
+    async paintPixelInRegion(regionX, regionY, pixelX, pixelY, color) {
+      try {
+        await ensureToken()
+        if (!turnstileToken) return "token_error"
+        const payload = { coords: [pixelX, pixelY], colors: [color], t: turnstileToken }
+        const res = await fetch(`https://backend.wplace.live/s0/pixel/${regionX}/${regionY}`, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=UTF-8" },
+          credentials: "include",
+          body: JSON.stringify(payload),
+        })
+        if (res.status === 403) {
+          console.error("❌ 403 Forbidden. Turnstile token might be invalid or expired.")
+          turnstileToken = null
+          tokenPromise = new Promise((resolve) => { _resolveToken = resolve })
+          return "token_error"
         }
+        const data = await res.json()
+        return data?.painted === 1
+      } catch (e) {
+        console.error("Paint request failed:", e)
+        return false
+      }
     },
-    
-    async getCharges(): Promise<{ charges: number; cooldown: number }> {
-        try {
-            const res = await fetch("https://backend.wplace.live/me", { credentials: "include" });
-            const data = await res.json();
-            return {
-                charges: data.charges?.count || 0,
-                cooldown: data.charges?.next || CONFIG.COOLDOWN_DEFAULT,
-            };
-        } catch (e) {
-            console.error("Failed to get charges:", e);
-            return { charges: 0, cooldown: CONFIG.COOLDOWN_DEFAULT };
+
+    async getCharges() {
+      try {
+        const res = await fetch("https://backend.wplace.live/me", {
+          credentials: "include",
+        })
+        const data = await res.json()
+        return {
+          charges: data.charges?.count || 0,
+          cooldown: data.charges?.next || CONFIG.COOLDOWN_DEFAULT,
         }
+      } catch (e) {
+        console.error("Failed to get charges:", e)
+        return {
+          charges: 0,
+          cooldown: CONFIG.COOLDOWN_DEFAULT,
+        }
+      }
     },
-  };
+  }
 
   // COLOR MATCHING FUNCTION - Optimized with caching
-  const colorCache = new Map<string, number>();
+  const colorCache = new Map()
 
-  function findClosestColor(targetRgb: RGBColor, availableColors: AvailableColor[]): number {
-    const cacheKey = targetRgb.join(',');
+  function findClosestColor(targetRgb, availableColors) {
+    // Create cache key from RGB values
+    const cacheKey = `${targetRgb[0]},${targetRgb[1]},${targetRgb[2]}`
+
+    // Check cache first
     if (colorCache.has(cacheKey)) {
-      return colorCache.get(cacheKey)!;
+      return colorCache.get(cacheKey)
     }
 
-    let minDistance = Number.POSITIVE_INFINITY;
-    let closestColorId = availableColors[0]?.id || 1;
+    let minDistance = Number.POSITIVE_INFINITY
+    let closestColorId = availableColors[0]?.id || 1
 
-    for (const color of availableColors) {
-      const distance = Utils.colorDistance(targetRgb, color.rgb);
+    // Use optimized loop for better performance
+    for (let i = 0; i < availableColors.length; i++) {
+      const color = availableColors[i]
+      const distance = Utils.colorDistance(targetRgb, color.rgb)
       if (distance < minDistance) {
-        minDistance = distance;
-        closestColorId = color.id;
-        if (distance === 0) break;
+        minDistance = distance
+        closestColorId = color.id
+
+        // If perfect match, break early
+        if (distance === 0) break
       }
     }
 
-    colorCache.set(cacheKey, closestColorId);
+    // Cache the result for future use
+    colorCache.set(cacheKey, closestColorId)
+
+    // Limit cache size to prevent memory leaks
     if (colorCache.size > 10000) {
-      const firstKey = colorCache.keys().next().value;
-      colorCache.delete(firstKey);
+      const firstKey = colorCache.keys().next().value
+      colorCache.delete(firstKey)
     }
-    return closestColorId;
+
+    return closestColorId
   }
 
-  // UI UPDATE FUNCTIONS (declared early)
-  let updateUI: (messageKey: string, type?: string, params?: Record<string, any>) => void = () => {};
-  let updateStats: () => Promise<void> = async () => {};
-  let updateDataButtons: () => void = () => {};
-
+  // UI UPDATE FUNCTIONS (declared early to avoid reference errors)
+  let updateUI = () => {}
+  let updateStats = () => {}
+  let updateDataButtons = () => {}
 
   // --- START: Color Palette Functions ---
-  function updateActiveColorPalette(): void {
-    state.activeColorPalette = [];
-    const activeSwatches = document.querySelectorAll<HTMLButtonElement>('.wplace-color-swatch.active');
-    activeSwatches.forEach(swatch => {
-        const rgb = swatch.getAttribute('data-rgb')?.split(',').map(Number) as RGBColor | undefined;
-        if(rgb) state.activeColorPalette.push(rgb);
-    });
-    
-    const resizeContainer = document.querySelector<HTMLElement>('.resize-container');
-    if (resizeContainer?.style.display === 'block') {
-        _updateResizePreview();
-    }
+  function updateActiveColorPalette() {
+      state.activeColorPalette = [];
+      const activeSwatches = document.querySelectorAll('.wplace-color-swatch.active');
+      if (activeSwatches) {
+          activeSwatches.forEach(swatch => {
+              const rgb = swatch.getAttribute('data-rgb').split(',').map(Number);
+              state.activeColorPalette.push(rgb);
+          });
+      }
+      // If the resize dialog is open, update its preview
+      if (document.querySelector('.resize-container')?.style.display === 'block') {
+          _updateResizePreview();
+      }
   }
 
-  function toggleAllColors(select: boolean, isPaid: boolean): void {
+  function toggleAllColors(select, isPaid) {
       const selector = isPaid ? '.wplace-color-swatch.paid' : '.wplace-color-swatch:not(.paid)';
-      const swatches = document.querySelectorAll<HTMLElement>(selector);
-      swatches.forEach(swatch => {
-          swatch.classList.toggle('active', select);
-      });
+      const swatches = document.querySelectorAll(selector);
+      if (swatches) {
+          swatches.forEach(swatch => {
+              swatch.classList.toggle('active', select);
+          });
+      }
       updateActiveColorPalette();
   }
 
-  function initializeColorPalette(container: HTMLElement): void {
-      const freeContainer = container.querySelector<HTMLElement>('#colors-free');
-      const paidContainer = container.querySelector<HTMLElement>('#colors-paid');
+  function initializeColorPalette(container) {
+      const freeContainer = container.querySelector('#colors-free');
+      const paidContainer = container.querySelector('#colors-paid');
       if (!freeContainer || !paidContainer) return;
 
       freeContainer.innerHTML = '';
       paidContainer.innerHTML = '';
 
-      const uniqueColors = [...new Set(CONFIG.COLOR_PALETTE.map(JSON.stringify))].map(str => JSON.parse(str) as RGBColor);
+      // Create a unique set of colors to avoid duplicates
+      const uniqueColors = [...new Set(CONFIG.COLOR_PALETTE.map(JSON.stringify))].map(JSON.parse);
 
       uniqueColors.forEach(rgb => {
           const key = rgb.join(',');
@@ -1240,8 +1128,11 @@ declare global {
           swatch.style.backgroundColor = `rgb(${key})`;
 
           const nameLabel = Utils.createElement('span', { className: 'wplace-color-item-name' }, name);
-          
-          if (!isPaid) swatch.classList.add('active');
+
+          // Default state: free are active, paid are not
+          if (!isPaid) {
+              swatch.classList.add('active');
+          }
 
           swatch.addEventListener('click', () => {
               swatch.classList.toggle('active');
@@ -1250,203 +1141,2771 @@ declare global {
 
           colorItem.appendChild(swatch);
           colorItem.appendChild(nameLabel);
-          
-          if (isPaid) paidContainer.appendChild(colorItem);
-          else freeContainer.appendChild(colorItem);
+
+          if (isPaid) {
+              paidContainer.appendChild(colorItem);
+          } else {
+              freeContainer.appendChild(colorItem);
+          }
       });
 
+      // Add event listeners for master buttons
       container.querySelector('#selectAllFreeBtn')?.addEventListener('click', () => toggleAllColors(true, false));
       container.querySelector('#unselectAllFreeBtn')?.addEventListener('click', () => toggleAllColors(false, false));
       container.querySelector('#selectAllPaidBtn')?.addEventListener('click', () => toggleAllColors(true, true));
       container.querySelector('#unselectAllPaidBtn')?.addEventListener('click', () => toggleAllColors(false, true));
-      
+
+      // Set the initial state
       updateActiveColorPalette();
   }
   // --- END: Color Palette Functions ---
 
-  async function createUI(): Promise<void> {
-    await detectLanguage();
 
-    // Clean up existing UI elements
-    document.getElementById("wplace-image-bot-container")?.remove();
-    document.getElementById("wplace-stats-container")?.remove();
-    document.getElementById("wplace-settings-container")?.remove();
-    document.querySelector(".resize-container")?.remove();
-    document.querySelector(".resize-overlay")?.remove();
+  async function createUI() {
+    await detectLanguage()
 
-    loadThemePreference();
-    loadLanguagePreference();
-    
-    const theme = getCurrentTheme();
-    
-    const fontAwesome = document.createElement("link");
-    fontAwesome.rel = "stylesheet";
-    fontAwesome.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css";
-    document.head.appendChild(fontAwesome);
+    // Clean up existing UI elements to prevent duplicates
+    const existingContainer = document.getElementById("wplace-image-bot-container")
+    const existingStats = document.getElementById("wplace-stats-container")
+    const existingSettings = document.getElementById("wplace-settings-container")
+    const existingResizeContainer = document.querySelector(".resize-container")
+    const existingResizeOverlay = document.querySelector(".resize-overlay")
+
+    if (existingContainer) existingContainer.remove()
+    if (existingStats) existingStats.remove()
+    if (existingSettings) existingSettings.remove()
+    if (existingResizeContainer) existingResizeContainer.remove()
+    if (existingResizeOverlay) existingResizeOverlay.remove()
+
+    loadThemePreference()
+    loadLanguagePreference()
+
+    const theme = getCurrentTheme()
+
+    const fontAwesome = document.createElement("link")
+    fontAwesome.rel = "stylesheet"
+    fontAwesome.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    document.head.appendChild(fontAwesome)
 
     if (theme.fontFamily.includes("Press Start 2P")) {
-        const googleFonts = document.createElement("link");
-        googleFonts.rel = "stylesheet";
-        googleFonts.href = "https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap";
-        document.head.appendChild(googleFonts);
+      const googleFonts = document.createElement("link")
+      googleFonts.rel = "stylesheet"
+      googleFonts.href = "https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      document.head.appendChild(googleFonts)
     }
-    
-    const style = document.createElement("style");
-    style.setAttribute("data-wplace-theme", "true");
 
-    // All the CSS from the original script is inserted here.
-    // To keep the response concise, this large block is represented by a comment.
-    // The actual implementation would include the full CSS string from the JS file.
-    style.textContent = `/* [OMITTED FOR BREVITY] The entire CSS string from the original script goes here. */`;
+    const style = document.createElement("style")
+    style.setAttribute("data-wplace-theme", "true")
 
-    document.head.appendChild(style);
-
-    const container = Utils.createElement("div", { id: "wplace-image-bot-container" });
-    // All the innerHTML for the main container from the original script is inserted here.
-    container.innerHTML = `<!-- [OMITTED FOR BREVITY] The entire main container HTML from the original script goes here. -->`;
-
-    const statsContainer = Utils.createElement("div", { id: "wplace-stats-container" });
-    statsContainer.style.display = "none";
-    // All the innerHTML for the stats container from the original script is inserted here.
-    statsContainer.innerHTML = `<!-- [OMITTED FOR BREVITY] The entire stats container HTML from the original script goes here. -->`;
-    
-    const settingsContainer = Utils.createElement("div", { id: "wplace-settings-container" });
-    // All the innerHTML for the settings container from the original script is inserted here.
-    settingsContainer.innerHTML = `<!-- [OMITTED FOR BREVITY] The entire settings container HTML from the original script goes here. -->`;
-    settingsContainer.style.display = "none";
-    
-    const resizeContainer = Utils.createElement("div", { className: "resize-container" });
-    // All the innerHTML for the resize container from the original script is inserted here.
-    resizeContainer.innerHTML = `<!-- [OMITTED FOR BREVITY] The entire resize container HTML from the original script goes here. -->`;
-    
-    const resizeOverlay = Utils.createElement("div", { className: "resize-overlay" });
-    
-    document.body.appendChild(container);
-    document.body.appendChild(resizeOverlay);
-    document.body.appendChild(resizeContainer);
-    document.body.appendChild(statsContainer);
-    document.body.appendChild(settingsContainer);
-
-    // Query UI elements with type safety
-    const initBotBtn = container.querySelector<HTMLButtonElement>("#initBotBtn");
-    const uploadBtn = container.querySelector<HTMLButtonElement>("#uploadBtn");
-    const resizeBtn = container.querySelector<HTMLButtonElement>("#resizeBtn");
-    const selectPosBtn = container.querySelector<HTMLButtonElement>("#selectPosBtn");
-    const startBtn = container.querySelector<HTMLButtonElement>("#startBtn");
-    const stopBtn = container.querySelector<HTMLButtonElement>("#stopBtn");
-    // ... and so on for all other querySelector calls.
-
-    // All event listeners and UI logic from the original script go here.
-    // They are omitted for brevity but would be included in a full conversion.
-    // Example:
-    if (initBotBtn) {
-        initBotBtn.addEventListener("click", async () => {
-            // ... click handler logic
-        });
-    }
-    
-    if (uploadBtn) {
-        uploadBtn.addEventListener("click", async () => {
-            // ... click handler logic
-        });
-    }
-    
-    // ... all other event listeners
-    
-    updateUI = (messageKey: string, type: string = "default", params: Record<string, any> = {}): void => {
-        const statusText = container.querySelector<HTMLDivElement>("#statusText");
-        if (!statusText) return;
-        const message = Utils.t(messageKey, params);
-        statusText.textContent = message;
-        statusText.className = `wplace-status status-${type}`;
-        statusText.style.animation = "none";
-        void statusText.offsetWidth; // Trigger reflow
-        statusText.style.animation = "slideIn 0.3s ease-out";
-    };
-
-    updateStats = async (): Promise<void> => {
-        // ... updateStats logic from original script
-    };
-
-    updateDataButtons = (): void => {
-        const saveBtn = container.querySelector<HTMLButtonElement>("#saveBtn");
-        const saveToFileBtn = container.querySelector<HTMLButtonElement>("#saveToFileBtn");
-        if(!saveBtn || !saveToFileBtn) return;
-        const hasImageData = state.imageLoaded && state.imageData;
-        saveBtn.disabled = !hasImageData;
-        saveToFileBtn.disabled = !hasImageData;
-    };
-    
-    // Check for saved progress on startup
-    setTimeout(() => {
-        const savedData = Utils.loadProgress();
-        if (savedData && savedData.state.paintedPixels > 0) {
-            Utils.showAlert(Utils.t("savedDataFound"), "info");
+    style.textContent = `
+      ${
+        theme.animations.glow
+          ? `
+      @keyframes neonGlow {
+        0%, 100% {
+          text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
         }
-    }, 1000);
-    
+        50% {
+          text-shadow: 0 0 2px currentColor, 0 0 5px currentColor, 0 0 8px currentColor;
+        }
+      }`
+          : ""
+      }
+
+      ${
+        theme.animations.pixelBlink
+          ? `
+      @keyframes pixelBlink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0.7; }
+      }`
+          : ""
+      }
+
+      ${
+        theme.animations.scanline
+          ? `
+      @keyframes scanline {
+        0% { transform: translateY(-100%); }
+        100% { transform: translateY(400px); }
+      }`
+          : ""
+      }
+
+      @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(0, 255, 0, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0); }
+      }
+      @keyframes slideIn {
+        from { transform: translateY(-10px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+      @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+      }
+
+      #wplace-image-bot-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: ${CONFIG.currentTheme === "Neon Retro" ? "280px" : "280px"};
+        max-height: calc(100vh - 40px);
+        background: ${
+          CONFIG.currentTheme === "Classic Autobot"
+            ? `linear-gradient(135deg, ${theme.primary} 0%, #1a1a1a 100%)`
+            : theme.primary
+        };
+        border: ${theme.borderWidth} ${theme.borderStyle} ${CONFIG.currentTheme === "Classic Autobot" ? theme.accent : theme.text};
+        border-radius: ${theme.borderRadius};
+        padding: 0;
+        box-shadow: ${theme.boxShadow};
+        z-index: 9998;
+        font-family: ${theme.fontFamily};
+        color: ${theme.text};
+        animation: slideIn 0.4s ease-out;
+        overflow-y: auto; /* Allow scrolling for main panel */
+        overflow-x: hidden;
+        ${theme.backdropFilter ? `backdrop-filter: ${theme.backdropFilter};` : ""}
+        transition: all 0.3s ease;
+        user-select: none;
+        ${CONFIG.currentTheme === "Neon Retro" ? "image-rendering: pixelated;" : ""}
+      }
+
+      ${
+        theme.animations.scanline
+          ? `
+      #wplace-image-bot-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, ${theme.neon}, transparent);
+        animation: scanline 3s linear infinite;
+        z-index: 1;
+        pointer-events: none;
+      }`
+          : ""
+      }
+
+      ${
+        CONFIG.currentTheme === "Neon Retro"
+          ? `
+      #wplace-image-bot-container::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+          repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(0, 255, 65, 0.03) 2px,
+            rgba(0, 255, 65, 0.03) 4px
+          );
+        pointer-events: none;
+        z-index: 1;
+      }`
+          : ""
+      }
+
+      #wplace-image-bot-container.wplace-dragging {
+        transition: none;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.8), 0 0 0 2px rgba(255,255,255,0.2);
+        transform: scale(1.02);
+        z-index: 9999;
+      }
+      #wplace-image-bot-container.wplace-minimized {
+        width: 200px;
+        height: auto;
+        overflow: hidden;
+      }
+      #wplace-image-bot-container.wplace-compact {
+        width: 240px;
+      }
+
+      /* Stats Container */
+      #wplace-stats-container {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        width: ${CONFIG.currentTheme === "Neon Retro" ? "280px" : "280px"};
+        max-height: calc(100vh - 40px);
+        background: ${
+          CONFIG.currentTheme === "Classic Autobot"
+            ? `linear-gradient(135deg, ${theme.primary} 0%, #1a1a1a 100%)`
+            : theme.primary
+        };
+        border: ${theme.borderWidth} ${theme.borderStyle} ${CONFIG.currentTheme === "Classic Autobot" ? theme.accent : theme.text};
+        border-radius: ${theme.borderRadius};
+        padding: 0;
+        box-shadow: ${theme.boxShadow};
+        z-index: 9997;
+        font-family: ${theme.fontFamily};
+        color: ${theme.text};
+        animation: slideIn 0.4s ease-out;
+        overflow: hidden;
+        ${theme.backdropFilter ? `backdrop-filter: ${theme.backdropFilter};` : ""}
+        transition: all 0.3s ease;
+        user-select: none;
+        ${CONFIG.currentTheme === "Neon Retro" ? "image-rendering: pixelated;" : ""}
+      }
+
+      .wplace-header {
+        padding: ${CONFIG.currentTheme === "Neon Retro" ? "8px 12px" : "8px 12px"};
+        background: ${
+          CONFIG.currentTheme === "Classic Autobot"
+            ? `linear-gradient(135deg, ${theme.secondary} 0%, #2a2a2a 100%)`
+            : theme.secondary
+        };
+        color: ${theme.highlight};
+        font-size: ${CONFIG.currentTheme === "Neon Retro" ? "11px" : "13px"};
+        font-weight: ${CONFIG.currentTheme === "Neon Retro" ? "normal" : "700"};
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: move;
+        user-select: none;
+        border-bottom: ${CONFIG.currentTheme === "Neon Retro" ? "2px" : "1px"} solid ${CONFIG.currentTheme === "Classic Autobot" ? "rgba(255,255,255,0.1)" : theme.text};
+        ${CONFIG.currentTheme === "Classic Autobot" ? "text-shadow: 0 1px 2px rgba(0,0,0,0.5);" : "text-transform: uppercase; letter-spacing: 1px;"}
+        transition: background 0.2s ease;
+        position: relative;
+        z-index: 2;
+        ${theme.animations.glow ? "animation: neonGlow 2s ease-in-out infinite alternate;" : ""}
+      }
+
+      .wplace-header-title {
+        display: flex;
+        align-items: center;
+        gap: ${CONFIG.currentTheme === "Neon Retro" ? "6px" : "6px"};
+      }
+
+      .wplace-header-controls {
+        display: flex;
+        gap: ${CONFIG.currentTheme === "Neon Retro" ? "6px" : "6px"};
+      }
+
+      .wplace-header-btn {
+        background: ${CONFIG.currentTheme === "Classic Autobot" ? "rgba(255,255,255,0.1)" : theme.accent};
+        border: ${CONFIG.currentTheme === "Neon Retro" ? `2px solid ${theme.text}` : "none"};
+        color: ${theme.text};
+        cursor: pointer;
+        border-radius: ${CONFIG.currentTheme === "Classic Autobot" ? "4px" : "0"};
+        width: ${CONFIG.currentTheme === "Classic Autobot" ? "18px" : "auto"};
+        height: ${CONFIG.currentTheme === "Classic Autobot" ? "18px" : "auto"};
+        padding: ${CONFIG.currentTheme === "Neon Retro" ? "4px 6px" : "0"};
+        font-size: ${CONFIG.currentTheme === "Neon Retro" ? "8px" : "10px"};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        font-family: ${theme.fontFamily};
+        ${CONFIG.currentTheme === "Neon Retro" ? "image-rendering: pixelated;" : ""}
+      }
+      .wplace-header-btn:hover {
+        background: ${CONFIG.currentTheme === "Classic Autobot" ? theme.accent : theme.text};
+        color: ${CONFIG.currentTheme === "Classic Autobot" ? theme.text : theme.primary};
+        transform: ${CONFIG.currentTheme === "Classic Autobot" ? "scale(1.1)" : "none"};
+        ${CONFIG.currentTheme === "Neon Retro" ? `box-shadow: 0 0 10px ${theme.text};` : ""}
+      }
+
+      .wplace-content {
+        padding: ${CONFIG.currentTheme === "Neon Retro" ? "12px" : "12px"};
+        display: block;
+        position: relative;
+        z-index: 2;
+      }
+      .wplace-content.wplace-hidden {
+        display: none;
+      }
+
+      .wplace-status-section {
+        margin-bottom: 12px;
+        padding: 8px;
+        background: rgba(255,255,255,0.03);
+        border-radius: ${theme.borderRadius};
+        border: 1px solid rgba(255,255,255,0.1);
+      }
+
+      .wplace-section {
+        margin-bottom: ${CONFIG.currentTheme === "Neon Retro" ? "12px" : "12px"};
+        padding: 12px;
+        background: rgba(255,255,255,0.03);
+        border-radius: ${theme.borderRadius};
+        border: 1px solid rgba(255,255,255,0.1);
+      }
+
+      .wplace-section-title {
+        font-size: 11px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: ${theme.highlight};
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .wplace-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .wplace-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .wplace-row.single {
+        grid-template-columns: 1fr;
+      }
+
+      .wplace-btn {
+        padding: ${CONFIG.currentTheme === "Neon Retro" ? "12px 8px" : "8px 12px"};
+        border: ${CONFIG.currentTheme === "Neon Retro" ? "2px solid" : "none"};
+        border-radius: ${theme.borderRadius};
+        font-weight: ${CONFIG.currentTheme === "Neon Retro" ? "normal" : "500"};
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: ${CONFIG.currentTheme === "Neon Retro" ? "8px" : "6px"};
+        font-size: ${CONFIG.currentTheme === "Neon Retro" ? "8px" : "11px"};
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        font-family: ${theme.fontFamily};
+        ${CONFIG.currentTheme === "Neon Retro" ? "text-transform: uppercase; letter-spacing: 1px; image-rendering: pixelated;" : ""}
+        background: ${
+          CONFIG.currentTheme === "Classic Autobot"
+            ? `linear-gradient(135deg, ${theme.accent} 0%, #4a4a4a 100%)`
+            : theme.accent
+        };
+        ${CONFIG.currentTheme === "Classic Autobot" ? "border: 1px solid rgba(255,255,255,0.1);" : ""}
+      }
+
+      ${
+        CONFIG.currentTheme === "Classic Autobot"
+          ? `
+      .wplace-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        transition: left 0.5s ease;
+      }
+      .wplace-btn:hover:not(:disabled)::before {
+        left: 100%;
+      }`
+          : `
+      .wplace-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+      }
+      .wplace-btn:hover::before {
+        left: 100%;
+      }`
+      }
+
+      .wplace-btn:hover:not(:disabled) {
+        transform: ${CONFIG.currentTheme === "Classic Autobot" ? "translateY(-1px)" : "none"};
+        box-shadow: ${
+          CONFIG.currentTheme === "Classic Autobot" ? "0 4px 12px rgba(0,0,0,0.4)" : "0 0 15px currentColor"
+        };
+        ${theme.animations.pixelBlink ? "animation: pixelBlink 0.5s infinite;" : ""}
+      }
+      .wplace-btn:active:not(:disabled) {
+        transform: translateY(0);
+      }
+
+      .wplace-btn-primary {
+        background: ${
+          CONFIG.currentTheme === "Classic Autobot"
+            ? `linear-gradient(135deg, ${theme.accent} 0%, #6a5acd 100%)`
+            : theme.accent
+        };
+        color: ${theme.text};
+        ${CONFIG.currentTheme === "Neon Retro" ? `border-color: ${theme.text};` : ""}
+      }
+      .wplace-btn-upload {
+        background: ${
+          CONFIG.currentTheme === "Classic Autobot"
+            ? `linear-gradient(135deg, ${theme.secondary} 0%, #4a4a4a 100%)`
+            : theme.purple
+        };
+        color: ${theme.text};
+        ${
+          CONFIG.currentTheme === "Classic Autobot"
+            ? `border: 1px dashed ${theme.highlight};`
+            : `border-color: ${theme.text}; border-style: dashed;`
+        }
+      }
+      .wplace-btn-start {
+        background: ${
+          CONFIG.currentTheme === "Classic Autobot"
+            ? `linear-gradient(135deg, ${theme.success} 0%, #228b22 100%)`
+            : theme.success
+        };
+        color: ${CONFIG.currentTheme === "Classic Autobot" ? "white" : theme.primary};
+        ${CONFIG.currentTheme === "Neon Retro" ? `border-color: ${theme.success};` : ""}
+      }
+      .wplace-btn-stop {
+        background: ${
+          CONFIG.currentTheme === "Classic Autobot"
+            ? `linear-gradient(135deg, ${theme.error} 0%, #dc143c 100%)`
+            : theme.error
+        };
+        color: ${CONFIG.currentTheme === "Classic Autobot" ? "white" : theme.text};
+        ${CONFIG.currentTheme === "Neon Retro" ? `border-color: ${theme.error};` : ""}
+      }
+      .wplace-btn-select {
+        background: ${
+          CONFIG.currentTheme === "Classic Autobot"
+            ? `linear-gradient(135deg, ${theme.highlight} 0%, #9370db 100%)`
+            : theme.highlight
+        };
+        color: ${CONFIG.currentTheme === "Classic Autobot" ? "white" : theme.primary};
+        ${CONFIG.currentTheme === "Neon Retro" ? `border-color: ${theme.highlight};` : ""}
+      }
+      .wplace-btn-file {
+        background: ${
+          CONFIG.currentTheme === "Classic Autobot"
+            ? "linear-gradient(135deg, #ff8c00 0%, #ff7f50 100%)"
+            : theme.warning
+        };
+        color: ${CONFIG.currentTheme === "Classic Autobot" ? "white" : theme.primary};
+        ${CONFIG.currentTheme === "Neon Retro" ? `border-color: ${theme.warning};` : ""}
+      }
+      .wplace-btn:disabled {
+        opacity: ${CONFIG.currentTheme === "Classic Autobot" ? "0.5" : "0.3"};
+        cursor: not-allowed;
+        transform: none !important;
+        ${theme.animations.pixelBlink ? "animation: none !important;" : ""}
+        box-shadow: none !important;
+      }
+      .wplace-btn:disabled::before {
+        display: none;
+      }
+
+      .wplace-stats {
+        background: ${CONFIG.currentTheme === "Classic Autobot" ? "rgba(255,255,255,0.03)" : theme.secondary};
+        padding: ${CONFIG.currentTheme === "Neon Retro" ? "12px" : "8px"};
+        border: ${CONFIG.currentTheme === "Neon Retro" ? `2px solid ${theme.text}` : "1px solid rgba(255,255,255,0.1)"};
+        border-radius: ${theme.borderRadius};
+        margin-bottom: ${CONFIG.currentTheme === "Neon Retro" ? "15px" : "8px"};
+        ${CONFIG.currentTheme === "Neon Retro" ? "box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.1);" : ""}
+      }
+
+      .wplace-stat-item {
+        display: flex;
+        justify-content: space-between;
+        padding: ${CONFIG.currentTheme === "Neon Retro" ? "6px 0" : "4px 0"};
+        font-size: ${CONFIG.currentTheme === "Neon Retro" ? "8px" : "11px"};
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        ${CONFIG.currentTheme === "Neon Retro" ? "text-transform: uppercase; letter-spacing: 1px;" : ""}
+      }
+      .wplace-stat-item:last-child {
+        border-bottom: none;
+      }
+      .wplace-stat-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        opacity: 0.9;
+        font-size: ${CONFIG.currentTheme === "Neon Retro" ? "8px" : "10px"};
+      }
+      .wplace-stat-value {
+        font-weight: 600;
+        color: ${theme.highlight};
+      }
+
+      .wplace-progress {
+        width: 100%;
+        background: ${CONFIG.currentTheme === "Classic Autobot" ? "rgba(0,0,0,0.3)" : theme.secondary};
+        border: ${CONFIG.currentTheme === "Neon Retro" ? `2px solid ${theme.text}` : "1px solid rgba(255,255,255,0.1)"};
+        border-radius: ${theme.borderRadius};
+        margin: ${CONFIG.currentTheme === "Neon Retro" ? "10px 0" : "8px 0"};
+        overflow: hidden;
+        height: ${CONFIG.currentTheme === "Neon Retro" ? "16px" : "6px"};
+        position: relative;
+      }
+
+      ${
+        CONFIG.currentTheme === "Neon Retro"
+          ? `
+      .wplace-progress::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+          repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 2px,
+            rgba(0, 255, 65, 0.1) 2px,
+            rgba(0, 255, 65, 0.1) 4px
+          );
+        pointer-events: none;
+      }`
+          : ""
+      }
+
+      .wplace-progress-bar {
+        height: ${CONFIG.currentTheme === "Neon Retro" ? "100%" : "6px"};
+        background: ${
+          CONFIG.currentTheme === "Classic Autobot"
+            ? `linear-gradient(135deg, ${theme.highlight} 0%, #9370db 100%)`
+            : `linear-gradient(90deg, ${theme.success}, ${theme.neon})`
+        };
+        transition: width ${CONFIG.currentTheme === "Neon Retro" ? "0.3s" : "0.5s"} ease;
+        position: relative;
+        ${CONFIG.currentTheme === "Neon Retro" ? `box-shadow: 0 0 10px ${theme.success};` : ""}
+      }
+
+      ${
+        CONFIG.currentTheme === "Classic Autobot"
+          ? `
+      .wplace-progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        animation: shimmer 2s infinite;
+      }`
+          : `
+      .wplace-progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 4px;
+        height: 100%;
+        background: ${theme.text};
+        animation: pixelBlink 1s infinite;
+      }`
+      }
+
+      .wplace-status {
+        padding: ${CONFIG.currentTheme === "Neon Retro" ? "10px" : "6px"};
+        border: ${CONFIG.currentTheme === "Neon Retro" ? "2px solid" : "1px solid"};
+        border-radius: ${theme.borderRadius};
+        text-align: center;
+        font-size: ${CONFIG.currentTheme === "Neon Retro" ? "8px" : "11px"};
+        ${CONFIG.currentTheme === "Neon Retro" ? "text-transform: uppercase; letter-spacing: 1px;" : ""}
+        position: relative;
+        overflow: hidden;
+      }
+
+      .status-default {
+        background: ${CONFIG.currentTheme === "Classic Autobot" ? "rgba(255,255,255,0.1)" : theme.accent};
+        border-color: ${theme.text};
+        color: ${theme.text};
+      }
+      .status-success {
+        background: ${CONFIG.currentTheme === "Classic Autobot" ? "rgba(0, 255, 0, 0.1)" : theme.success};
+        border-color: ${theme.success};
+        color: ${CONFIG.currentTheme === "Classic Autobot" ? theme.success : theme.primary};
+        box-shadow: 0 0 15px ${theme.success};
+      }
+      .status-error {
+        background: ${CONFIG.currentTheme === "Classic Autobot" ? "rgba(255, 0, 0, 0.1)" : theme.error};
+        border-color: ${theme.error};
+        color: ${CONFIG.currentTheme === "Classic Autobot" ? theme.error : theme.text};
+        box-shadow: 0 0 15px ${theme.error};
+        ${theme.animations.pixelBlink ? "animation: pixelBlink 0.5s infinite;" : ""}
+      }
+      .status-warning {
+        background: ${CONFIG.currentTheme === "Classic Autobot" ? "rgba(255, 165, 0, 0.1)" : theme.warning};
+        border-color: ${theme.warning};
+        color: ${CONFIG.currentTheme === "Classic Autobot" ? "orange" : theme.primary};
+        box-shadow: 0 0 15px ${theme.warning};
+      }
+
+      .resize-container {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: ${theme.primary};
+        padding: 20px;
+        border: ${theme.borderWidth} ${theme.borderStyle} ${theme.text};
+        border-radius: ${theme.borderRadius};
+        z-index: 10000;
+        box-shadow: ${
+          CONFIG.currentTheme === "Classic Autobot" ? "0 0 20px rgba(0,0,0,0.5)" : "0 0 30px rgba(0, 255, 65, 0.5)"
+        };
+        width: 90%;
+        max-width: 700px; /* Increased width */
+        max-height: 90%;
+        overflow: auto;
+        font-family: ${theme.fontFamily};
+      }
+
+      .resize-preview-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid ${theme.accent};
+        background: rgba(0,0,0,0.2);
+        margin: 15px 0;
+        height: 300px;
+        overflow: auto;
+      }
+
+      .resize-preview {
+        max-width: none; /* Allow image to exceed wrapper for zoom */
+        transition: transform 0.1s ease;
+        image-rendering: pixelated;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: crisp-edges;
+      }
+
+      .resize-controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        align-items: center;
+      }
+
+      .resize-controls label {
+        font-size: ${CONFIG.currentTheme === "Neon Retro" ? "8px" : "12px"};
+        ${CONFIG.currentTheme === "Neon Retro" ? "text-transform: uppercase; letter-spacing: 1px;" : ""}
+        color: ${theme.text};
+      }
+
+      .resize-slider {
+        width: 100%;
+        height: ${CONFIG.currentTheme === "Neon Retro" ? "8px" : "4px"};
+        background: ${CONFIG.currentTheme === "Classic Autobot" ? "#ccc" : theme.secondary};
+        border: ${CONFIG.currentTheme === "Neon Retro" ? `2px solid ${theme.text}` : "none"};
+        border-radius: ${theme.borderRadius};
+        outline: none;
+        -webkit-appearance: none;
+      }
+
+      ${
+        CONFIG.currentTheme === "Neon Retro"
+          ? `
+      .resize-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 16px;
+        height: 16px;
+        background: ${theme.highlight};
+        border: 2px solid ${theme.text};
+        border-radius: 0;
+        cursor: pointer;
+        box-shadow: 0 0 5px ${theme.highlight};
+      }
+
+      .resize-slider::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        background: ${theme.highlight};
+        border: 2px solid ${theme.text};
+        border-radius: 0;
+        cursor: pointer;
+        box-shadow: 0 0 5px ${theme.highlight};
+      }`
+          : ""
+      }
+      
+      .resize-zoom-controls {
+        grid-column: 1 / -1; /* Span full width */
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .resize-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      .resize-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 9999;
+        display: none;
+      }
+      /* --- START: Color Palette Styles --- */
+      .wplace-color-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); /* Wider columns for name */
+        gap: 10px;
+        padding-top: 8px;
+      }
+      .wplace-color-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+      .wplace-color-item-name {
+        font-size: 9px;
+        color: #ccc;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+      }
+      .wplace-color-swatch {
+        width: 22px;
+        height: 22px;
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: transform 0.1s ease, box-shadow 0.2s ease;
+        position: relative;
+        margin: 0 auto;
+      }
+      .wplace-color-swatch.paid {
+        border-color: gold;
+      }
+      .wplace-color-swatch:hover {
+        transform: scale(1.1);
+        z-index: 1;
+      }
+      .wplace-color-swatch:not(.active) {
+        opacity: 0.3;
+        filter: grayscale(80%);
+      }
+      .wplace-color-swatch.active::after {
+        content: '✔';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        text-shadow: 0 0 3px black;
+      }
+      .wplace-color-divider {
+        border: none;
+        height: 1px;
+        background: rgba(255,255,255,0.1);
+        margin: 8px 0;
+      }
+      /* --- END: Color Palette Styles --- */
+
+      ${
+        CONFIG.currentTheme === "Neon Retro"
+          ? `
+      /* Retro checkbox styling */
+      input[type="checkbox"] {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border: 2px solid ${theme.text};
+        background: ${theme.secondary};
+        margin-right: 8px;
+        position: relative;
+        cursor: pointer;
+      }
+
+      input[type="checkbox"]:checked {
+        background: ${theme.success};
+      }
+
+      input[type="checkbox"]:checked::after {
+        content: '✓';
+        position: absolute;
+        top: -2px;
+        left: 1px;
+        color: ${theme.primary};
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      /* Icon styling for retro feel */
+      .fas, .fa {
+        filter: drop-shadow(0 0 3px currentColor);
+      }
+
+      /* Speed Control Styles */
+      .wplace-speed-control {
+        margin-top: 12px;
+        padding: 12px;
+        background: ${theme.secondary};
+        border: ${theme.borderWidth} ${theme.borderStyle} ${theme.accent};
+        border-radius: ${theme.borderRadius};
+        backdrop-filter: ${theme.backdropFilter};
+      }
+
+      .wplace-speed-label {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        color: ${theme.text};
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .wplace-speed-label i {
+        margin-right: 6px;
+        color: ${theme.highlight};
+      }
+
+      .wplace-speed-slider-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .wplace-speed-slider {
+        flex: 1;
+        height: 6px;
+        border-radius: 3px;
+        background: ${theme.primary};
+        outline: none;
+        cursor: pointer;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+
+      .wplace-speed-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: ${theme.highlight};
+        cursor: pointer;
+        border: 2px solid ${theme.text};
+        box-shadow: ${theme.boxShadow};
+      }
+
+      .wplace-speed-slider::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: ${theme.highlight};
+        cursor: pointer;
+        border: 2px solid ${theme.text};
+        box-shadow: ${theme.boxShadow};
+      }
+
+      .wplace-speed-display {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        min-width: 90px;
+        justify-content: flex-end;
+      }
+
+      #speedValue {
+        color: ${theme.highlight};
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      .wplace-speed-unit {
+        color: ${theme.text};
+        font-size: 11px;
+        opacity: 0.8;
+      }
+
+      /* Settings Window Styles */
+      #wplace-settings-container {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10001;
+        min-width: 400px;
+        max-width: 500px;
+        background: ${theme.primary};
+        border: ${theme.borderWidth} ${theme.borderStyle} ${theme.accent};
+        border-radius: ${theme.borderRadius};
+        box-shadow: ${theme.boxShadow};
+        backdrop-filter: ${theme.backdropFilter};
+      }
+
+      .wplace-settings {
+        padding: 16px;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .wplace-setting-section {
+        margin-bottom: 20px;
+        padding: 12px;
+        background: ${theme.secondary};
+        border: ${theme.borderWidth} ${theme.borderStyle} ${theme.accent};
+        border-radius: ${theme.borderRadius};
+      }
+
+      .wplace-setting-title {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        color: ${theme.text};
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .wplace-setting-title i {
+        margin-right: 8px;
+        color: ${theme.highlight};
+      }
+
+      .wplace-setting-content {
+        color: ${theme.text};
+      }
+
+      .wplace-section {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: ${theme.secondary};
+        border: ${theme.borderWidth} ${theme.borderStyle} ${theme.accent};
+        border-radius: ${theme.borderRadius};
+      }
+
+      .wplace-section-title {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        color: ${theme.text};
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .wplace-section-title i {
+        margin-right: 8px;
+        color: ${theme.highlight};
+      }
+
+      .wplace-speed-container {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 10px;
+      }
+
+      .wplace-slider {
+        flex: 1;
+        height: 6px;
+        background: ${theme.accent};
+        border-radius: 3px;
+        outline: none;
+        -webkit-appearance: none;
+      }
+
+      .wplace-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        background: ${theme.highlight};
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid ${theme.primary};
+      }
+
+      .wplace-speed-display {
+        background: ${theme.accent};
+        padding: 5px 10px;
+        border-radius: 4px;
+        color: ${theme.text};
+        font-weight: 600;
+        min-width: 80px;
+        text-align: center;
+        border: ${theme.borderWidth} ${theme.borderStyle} ${theme.highlight};
+      }
+
+      .wplace-select {
+        width: 100%;
+        padding: 8px 12px;
+        background: ${theme.secondary};
+        border: ${theme.borderWidth} ${theme.borderStyle} ${theme.accent};
+        border-radius: ${theme.borderRadius};
+        color: ${theme.text};
+        font-size: 14px;
+        margin-bottom: 10px;
+      }
+
+      .wplace-select:focus {
+        outline: none;
+        border-color: ${theme.highlight};
+      }
+
+      .wplace-description {
+        color: ${theme.text};
+        font-size: 12px;
+        opacity: 0.8;
+        line-height: 1.4;
+      }
+
+      .wplace-theme-custom {
+        margin-top: 15px;
+        padding: 15px;
+        background: ${theme.accent};
+        border-radius: ${theme.borderRadius};
+        border: ${theme.borderWidth} ${theme.borderStyle} ${theme.highlight};
+      }
+
+      .wplace-custom-group {
+        margin-bottom: 15px;
+      }
+
+      .wplace-custom-label {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        color: ${theme.text};
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .wplace-custom-label i {
+        margin-right: 8px;
+        color: ${theme.highlight};
+        width: 16px;
+      }
+
+      .wplace-color-input-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .wplace-color-input {
+        width: 50px;
+        height: 30px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        background: transparent;
+      }
+
+      .wplace-color-text {
+        flex: 1;
+        padding: 6px 10px;
+        background: ${theme.secondary};
+        border: ${theme.borderWidth} ${theme.borderStyle} ${theme.accent};
+        border-radius: 4px;
+        color: ${theme.text};
+        font-size: 12px;
+        font-family: monospace;
+      }
+
+      .wplace-animation-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .wplace-checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: ${theme.text};
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      .wplace-checkbox-label input[type="checkbox"] {
+        accent-color: ${theme.highlight};
+      }
+
+      .wplace-slider-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .wplace-slider-container .wplace-slider {
+        flex: 1;
+      }
+
+      .wplace-slider-container span {
+        color: ${theme.text};
+        font-size: 12px;
+        font-weight: 600;
+        min-width: 40px;
+      }
+
+      .wplace-custom-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        border-top: 1px solid ${theme.accent};
+        padding-top: 15px;
+      }
+
+      .wplace-btn-secondary {
+        background: ${theme.accent};
+        color: ${theme.text};
+        border: ${theme.borderWidth} ${theme.borderStyle} ${theme.highlight};
+      }
+
+      .wplace-btn-secondary:hover {
+        background: ${theme.secondary};
+      }`
+          : ""
+      }
+    `
+    document.head.appendChild(style)
+
+    const container = document.createElement("div")
+    container.id = "wplace-image-bot-container"
+    container.innerHTML = `
+      <div class="wplace-header">
+        <div class="wplace-header-title">
+          <i class="fas fa-image"></i>
+          <span>${Utils.t("title")}</span>
+        </div>
+        <div class="wplace-header-controls">
+          <button id="settingsBtn" class="wplace-header-btn" title="${Utils.t("settings")}">
+            <i class="fas fa-cog"></i>
+          </button>
+          <button id="statsBtn" class="wplace-header-btn" title="Show Stats">
+            <i class="fas fa-chart-bar"></i>
+          </button>
+          <button id="compactBtn" class="wplace-header-btn" title="Compact Mode">
+            <i class="fas fa-compress"></i>
+          </button>
+          <button id="minimizeBtn" class="wplace-header-btn" title="${Utils.t("minimize")}">
+            <i class="fas fa-minus"></i>
+          </button>
+        </div>
+      </div>
+      <div class="wplace-content">
+        <!-- Status Section - Always visible -->
+        <div class="wplace-status-section">
+          <div id="statusText" class="wplace-status status-default">
+            ${Utils.t("waitingInit")}
+          </div>
+          <div class="wplace-progress">
+            <div id="progressBar" class="wplace-progress-bar" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Setup Section -->
+        <div class="wplace-section">
+          <div class="wplace-section-title">🤖 Bot Setup</div>
+          <div class="wplace-controls">
+            <button id="initBotBtn" class="wplace-btn wplace-btn-primary">
+              <i class="fas fa-robot"></i>
+              <span>${Utils.t("initBot")}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Image Section -->
+        <div class="wplace-section">
+          <div class="wplace-section-title">🖼️ Image Management</div>
+          <div class="wplace-controls">
+            <div class="wplace-row">
+              <button id="uploadBtn" class="wplace-btn wplace-btn-upload" disabled>
+                <i class="fas fa-upload"></i>
+                <span>${Utils.t("uploadImage")}</span>
+              </button>
+              <button id="resizeBtn" class="wplace-btn wplace-btn-primary" disabled>
+                <i class="fas fa-expand"></i>
+                <span>${Utils.t("resizeImage")}</span>
+              </button>
+            </div>
+            <div class="wplace-row single">
+              <button id="selectPosBtn" class="wplace-btn wplace-btn-select" disabled>
+                <i class="fas fa-crosshairs"></i>
+                <span>${Utils.t("selectPosition")}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Control Section -->
+        <div class="wplace-section">
+          <div class="wplace-section-title">🎮 Painting Control</div>
+          <div class="wplace-controls">
+            <div class="wplace-row">
+              <button id="startBtn" class="wplace-btn wplace-btn-start" disabled>
+                <i class="fas fa-play"></i>
+                <span>${Utils.t("startPainting")}</span>
+              </button>
+              <button id="stopBtn" class="wplace-btn wplace-btn-stop" disabled>
+                <i class="fas fa-stop"></i>
+                <span>${Utils.t("stopPainting")}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Section -->
+        <div class="wplace-section">
+          <div class="wplace-section-title">💾 Data Management</div>
+          <div class="wplace-controls">
+            <div class="wplace-row">
+              <button id="saveBtn" class="wplace-btn wplace-btn-primary" disabled>
+                <i class="fas fa-save"></i>
+                <span>${Utils.t("saveData")}</span>
+              </button>
+              <button id="loadBtn" class="wplace-btn wplace-btn-primary">
+                <i class="fas fa-folder-open"></i>
+                <span>${Utils.t("loadData")}</span>
+              </button>
+            </div>
+            <div class="wplace-row">
+              <button id="saveToFileBtn" class="wplace-btn wplace-btn-file" disabled>
+                <i class="fas fa-download"></i>
+                <span>${Utils.t("saveToFile")}</span>
+              </button>
+              <button id="loadFromFileBtn" class="wplace-btn wplace-btn-file">
+                <i class="fas fa-upload"></i>
+                <span>${Utils.t("loadFromFile")}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+
+    // Stats Window - Separate UI
+    const statsContainer = document.createElement("div")
+    statsContainer.id = "wplace-stats-container"
+    statsContainer.style.display = "none"
+    statsContainer.innerHTML = `
+      <div class="wplace-header">
+        <div class="wplace-header-title">
+          <i class="fas fa-chart-bar"></i>
+          <span>Painting Stats</span>
+        </div>
+        <div class="wplace-header-controls">
+          <button id="refreshChargesBtn" class="wplace-header-btn" title="Refresh Charges">
+            <i class="fas fa-sync"></i>
+          </button>
+          <button id="closeStatsBtn" class="wplace-header-btn" title="Close Stats">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      <div class="wplace-content">
+        <div class="wplace-stats">
+          <div id="statsArea">
+            <div class="wplace-stat-item">
+              <div class="wplace-stat-label"><i class="fas fa-info-circle"></i> ${Utils.t("initMessage")}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+
+    // Modern Settings Container
+    const settingsContainer = document.createElement("div")
+    settingsContainer.id = "wplace-settings-container"
+    settingsContainer.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      border-radius: 16px;
+      padding: 0;
+      z-index: 10002;
+      display: none;
+      min-width: 380px;
+      max-width: 420px;
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+      animation: settingsSlideIn 0.4s ease-out;
+    `
+
+    settingsContainer.innerHTML = `
+      <div class="wplace-settings-header" style="background: rgba(255,255,255,0.1); padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: move;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin: 0; color: white; font-size: 20px; font-weight: 300; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-cog" style="font-size: 18px; animation: spin 2s linear infinite;"></i>
+            ${Utils.t("settings")}
+          </h3>
+          <button id="closeSettingsBtn" style="
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 300;
+          " onmouseover="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='scale(1.1)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'; this.style.transform='scale(1)'">✕</button>
+        </div>
+      </div>
+
+      <div style="padding: 25px;">
+        <!-- Speed Control Section -->
+        <div style="margin-bottom: 25px;">
+          <label style="display: block; margin-bottom: 12px; color: white; font-weight: 500; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-tachometer-alt" style="color: #4facfe; font-size: 16px;"></i>
+            ${Utils.t("paintingSpeed")}
+          </label>
+          <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 18px; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+              <input type="range" id="speedSlider" min="${CONFIG.PAINTING_SPEED.MIN}" max="${CONFIG.PAINTING_SPEED.MAX}" value="${CONFIG.PAINTING_SPEED.DEFAULT}"
+                style="
+                  flex: 1;
+                  height: 8px;
+                  background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+                  border-radius: 4px;
+                  outline: none;
+                  -webkit-appearance: none;
+                  cursor: pointer;
+                ">
+              <div id="speedValue" style="
+                min-width: 70px;
+                text-align: center;
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+                padding: 8px 12px;
+                border-radius: 8px;
+                color: white;
+                font-weight: bold;
+                font-size: 13px;
+                box-shadow: 0 3px 10px rgba(79, 172, 254, 0.3);
+                border: 1px solid rgba(255,255,255,0.2);
+              ">${CONFIG.PAINTING_SPEED.DEFAULT} px/s</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; color: rgba(255,255,255,0.7); font-size: 11px; margin-top: 8px;">
+              <span><i class="fas fa-turtle"></i> ${CONFIG.PAINTING_SPEED.MIN}</span>
+              <span><i class="fas fa-rabbit"></i> ${CONFIG.PAINTING_SPEED.MAX}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Painting Speed Enable Toggle -->
+        <div style="margin-bottom: 25px;">
+          <label style="display: flex; align-items: center; gap: 8px; color: white;">
+            <input type="checkbox" id="enableSpeedToggle" ${CONFIG.PAINTING_SPEED_ENABLED ? 'checked' : ''} style="cursor: pointer;"/>
+            <span>Enable painting speed</span>
+          </label>
+        </div>
+
+        <!-- Theme Selection Section -->
+        <div style="margin-bottom: 25px;">
+          <label style="display: block; margin-bottom: 12px; color: white; font-weight: 500; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-palette" style="color: #f093fb; font-size: 16px;"></i>
+            ${Utils.t("themeSettings")}
+          </label>
+          <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 18px; border: 1px solid rgba(255,255,255,0.1);">
+            <select id="themeSelect" style="
+              width: 100%;
+              padding: 12px 16px;
+              background: rgba(255,255,255,0.15);
+              color: white;
+              border: 1px solid rgba(255,255,255,0.2);
+              border-radius: 8px;
+              font-size: 14px;
+              outline: none;
+              cursor: pointer;
+              transition: all 0.3s ease;
+              font-family: inherit;
+              box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            ">
+              ${Object.keys(CONFIG.THEMES).map(themeName =>
+                `<option value="${themeName}" ${CONFIG.currentTheme === themeName ? 'selected' : ''} style="background: #2d3748; color: white; padding: 10px;">${themeName}</option>`
+              ).join('')}
+            </select>
+          </div>
+        </div>
+
+        <!-- Language Selection Section -->
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 12px; color: white; font-weight: 500; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-globe" style="color: #ffeaa7; font-size: 16px;"></i>
+            ${Utils.t("language")}
+          </label>
+          <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 18px; border: 1px solid rgba(255,255,255,0.1);">
+            <select id="languageSelect" style="
+              width: 100%;
+              padding: 12px 16px;
+              background: rgba(255,255,255,0.15);
+              color: white;
+              border: 1px solid rgba(255,255,255,0.2);
+              border-radius: 8px;
+              font-size: 14px;
+              outline: none;
+              cursor: pointer;
+              transition: all 0.3s ease;
+              font-family: inherit;
+              box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            ">
+              <option value="vi" ${state.language === 'vi' ? 'selected' : ''} style="background: #2d3748; color: white;">🇻🇳 Tiếng Việt</option>
+              <option value="ru" ${state.language === 'ru' ? 'selected' : ''} style="background: #2d3748; color: white;">🇷🇺 Русский</option>
+              <option value="en" ${state.language === 'en' ? 'selected' : ''} style="background: #2d3748; color: white;">🇺🇸 English</option>
+              <option value="pt" ${state.language === 'pt' ? 'selected' : ''} style="background: #2d3748; color: white;">🇧🇷 Português</option>
+              <option value="fr" ${state.language === 'fr' ? 'selected' : ''} style="background: #2d3748; color: white;">🇫🇷 Français</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <style>
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        @keyframes settingsSlideIn {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+          }
+        }
+
+        @keyframes settingsFadeOut {
+          from {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+          }
+          to {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.9);
+          }
+        }
+
+        #speedSlider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: white;
+          box-shadow: 0 3px 6px rgba(0,0,0,0.3), 0 0 0 2px #4facfe;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        #speedSlider::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+          box-shadow: 0 4px 8px rgba(0,0,0,0.4), 0 0 0 3px #4facfe;
+        }
+
+        #speedSlider::-moz-range-thumb {
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: white;
+          box-shadow: 0 3px 6px rgba(0,0,0,0.3), 0 0 0 2px #4facfe;
+          cursor: pointer;
+          border: none;
+          transition: all 0.2s ease;
+        }
+
+        #themeSelect:hover, #languageSelect:hover {
+          border-color: rgba(255,255,255,0.4);
+          background: rgba(255,255,255,0.2);
+          transform: translateY(-1px);
+          box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+
+        #themeSelect:focus, #languageSelect:focus {
+          border-color: #4facfe;
+          box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.3);
+        }
+
+        #themeSelect option, #languageSelect option {
+          background: #2d3748;
+          color: white;
+          padding: 10px;
+          border-radius: 6px;
+        }
+
+        #themeSelect option:hover, #languageSelect option:hover {
+          background: #4a5568;
+        }
+
+        /* Dragging state styles */
+        .wplace-dragging {
+          opacity: 0.9;
+          box-shadow: 0 30px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.2);
+          transition: none;
+        }
+
+        .wplace-settings-header:hover {
+          background: rgba(255,255,255,0.15) !important;
+        }
+
+        .wplace-settings-header:active {
+          background: rgba(255,255,255,0.2) !important;
+        }
+      </style>
+    `
+
+    const resizeContainer = document.createElement("div")
+    resizeContainer.className = "resize-container"
+    resizeContainer.innerHTML = `
+      <h3 style="margin-top: 0; color: ${theme.text}">${Utils.t("resizeImage")}</h3>
+      <div class="resize-controls">
+        <label>
+          ${Utils.t("width")}: <span id="widthValue">0</span>px
+          <input type="range" id="widthSlider" class="resize-slider" min="10" max="500" value="100">
+        </label>
+        <label>
+          ${Utils.t("height")}: <span id="heightValue">0</span>px
+          <input type="range" id="heightSlider" class="resize-slider" min="10" max="500" value="100">
+        </label>
+        <label style="display: flex; align-items: center;">
+          <input type="checkbox" id="keepAspect" checked>
+          Keep Aspect Ratio
+        </label>
+        <label style="display: flex; align-items: center;">
+            <input type="checkbox" id="paintWhiteToggle" checked>
+            Paint White Pixels
+        </label>
+        <div class="resize-zoom-controls">
+          <i class="fas fa-search-minus"></i>
+          <input type="range" id="zoomSlider" class="resize-slider" min="1" max="10" value="1" step="0.1">
+          <i class="fas fa-search-plus"></i>
+        </div>
+      </div>
+
+      <div class="resize-preview-wrapper">
+          <img id="resizePreview" class="resize-preview" src="" alt="Resized image preview will appear here.">
+      </div>
+
+      <!-- START: Moved Color Palette -->
+      <div class="wplace-section" id="color-palette-section" style="margin-top: 15px;">
+          <div class="wplace-section-title">
+              <i class="fas fa-palette"></i>&nbsp;Color Palette
+          </div>
+          <div class="wplace-controls">
+              <div class="wplace-row">
+                  <button id="selectAllFreeBtn" class="wplace-btn">All Free</button>
+                  <button id="unselectAllFreeBtn" class="wplace-btn">None Free</button>
+              </div>
+              <div id="colors-free" class="wplace-color-grid"></div>
+              <hr class="wplace-color-divider">
+              <div class="wplace-row">
+                  <button id="selectAllPaidBtn" class="wplace-btn">All Paid</button>
+                  <button id="unselectAllPaidBtn" class="wplace-btn">None Paid</button>
+              </div>
+              <div id="colors-paid" class="wplace-color-grid"></div>
+          </div>
+      </div>
+      <!-- END: Moved Color Palette -->
+
+      <div class="resize-buttons">
+        <button id="downloadPreviewBtn" class="wplace-btn wplace-btn-primary">
+          <i class="fas fa-download"></i>
+          <span>Download Preview</span>
+        </button>
+        <button id="confirmResize" class="wplace-btn wplace-btn-start">
+          <i class="fas fa-check"></i>
+          <span>Apply</span>
+        </button>
+        <button id="cancelResize" class="wplace-btn wplace-btn-stop">
+          <i class="fas fa-times"></i>
+          <span>Cancel</span>
+        </button>
+      </div>
+    `
+
+    const resizeOverlay = document.createElement("div")
+    resizeOverlay.className = "resize-overlay"
+
+    document.body.appendChild(container)
+    document.body.appendChild(resizeOverlay)
+    document.body.appendChild(resizeContainer)
+    document.body.appendChild(statsContainer)
+    document.body.appendChild(settingsContainer)
+
+    // Query all UI elements after appending to DOM
+    const initBotBtn = container.querySelector("#initBotBtn")
+    const uploadBtn = container.querySelector("#uploadBtn")
+    const resizeBtn = container.querySelector("#resizeBtn")
+    const selectPosBtn = container.querySelector("#selectPosBtn")
+    const startBtn = container.querySelector("#startBtn")
+    const stopBtn = container.querySelector("#stopBtn")
+    const saveBtn = container.querySelector("#saveBtn")
+    const loadBtn = container.querySelector("#loadBtn")
+    const saveToFileBtn = container.querySelector("#saveToFileBtn")
+    const loadFromFileBtn = container.querySelector("#loadFromFileBtn")
+    const minimizeBtn = container.querySelector("#minimizeBtn")
+    const compactBtn = container.querySelector("#compactBtn")
+    const statsBtn = container.querySelector("#statsBtn")
+    const statusText = container.querySelector("#statusText")
+    const progressBar = container.querySelector("#progressBar")
+    const statsArea = statsContainer.querySelector("#statsArea")
+    const content = container.querySelector(".wplace-content")
+    const closeStatsBtn = statsContainer.querySelector("#closeStatsBtn")
+    const refreshChargesBtn = statsContainer.querySelector("#refreshChargesBtn")
+
+    // Check if all elements are found
+    if (!initBotBtn || !uploadBtn || !selectPosBtn || !startBtn || !stopBtn) {
+      console.error("Some UI elements not found:", {
+        initBotBtn: !!initBotBtn,
+        uploadBtn: !!uploadBtn,
+        selectPosBtn: !!selectPosBtn,
+        startBtn: !!startBtn,
+        stopBtn: !!stopBtn,
+      })
+    }
+
+    if (!statsContainer || !statsArea || !closeStatsBtn) {
+      console.error("Stats UI elements not found:", {
+        statsContainer: !!statsContainer,
+        statsArea: !!statsArea,
+        closeStatsBtn: !!closeStatsBtn,
+      })
+    }
+
+    const header = container.querySelector(".wplace-header")
+
+    // Use the shared makeDraggable function for consistency
+    makeDraggable(container)
+
+    function makeDraggable(element) {
+      let pos1 = 0,
+        pos2 = 0,
+        pos3 = 0,
+        pos4 = 0
+      let isDragging = false
+      const header = element.querySelector(".wplace-header") || element.querySelector(".wplace-settings-header")
+
+      // Check if header exists to prevent null error
+      if (!header) {
+        console.warn("No draggable header found for element:", element)
+        return
+      }
+
+      header.onmousedown = dragMouseDown
+
+      function dragMouseDown(e) {
+        if (e.target.closest(".wplace-header-btn") || e.target.closest("button")) return
+
+        e.preventDefault()
+        isDragging = true
+
+        // Get current position
+        const rect = element.getBoundingClientRect()
+
+        // Remove transform and set absolute position
+        element.style.transform = "none"
+        element.style.top = rect.top + "px"
+        element.style.left = rect.left + "px"
+
+        pos3 = e.clientX
+        pos4 = e.clientY
+        element.classList.add("wplace-dragging")
+        document.onmouseup = closeDragElement
+        document.onmousemove = elementDrag
+
+        // Prevent text selection during drag
+        document.body.style.userSelect = "none"
+      }
+
+      function elementDrag(e) {
+        if (!isDragging) return
+
+        e.preventDefault()
+        pos1 = pos3 - e.clientX
+        pos2 = pos4 - e.clientY
+        pos3 = e.clientX
+        pos4 = e.clientY
+
+        let newTop = element.offsetTop - pos2
+        let newLeft = element.offsetLeft - pos1
+
+        // Boundary checking to keep UI within viewport
+        const rect = element.getBoundingClientRect()
+        const maxTop = window.innerHeight - rect.height
+        const maxLeft = window.innerWidth - rect.width
+
+        newTop = Math.max(0, Math.min(newTop, maxTop))
+        newLeft = Math.max(0, Math.min(newLeft, maxLeft))
+
+        element.style.top = newTop + "px"
+        element.style.left = newLeft + "px"
+      }
+
+      function closeDragElement() {
+        isDragging = false
+        element.classList.remove("wplace-dragging")
+        document.onmouseup = null
+        document.onmousemove = null
+        document.body.style.userSelect = ""
+      }
+    }
+
+    // Make stats container draggable
+    makeDraggable(statsContainer)
+
+    // Make main container draggable
+    makeDraggable(container)
+
+    // Stats window functionality
+    if (statsBtn && closeStatsBtn) {
+      statsBtn.addEventListener("click", () => {
+        const isVisible = statsContainer.style.display !== "none"
+        if (isVisible) {
+          statsContainer.style.display = "none"
+          statsBtn.innerHTML = '<i class="fas fa-chart-bar"></i>'
+          statsBtn.title = "Show Stats"
+        } else {
+          statsContainer.style.display = "block"
+          statsBtn.innerHTML = '<i class="fas fa-chart-line"></i>'
+          statsBtn.title = "Hide Stats"
+        }
+      })
+
+      closeStatsBtn.addEventListener("click", () => {
+        statsContainer.style.display = "none"
+        statsBtn.innerHTML = '<i class="fas fa-chart-bar"></i>'
+        statsBtn.title = "Show Stats"
+      })
+
+      // Refresh charges button
+      if (refreshChargesBtn) {
+        refreshChargesBtn.addEventListener("click", async () => {
+          refreshChargesBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'
+          refreshChargesBtn.disabled = true
+
+          try {
+            await updateStats()
+          } catch (error) {
+            console.error("Error refreshing charges:", error)
+          } finally {
+            refreshChargesBtn.innerHTML = '<i class="fas fa-sync"></i>'
+            refreshChargesBtn.disabled = false
+          }
+        })
+      }
+    }
+
+    // Settings window functionality
+    const settingsBtn = container.querySelector("#settingsBtn")
+    const closeSettingsBtn = settingsContainer.querySelector("#closeSettingsBtn")
+
+    if (settingsBtn && closeSettingsBtn) {
+      settingsBtn.addEventListener("click", () => {
+        const isVisible = settingsContainer.style.display !== "none"
+        if (isVisible) {
+          // Add fade out animation
+          settingsContainer.style.animation = "settingsFadeOut 0.3s ease-out forwards"
+          setTimeout(() => {
+            settingsContainer.style.display = "none"
+            settingsContainer.style.animation = ""
+          }, 300)
+        } else {
+          // Reset position to center before showing
+          settingsContainer.style.top = "50%"
+          settingsContainer.style.left = "50%"
+          settingsContainer.style.transform = "translate(-50%, -50%)"
+          settingsContainer.style.display = "block"
+          settingsContainer.style.animation = "settingsSlideIn 0.4s ease-out"
+        }
+      })
+
+      closeSettingsBtn.addEventListener("click", () => {
+        // Add fade out animation
+        settingsContainer.style.animation = "settingsFadeOut 0.3s ease-out forwards"
+        setTimeout(() => {
+          settingsContainer.style.display = "none"
+          settingsContainer.style.animation = ""
+          // Reset position for next time
+          settingsContainer.style.top = "50%"
+          settingsContainer.style.left = "50%"
+          settingsContainer.style.transform = "translate(-50%, -50%)"
+        }, 300)
+      })
+
+      // Make settings window draggable
+      makeDraggable(settingsContainer)
+
+      // Language selector event listener
+      const languageSelect = settingsContainer.querySelector("#languageSelect")
+      if (languageSelect) {
+        languageSelect.addEventListener("change", (e) => {
+          const newLanguage = e.target.value
+          state.language = newLanguage
+          localStorage.setItem('wplace_language', newLanguage)
+
+          // Refresh the UI to apply new language
+          setTimeout(() => {
+            // Hide settings first
+            settingsContainer.style.display = "none"
+
+            // Recreate UI with new language (cleanup is handled in createUI)
+            createUI()
+          }, 100)
+        })
+      }
+
+      // Theme selector event listener
+      const themeSelect = settingsContainer.querySelector("#themeSelect")
+      if (themeSelect) {
+        themeSelect.addEventListener("change", (e) => {
+          const newTheme = e.target.value
+          switchTheme(newTheme)
+        })
+      }
+
+      // Theme customization event listeners
+      const primaryColor = settingsContainer.querySelector("#primaryColor")
+      const primaryColorText = settingsContainer.querySelector("#primaryColorText")
+      const secondaryColor = settingsContainer.querySelector("#secondaryColor")
+      const secondaryColorText = settingsContainer.querySelector("#secondaryColorText")
+      const highlightColor = settingsContainer.querySelector("#highlightColor")
+      const highlightColorText = settingsContainer.querySelector("#highlightColorText")
+      const borderRadiusSlider = settingsContainer.querySelector("#borderRadiusSlider")
+      const borderRadiusValue = settingsContainer.querySelector("#borderRadiusValue")
+      const applyChangesBtn = settingsContainer.querySelector("#applyThemeChanges")
+      const resetDefaultsBtn = settingsContainer.querySelector("#resetThemeDefaults")
+
+      // Color input synchronization
+      if (primaryColor && primaryColorText) {
+        primaryColor.addEventListener("input", (e) => {
+          primaryColorText.value = e.target.value
+        })
+        primaryColorText.addEventListener("input", (e) => {
+          if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+            primaryColor.value = e.target.value
+          }
+        })
+      }
+
+      if (secondaryColor && secondaryColorText) {
+        secondaryColor.addEventListener("input", (e) => {
+          secondaryColorText.value = e.target.value
+        })
+        secondaryColorText.addEventListener("input", (e) => {
+          if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+            secondaryColor.value = e.target.value
+          }
+        })
+      }
+
+      if (highlightColor && highlightColorText) {
+        highlightColor.addEventListener("input", (e) => {
+          highlightColorText.value = e.target.value
+        })
+        highlightColorText.addEventListener("input", (e) => {
+          if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+            highlightColor.value = e.target.value
+          }
+        })
+      }
+
+      // Border radius slider
+      if (borderRadiusSlider && borderRadiusValue) {
+        borderRadiusSlider.addEventListener("input", (e) => {
+          borderRadiusValue.textContent = e.target.value + "px"
+        })
+      }
+
+      // Apply theme changes
+      if (applyChangesBtn) {
+        applyChangesBtn.addEventListener("click", () => {
+          const currentTheme = getCurrentTheme()
+          const currentThemeName = CONFIG.currentTheme
+
+          // Get all values
+          const newValues = {
+            primary: primaryColorText?.value || currentTheme.primary,
+            secondary: secondaryColorText?.value || currentTheme.secondary,
+            highlight: highlightColorText?.value || currentTheme.highlight,
+            borderRadius: (borderRadiusSlider?.value || 0) + "px",
+            animations: {
+              glow: settingsContainer.querySelector("#glowAnimation")?.checked || false,
+              scanline: settingsContainer.querySelector("#scanlineAnimation")?.checked || false,
+              pixelBlink: settingsContainer.querySelector("#pixelBlinkAnimation")?.checked || false
+            }
+          }
+
+          // Update theme
+          CONFIG.THEMES[currentThemeName] = {
+            ...currentTheme,
+            ...newValues
+          }
+
+          // Save and apply
+          saveThemePreference()
+          setTimeout(() => {
+            settingsContainer.style.display = "none"
+            createUI()
+          }, 100)
+        })
+      }
+
+      // Reset to defaults
+      if (resetDefaultsBtn) {
+        resetDefaultsBtn.addEventListener("click", () => {
+          // Reset to original theme values (you'll need to store defaults)
+          const confirmReset = confirm("Reset theme to default settings?")
+          if (confirmReset) {
+            // Reload original theme (this is a simplified approach)
+            location.reload()
+          }
+        })
+      }
+    }
+
+    const widthSlider = resizeContainer.querySelector("#widthSlider")
+    const heightSlider = resizeContainer.querySelector("#heightSlider")
+    const widthValue = resizeContainer.querySelector("#widthValue")
+    const heightValue = resizeContainer.querySelector("#heightValue")
+    const keepAspect = resizeContainer.querySelector("#keepAspect")
+    const paintWhiteToggle = resizeContainer.querySelector("#paintWhiteToggle");
+    const zoomSlider = resizeContainer.querySelector("#zoomSlider");
+    const resizePreview = resizeContainer.querySelector("#resizePreview")
+    const confirmResize = resizeContainer.querySelector("#confirmResize")
+    const cancelResize = resizeContainer.querySelector("#cancelResize")
+    const downloadPreviewBtn = resizeContainer.querySelector("#downloadPreviewBtn");
+
+    // Compact mode functionality
+    if (compactBtn) {
+      compactBtn.addEventListener("click", () => {
+        container.classList.toggle("wplace-compact")
+        const isCompact = container.classList.contains("wplace-compact")
+
+        if (isCompact) {
+          compactBtn.innerHTML = '<i class="fas fa-expand"></i>'
+          compactBtn.title = "Expand Mode"
+        } else {
+          compactBtn.innerHTML = '<i class="fas fa-compress"></i>'
+          compactBtn.title = "Compact Mode"
+        }
+      })
+    }
+
+    // Minimize functionality
+    if (minimizeBtn) {
+      minimizeBtn.addEventListener("click", () => {
+        state.minimized = !state.minimized
+        if (state.minimized) {
+          container.classList.add("wplace-minimized")
+          content.classList.add("wplace-hidden")
+          minimizeBtn.innerHTML = '<i class="fas fa-expand"></i>'
+          minimizeBtn.title = "Restore"
+        } else {
+          container.classList.remove("wplace-minimized")
+          content.classList.remove("wplace-hidden")
+          minimizeBtn.innerHTML = '<i class="fas fa-minus"></i>'
+          minimizeBtn.title = "Minimize"
+        }
+      })
+    }
+
+    // Save progress functionality
+    if (saveBtn) {
+      saveBtn.addEventListener("click", () => {
+        if (!state.imageLoaded) {
+          Utils.showAlert(Utils.t("missingRequirements"), "error")
+          return
+        }
+
+        const success = Utils.saveProgress()
+        if (success) {
+          updateUI("autoSaved", "success")
+          Utils.showAlert(Utils.t("autoSaved"), "success")
+        } else {
+          Utils.showAlert("❌ Erro ao salvar progresso", "error")
+        }
+      })
+    }
+
+    // Load progress functionality
+    if (loadBtn) {
+      loadBtn.addEventListener("click", () => {
+        const savedData = Utils.loadProgress()
+        if (!savedData) {
+          updateUI("noSavedData", "warning")
+          Utils.showAlert(Utils.t("noSavedData"), "warning")
+          return
+        }
+
+        // Show confirmation dialog
+        const confirmLoad = confirm(
+          `${Utils.t("savedDataFound")}\n\n` +
+            `Saved: ${new Date(savedData.timestamp).toLocaleString()}\n` +
+            `Progress: ${savedData.state.paintedPixels}/${savedData.state.totalPixels} pixels`,
+        )
+
+        if (confirmLoad) {
+          const success = Utils.restoreProgress(savedData)
+          if (success) {
+            updateUI("dataLoaded", "success")
+            Utils.showAlert(Utils.t("dataLoaded"), "success")
+            updateDataButtons()
+
+            // Check charges immediately after loading auto-save
+            updateStats()
+
+            if (!state.colorsChecked) {
+              initBotBtn.style.display = "block"
+            }
+
+            if (state.imageLoaded && state.startPosition && state.region && state.colorsChecked) {
+              startBtn.disabled = false
+            }
+          } else {
+            Utils.showAlert("❌ Erro ao carregar progresso", "error")
+          }
+        }
+      })
+    }
+
+    // Save to file functionality
+    if (saveToFileBtn) {
+      saveToFileBtn.addEventListener("click", () => {
+        const success = Utils.saveProgressToFile()
+        if (success) {
+          updateUI("fileSaved", "success")
+          Utils.showAlert(Utils.t("fileSaved"), "success")
+        } else {
+          Utils.showAlert(Utils.t("fileError"), "error")
+        }
+      })
+    }
+
+    // Load from file functionality
+    if (loadFromFileBtn) {
+      loadFromFileBtn.addEventListener("click", async () => {
+        try {
+          const success = await Utils.loadProgressFromFile()
+          if (success) {
+            updateUI("fileLoaded", "success")
+            Utils.showAlert(Utils.t("fileLoaded"), "success")
+            updateDataButtons()
+
+            // Check charges immediately after loading file
+            await updateStats()
+
+            // Auto-enable buttons after loading from file
+            if (state.colorsChecked) {
+              uploadBtn.disabled = false
+              selectPosBtn.disabled = false
+              resizeBtn.disabled = false
+              initBotBtn.style.display = "none"
+            } else {
+              initBotBtn.style.display = "block"
+            }
+
+            if (state.imageLoaded && state.startPosition && state.region && state.colorsChecked) {
+              startBtn.disabled = false
+            }
+          }
+        } catch (error) {
+          if (error.message === "Invalid JSON file") {
+            Utils.showAlert(Utils.t("invalidFileFormat"), "error")
+          } else {
+            Utils.showAlert(Utils.t("fileError"), "error")
+          }
+        }
+      })
+    }
+
+    updateUI = (messageKey, type = "default", params = {}) => {
+      const message = Utils.t(messageKey, params)
+      statusText.textContent = message
+      statusText.className = `wplace-status status-${type}`
+      statusText.style.animation = "none"
+      void statusText.offsetWidth
+      statusText.style.animation = "slideIn 0.3s ease-out"
+    }
+
+    updateStats = async () => {
+      if (!state.colorsChecked || !state.imageLoaded) return
+
+      const { charges, cooldown } = await WPlaceService.getCharges()
+      state.currentCharges = Math.floor(charges)
+      state.cooldown = cooldown
+
+      const progress = state.totalPixels > 0 ? Math.round((state.paintedPixels / state.totalPixels) * 100) : 0
+      const remainingPixels = state.totalPixels - state.paintedPixels
+
+      state.estimatedTime = Utils.calculateEstimatedTime(remainingPixels, state.currentCharges, state.cooldown)
+
+      progressBar.style.width = `${progress}%`
+
+      statsArea.innerHTML = `
+        <div class="wplace-stat-item">
+          <div class="wplace-stat-label"><i class="fas fa-image"></i> ${Utils.t("progress")}</div>
+          <div class="wplace-stat-value">${progress}%</div>
+        </div>
+        <div class="wplace-stat-item">
+          <div class="wplace-stat-label"><i class="fas fa-paint-brush"></i> ${Utils.t("pixels")}</div>
+          <div class="wplace-stat-value">${state.paintedPixels}/${state.totalPixels}</div>
+        </div>
+        <div class="wplace-stat-item">
+          <div class="wplace-stat-label"><i class="fas fa-bolt"></i> ${Utils.t("charges")}</div>
+          <div class="wplace-stat-value">${Math.floor(state.currentCharges)}</div>
+        </div>
+        ${
+          state.imageLoaded
+            ? `
+        <div class="wplace-stat-item">
+          <div class="wplace-stat-label"><i class="fas fa-clock"></i> ${Utils.t("estimatedTime")}</div>
+          <div class="wplace-stat-value">${Utils.formatTime(state.estimatedTime)}</div>
+        </div>
+        `
+            : ""
+        }
+      `
+    }
+
+    // Helper function to update data management buttons
+    updateDataButtons = () => {
+      const hasImageData = state.imageLoaded && state.imageData
+      saveBtn.disabled = !hasImageData
+      saveToFileBtn.disabled = !hasImageData
+    }
+
+    // Initialize data buttons state
+    updateDataButtons()
+
+    function showResizeDialog(processor) {
+        const { width, height } = processor.getDimensions();
+        const aspectRatio = width / height;
+
+        widthSlider.value = width;
+        heightSlider.value = height;
+        widthSlider.max = width * 2; // Set a reasonable max
+        heightSlider.max = height * 2; // Set a reasonable max
+        widthValue.textContent = width;
+        heightValue.textContent = height;
+        zoomSlider.value = 1;
+        paintWhiteToggle.checked = state.paintWhitePixels;
+
+        _updateResizePreview = () => {
+            const newWidth = parseInt(widthSlider.value, 10);
+            const newHeight = parseInt(heightSlider.value, 10);
+            const zoomLevel = parseFloat(zoomSlider.value);
+
+            widthValue.textContent = newWidth;
+            heightValue.textContent = newHeight;
+
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = newWidth;
+            tempCanvas.height = newHeight;
+            tempCtx.imageSmoothingEnabled = false;
+            tempCtx.drawImage(processor.img, 0, 0, newWidth, newHeight);
+
+            const imgData = tempCtx.getImageData(0, 0, newWidth, newHeight);
+            const data = imgData.data;
+
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+
+                if (a < CONFIG.TRANSPARENCY_THRESHOLD || (!state.paintWhitePixels && Utils.isWhitePixel(r, g, b))) {
+                    data[i + 3] = 0; // Make transparent
+                    continue;
+                }
+
+                const [nr, ng, nb] = Utils.findClosestPaletteColor(r, g, b, state.activeColorPalette);
+                data[i] = nr;
+                data[i + 1] = ng;
+                data[i + 2] = nb;
+                data[i + 3] = 255; // ** THE FIX IS HERE **
+            }
+            tempCtx.putImageData(imgData, 0, 0);
+            resizePreview.src = tempCanvas.toDataURL();
+            resizePreview.style.transform = `scale(${zoomLevel})`;
+        };
+
+        const onWidthInput = () => {
+            if (keepAspect.checked) {
+                heightSlider.value = Math.round(parseInt(widthSlider.value, 10) / aspectRatio);
+            }
+            _updateResizePreview();
+        };
+
+        const onHeightInput = () => {
+            if (keepAspect.checked) {
+                widthSlider.value = Math.round(parseInt(heightSlider.value, 10) * aspectRatio);
+            }
+            _updateResizePreview();
+        };
+        
+        paintWhiteToggle.onchange = (e) => {
+            state.paintWhitePixels = e.target.checked;
+            _updateResizePreview();
+        };
+        
+        zoomSlider.addEventListener('input', _updateResizePreview);
+        widthSlider.addEventListener("input", onWidthInput);
+        heightSlider.addEventListener("input", onHeightInput);
+
+        confirmResize.onclick = () => {
+            const newWidth = parseInt(widthSlider.value, 10);
+            const newHeight = parseInt(heightSlider.value, 10);
+            const newPixels = processor.resize(newWidth, newHeight);
+
+            let totalValidPixels = 0;
+            for (let i = 0; i < newPixels.length; i += 4) {
+                const isTransparent = newPixels[i + 3] < CONFIG.TRANSPARENCY_THRESHOLD;
+                const isWhiteAndSkipped = !state.paintWhitePixels && Utils.isWhitePixel(newPixels[i], newPixels[i+1], newPixels[i+2]);
+                if (!isTransparent && !isWhiteAndSkipped) {
+                    totalValidPixels++;
+                }
+            }
+
+            state.imageData.pixels = newPixels;
+            state.imageData.width = newWidth;
+            state.imageData.height = newHeight;
+            state.imageData.totalPixels = totalValidPixels;
+            state.totalPixels = totalValidPixels;
+            state.paintedPixels = 0;
+
+            updateStats();
+            updateUI("resizeSuccess", "success", { width: newWidth, height: newHeight });
+            closeResizeDialog();
+        };
+
+        downloadPreviewBtn.onclick = () => {
+            const link = document.createElement('a');
+            link.download = 'wplace-preview.png';
+            link.href = resizePreview.src;
+            link.click();
+        };
+
+        cancelResize.onclick = closeResizeDialog;
+
+        resizeOverlay.style.display = "block";
+        resizeContainer.style.display = "block";
+        _updateResizePreview(); // Initial preview
+    }
+
+    function closeResizeDialog() {
+        resizeOverlay.style.display = "none";
+        resizeContainer.style.display = "none";
+        _updateResizePreview = () => {}; // Clear the function to prevent memory leaks
+    }
+
+    if (initBotBtn) {
+      initBotBtn.addEventListener("click", async () => {
+        try {
+          updateUI("checkingColors", "default")
+
+          state.availableColors = Utils.extractAvailableColors()
+
+          if (state.availableColors.length === 0) {
+            Utils.showAlert(Utils.t("noColorsFound"), "error")
+            updateUI("noColorsFound", "error")
+            return
+          }
+
+          state.colorsChecked = true
+          uploadBtn.disabled = false
+          selectPosBtn.disabled = false
+          initBotBtn.style.display = "none"
+
+          updateUI("colorsFound", "success", {
+            count: state.availableColors.length,
+          })
+          updateStats()
+        } catch {
+          updateUI("imageError", "error")
+        }
+      })
+    }
+
+    if (uploadBtn) {
+      uploadBtn.addEventListener("click", async () => {
+        try {
+          updateUI("loadingImage", "default")
+          const imageSrc = await Utils.createImageUploader()
+
+          const processor = new ImageProcessor(imageSrc)
+          await processor.load()
+
+          const { width, height } = processor.getDimensions()
+          const pixels = processor.getPixelData()
+
+          let totalValidPixels = 0;
+          for (let i = 0; i < pixels.length; i += 4) {
+              const isTransparent = pixels[i + 3] < CONFIG.TRANSPARENCY_THRESHOLD;
+              const isWhiteAndSkipped = !state.paintWhitePixels && Utils.isWhitePixel(pixels[i], pixels[i+1], pixels[i+2]);
+              if (!isTransparent && !isWhiteAndSkipped) {
+                  totalValidPixels++;
+              }
+          }
+
+          state.imageData = {
+            width,
+            height,
+            pixels,
+            totalPixels: totalValidPixels,
+            processor,
+          }
+
+          state.totalPixels = totalValidPixels
+          state.paintedPixels = 0
+          state.imageLoaded = true
+          state.lastPosition = { x: 0, y: 0 }
+
+          resizeBtn.disabled = false
+          saveBtn.disabled = false
+
+          if (state.startPosition) {
+            startBtn.disabled = false
+          }
+
+          updateStats()
+          updateDataButtons()
+          updateUI("imageLoaded", "success", { count: totalValidPixels })
+        } catch {
+          updateUI("imageError", "error")
+        }
+      })
+    }
+
+    if (resizeBtn) {
+      resizeBtn.addEventListener("click", () => {
+        if (state.imageLoaded && state.imageData.processor) {
+          showResizeDialog(state.imageData.processor)
+        }
+      })
+    }
+
+    if (selectPosBtn) {
+      selectPosBtn.addEventListener("click", async () => {
+        if (state.selectingPosition) return
+
+        state.selectingPosition = true
+        state.startPosition = null
+        state.region = null
+        startBtn.disabled = true
+
+        Utils.showAlert(Utils.t("selectPositionAlert"), "info")
+        updateUI("waitingPosition", "default")
+
+        const originalFetch = window.fetch
+
+        window.fetch = async (url, options) => {
+          if (
+            typeof url === "string" &&
+            url.includes("https://backend.wplace.live/s0/pixel/") &&
+            options?.method?.toUpperCase() === "POST"
+          ) {
+            try {
+              const response = await originalFetch(url, options)
+              const clonedResponse = response.clone()
+              const data = await clonedResponse.json()
+
+              if (data?.painted === 1) {
+                const regionMatch = url.match(/\/pixel\/(\d+)\/(\d+)/)
+                if (regionMatch && regionMatch.length >= 3) {
+                  state.region = {
+                    x: Number.parseInt(regionMatch[1]),
+                    y: Number.parseInt(regionMatch[2]),
+                  }
+                }
+
+                const payload = JSON.parse(options.body)
+                if (payload?.coords && Array.isArray(payload.coords)) {
+                  state.startPosition = {
+                    x: payload.coords[0],
+                    y: payload.coords[1],
+                  }
+                  state.lastPosition = { x: 0, y: 0 }
+
+                  if (state.imageLoaded) {
+                    startBtn.disabled = false
+                  }
+
+                  window.fetch = originalFetch
+                  state.selectingPosition = false
+                  updateUI("positionSet", "success")
+                }
+              }
+
+              return response
+            } catch {
+              return originalFetch(url, options)
+            }
+          }
+          return originalFetch(url, options)
+        }
+
+        setTimeout(() => {
+          if (state.selectingPosition) {
+            window.fetch = originalFetch
+            state.selectingPosition = false
+            updateUI("positionTimeout", "error")
+            Utils.showAlert(Utils.t("positionTimeout"), "error")
+          }
+        }, 120000)
+      })
+    }
+
+    // Function to start painting (can be called programmatically)
+    async function startPainting() {
+      if (!state.imageLoaded || !state.startPosition || !state.region) {
+        updateUI("missingRequirements", "error")
+        return false
+      }
+  // Ensure we have a valid token before starting
+  await ensureToken()
+  if (!turnstileToken) return false
+
+      state.running = true
+      state.stopFlag = false
+      startBtn.disabled = true
+      stopBtn.disabled = false
+      uploadBtn.disabled = true
+      selectPosBtn.disabled = true
+      resizeBtn.disabled = true
+      saveBtn.disabled = true
+
+      updateUI("startPaintingMsg", "success")
+
+      try {
+        await processImage()
+        return true
+      } catch {
+        updateUI("paintingError", "error")
+        return false
+      } finally {
+        state.running = false
+        stopBtn.disabled = true
+        saveBtn.disabled = false
+
+        if (!state.stopFlag) {
+          startBtn.disabled = true
+          uploadBtn.disabled = false
+          selectPosBtn.disabled = false
+          resizeBtn.disabled = false
+        } else {
+          startBtn.disabled = false
+        }
+      }
+    }
+
+    if (startBtn) {
+      startBtn.addEventListener("click", startPainting)
+    }
+
+    if (stopBtn) {
+      stopBtn.addEventListener("click", () => {
+        state.stopFlag = true
+        state.running = false
+        stopBtn.disabled = true
+        updateUI("paintingStopped", "warning")
+
+        // Auto save when stopping
+        if (state.imageLoaded && state.paintedPixels > 0) {
+          Utils.saveProgress()
+          Utils.showAlert(Utils.t("autoSaved"), "success")
+        }
+      })
+    }
+
+    // Check for saved progress on startup
+    const checkSavedProgress = () => {
+      const savedData = Utils.loadProgress()
+      if (savedData && savedData.state.paintedPixels > 0) {
+        const savedDate = new Date(savedData.timestamp).toLocaleString()
+        const progress = Math.round((savedData.state.paintedPixels / savedData.state.totalPixels) * 100)
+
+        Utils.showAlert(
+          `${Utils.t("savedDataFound")}\n\n` +
+            `Saved: ${savedDate}\n` +
+            `Progress: ${savedData.state.paintedPixels}/${savedData.state.totalPixels} pixels (${progress}%)\n` +
+            `${Utils.t("clickLoadToContinue")}`,
+          "info",
+        )
+      }
+    }
+
+    // Check for saved progress after a short delay to let UI settle
+    setTimeout(checkSavedProgress, 1000)
+
+    // Speed Slider Event Listener (in settings window)
+    const speedSlider = settingsContainer.querySelector("#speedSlider")
+    const speedValue = settingsContainer.querySelector("#speedValue")
+    if (speedSlider && speedValue) {
+      speedSlider.addEventListener("input", (e) => {
+        const speed = parseInt(e.target.value) // Use integer instead of float
+        state.paintingSpeed = speed
+        speedValue.textContent = speed + " px/s" // Add px/s unit
+
+        // Save speed preference to localStorage
+        try {
+          localStorage.setItem("wplace-painting-speed", speed.toString())
+        } catch (error) {
+          console.warn("Could not save painting speed preference:", error)
+        }
+      })
+
+      // Load saved speed preference
+      try {
+        const savedSpeed = localStorage.getItem("wplace-painting-speed")
+        if (savedSpeed) {
+          const speed = parseInt(savedSpeed)
+          if (speed >= CONFIG.PAINTING_SPEED.MIN && speed <= CONFIG.PAINTING_SPEED.MAX) {
+            state.paintingSpeed = speed
+            speedSlider.value = speed
+            speedValue.textContent = speed.toString()
+          }
+        }
+      } catch (error) {
+        console.warn("Could not load painting speed preference:", error)
+      }
+    }
+
+    // Painting speed toggle
+    const enableSpeedToggle = settingsContainer.querySelector("#enableSpeedToggle")
+    if (enableSpeedToggle) {
+      // Initialize speed slider disabled state
+      const speedSliderToggle = settingsContainer.querySelector("#speedSlider")
+      if (speedSliderToggle) speedSliderToggle.disabled = !CONFIG.PAINTING_SPEED_ENABLED
+      enableSpeedToggle.checked = CONFIG.PAINTING_SPEED_ENABLED
+      enableSpeedToggle.addEventListener("change", (e) => {
+        CONFIG.PAINTING_SPEED_ENABLED = e.target.checked
+        // Toggle speed slider
+        if (speedSliderToggle) speedSliderToggle.disabled = !CONFIG.PAINTING_SPEED_ENABLED
+        // Save preference to localStorage
+        try {
+          localStorage.setItem("wplace-painting-speed-enabled", CONFIG.PAINTING_SPEED_ENABLED.toString())
+        } catch (error) {
+          console.warn("Could not save painting speed enabled preference:", error)
+        }
+      })
+      // Load saved preference
+      try {
+        const savedEnabled = localStorage.getItem("wplace-painting-speed-enabled")
+        if (savedEnabled !== null) {
+          CONFIG.PAINTING_SPEED_ENABLED = savedEnabled === "true"
+          enableSpeedToggle.checked = CONFIG.PAINTING_SPEED_ENABLED
+          if (speedSliderToggle) speedSliderToggle.disabled = !CONFIG.PAINTING_SPEED_ENABLED
+        }
+      } catch (error) {
+        console.warn("Could not load painting speed enabled preference:", error)
+      }
+    }
+    // --- Initialize Color Palette UI ---
     initializeColorPalette(resizeContainer);
   }
 
-  async function processImage(): Promise<void> {
-      if (!state.imageData || !state.startPosition || !state.region) return;
+  async function processImage() {
+    const { width, height, pixels } = state.imageData
+    const { x: startX, y: startY } = state.startPosition
+    const { x: regionX, y: regionY } = state.region
 
-      const { width, height, pixels } = state.imageData;
-      const { x: startX, y: startY } = state.startPosition;
-      const { x: regionX, y: regionY } = state.region;
+    const startRow = state.lastPosition.y || 0
+    const startCol = state.lastPosition.x || 0
 
-      const startRow = state.lastPosition.y || 0;
-      const startCol = state.lastPosition.x || 0;
+    if (!state.paintedMap) {
+      state.paintedMap = Array(height)
+        .fill()
+        .map(() => Array(width).fill(false))
+    }
 
-      if (!state.paintedMap) {
-          state.paintedMap = Array(height).fill(null).map(() => Array(width).fill(false));
-      }
-      
-      // ... The rest of the processImage logic from the original script
-  }
-  
-  interface PixelBatchItem {
-      x: number;
-      y: number;
-      color: number;
-      localX: number;
-      localY: number;
-  }
+    let pixelBatch = []
 
-  async function sendPixelBatch(pixelBatch: PixelBatchItem[], regionX: number, regionY: number): Promise<boolean | "token_error"> {
-      if (!turnstileToken) return "token_error";
-      
-      const coords: number[] = [];
-      const colors: number[] = [];
-      pixelBatch.forEach(p => {
-          coords.push(p.x, p.y);
-          colors.push(p.color);
-      });
-
-      try {
-          const payload = { coords, colors, t: turnstileToken };
-          const res = await fetch(`https://backend.wplace.live/s0/pixel/${regionX}/${regionY}`, {
-              method: "POST",
-              headers: { "Content-Type": "text/plain;charset=UTF-8" },
-              credentials: "include",
-              body: JSON.stringify(payload),
-          });
-          
-          if (res.status === 403) {
-              console.error("❌ 403 Forbidden. Turnstile token might be invalid or expired.");
-              turnstileToken = null;
-              tokenPromise = new Promise((resolve) => { _resolveToken = resolve; });
-              Utils.showAlert(Utils.t("captchaNeeded"), "error");
-              return "token_error";
+    try {
+      outerLoop: for (let y = startRow; y < height; y++) {
+        for (let x = y === startRow ? startCol : 0; x < width; x++) {
+          if (state.stopFlag) {
+            if (pixelBatch.length > 0) {
+              await sendPixelBatch(pixelBatch, regionX, regionY)
+            }
+            state.lastPosition = { x, y }
+            updateUI("paintingPaused", "warning", { x, y })
+            break outerLoop
           }
-          const data = await res.json();
-          return data?.painted === pixelBatch.length;
-      } catch (e) {
-          console.error("Batch paint request failed:", e);
-          return false;
+
+          if (state.paintedMap[y][x]) continue
+
+          const idx = (y * width + x) * 4
+          const r = pixels[idx]
+          const g = pixels[idx + 1]
+          const b = pixels[idx + 2]
+          const alpha = pixels[idx + 3]
+
+          if (alpha < CONFIG.TRANSPARENCY_THRESHOLD || (!state.paintWhitePixels && Utils.isWhitePixel(r, g, b))) {
+              continue;
+          }
+
+          // Step 1: Quantize source pixel to the user's selected palette
+          const targetRgb = Utils.findClosestPaletteColor(r, g, b, state.activeColorPalette);
+
+          // Step 2: Find the closest available in-game color to the quantized color
+          const colorId = findClosestColor(targetRgb, state.availableColors);
+
+          const pixelX = startX + x
+          const pixelY = startY + y
+
+          pixelBatch.push({
+            x: pixelX,
+            y: pixelY,
+            color: colorId,
+            localX: x,
+            localY: y,
+          })
+
+          if (pixelBatch.length >= Math.floor(state.currentCharges)) {
+            const success = await sendPixelBatch(pixelBatch, regionX, regionY)
+
+            if (success === "token_error") {
+              state.stopFlag = true
+              updateUI("captchaNeeded", "error")
+              Utils.showAlert(Utils.t("captchaNeeded"), "error")
+              break outerLoop
+            }
+
+            if (success) {
+              pixelBatch.forEach((pixel) => {
+                state.paintedMap[pixel.localY][pixel.localX] = true
+                state.paintedPixels++
+              })
+
+              state.currentCharges -= pixelBatch.length
+              updateStats()
+              updateUI("paintingProgress", "default", {
+                painted: state.paintedPixels,
+                total: state.totalPixels,
+              })
+
+              // Auto-save progress every 50 pixels
+              if (state.paintedPixels % 50 === 0) {
+                Utils.saveProgress()
+              }
+
+              // Apply painting speed delay if enabled
+              if (CONFIG.PAINTING_SPEED_ENABLED && state.paintingSpeed > 0 && pixelBatch.length > 0) {
+                const delayPerPixel = 1000 / state.paintingSpeed // ms per pixel
+                const totalDelay = Math.max(100, delayPerPixel * pixelBatch.length) // minimum 100ms
+                await Utils.sleep(totalDelay)
+              }
+            }
+
+            pixelBatch = []
+
+            if (state.currentCharges < 1) {
+              updateUI("noCharges", "warning", {
+                time: Utils.formatTime(state.cooldown),
+              })
+              await Utils.sleep(state.cooldown)
+
+              const chargeUpdate = await WPlaceService.getCharges()
+              state.currentCharges = chargeUpdate.charges
+              state.cooldown = chargeUpdate.cooldown
+            }
+          }
+        }
       }
+
+      if (pixelBatch.length > 0 && !state.stopFlag) {
+        const success = await sendPixelBatch(pixelBatch, regionX, regionY)
+        if (success) {
+          pixelBatch.forEach((pixel) => {
+            state.paintedMap[pixel.localY][pixel.localX] = true
+            state.paintedPixels++
+          })
+          state.currentCharges -= pixelBatch.length
+          // Apply painting speed delay for remaining pixels if enabled
+          if (CONFIG.PAINTING_SPEED_ENABLED && state.paintingSpeed > 0 && pixelBatch.length > 0) {
+            const delayPerPixel = 1000 / state.paintingSpeed // ms per pixel
+            const totalDelay = Math.max(100, delayPerPixel * pixelBatch.length) // minimum 100ms
+            await Utils.sleep(totalDelay)
+          }
+        }
+      }
+    } finally {
+      if (window._chargesInterval) clearInterval(window._chargesInterval)
+      window._chargesInterval = null
+    }
+
+    if (state.stopFlag) {
+      updateUI("paintingStopped", "warning")
+      // Save progress when stopped
+      Utils.saveProgress()
+    } else {
+      updateUI("paintingComplete", "success", { count: state.paintedPixels })
+      state.lastPosition = { x: 0, y: 0 }
+      state.paintedMap = null
+      // Clear saved data when completed
+      Utils.clearProgress()
+    }
+
+    updateStats()
   }
 
-  // Initial call to create the UI
-  createUI();
-})();
+  async function sendPixelBatch(pixelBatch, regionX, regionY) {
+  if (!turnstileToken) return "token_error"
+
+    // Pre-allocate arrays for performance
+    const coords = new Array(pixelBatch.length * 2)
+    const colors = new Array(pixelBatch.length)
+    for (let i = 0; i < pixelBatch.length; i++) {
+      const pixel = pixelBatch[i]
+      coords[i * 2] = pixel.x
+      coords[i * 2 + 1] = pixel.y
+      colors[i] = pixel.color
+    }
+
+    try {
+  const payload = { coords, colors, t: turnstileToken }
+
+      const res = await fetch(`https://backend.wplace.live/s0/pixel/${regionX}/${regionY}`, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=UTF-8" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      })
+
+      if (res.status === 403) {
+        let data = null
+        try { data = await res.json() } catch (_) {}
+        console.error("❌ 403 Forbidden. Turnstile token might be invalid or expired.")
+        // Reset token & create new promise to await fresh token
+        turnstileToken = null
+        tokenPromise = new Promise((resolve) => { _resolveToken = resolve })
+        Utils.showAlert(Utils.t("captchaNeeded"), "error")
+        return "token_error"
+      }
+      const data = await res.json()
+      return data?.painted === pixelBatch.length
+    } catch (e) {
+      console.error("Batch paint request failed:", e)
+      return false
+    }
+  }
+
+  createUI()
+})()
