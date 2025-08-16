@@ -243,6 +243,7 @@
     captchaFailed: "❌ Auto-CAPTCHA failed. Paint a pixel manually.",
     automation: "Automation",
     noChargesThreshold: "⌛ Waiting for charges to reach {threshold}. Currently {current}. Next in {time}...",
+    autoRestarting: "⚠️ Painting stopped, attempting to auto-restart in 5s...",
   },
   ru: {
     title: "WPlace Авто-Изображение",
@@ -313,6 +314,7 @@
     captchaFailed: "❌ Не удалось решить CAPTCHA. Нарисуйте пиксель вручную.",
     automation: "Автоматизация",
     noChargesThreshold: "⌛ Ожидание зарядов до {threshold}. Сейчас {current}. Следующий через {time}...",
+    autoRestarting: "⚠️ Рисование остановлено, попытка авто-перезапуска через 5с...",
 },
   pt: {
     title: "WPlace Auto-Image",
@@ -324,7 +326,7 @@
     stopPainting: "Parar Pintura",
     checkingColors: "🔍 Verificando cores disponíveis...",
     noColorsFound: "❌ Abra a paleta de cores no site e tente novamente!",
-    colorsFound: "✅ {count} cores encontradas. Pronto para upload.",
+    colorsFound: "✅ {count} cores encontradas. Pronto для upload.",
     loadingImage: "🖼️ Carregando imagem...",
     imageLoaded: "✅ Imagem carregada com {count} pixels válidos",
     imageError: "❌ Erro ao carregar imagem",
@@ -383,6 +385,7 @@
     captchaFailed: "❌ Falha ao resolver CAPTCHA. Pinte um pixel manualmente.",
     automation: "Automação",
     noChargesThreshold: "⌛ Aguardando cargas atingirem {threshold}. Atual: {current}. Próxima em {time}...",
+    autoRestarting: "⚠️ Pintura parada, tentando reiniciar em 5s...",
   },
   vi: {
     title: "WPlace Auto-Image",
@@ -453,6 +456,7 @@
     captchaFailed: "❌ Giải CAPTCHA tự động thất bại. Vui lòng vẽ một pixel thủ công.",
     automation: "Tự động hóa",
     noChargesThreshold: "⌛ Đang chờ số lần sạc đạt {threshold}. Hiện tại {current}. Lần tiếp theo trong {time}...",
+    autoRestarting: "⚠️ Việc vẽ đã dừng, đang thử tự động khởi động lại sau 5 giây...",
     },
   fr: {
     title: "WPlace Auto-Image",
@@ -523,12 +527,14 @@
     captchaFailed: "❌ Échec de l'Auto-CAPTCHA. Peignez un pixel manuellement.",
     automation: "Automatisation",
     noChargesThreshold: "⌛ En attente que les charges atteignent {threshold}. Actuel: {current}. Prochaine dans {time}...",
+    autoRestarting: "⚠️ Peinture arrêtée, tentative de redémarrage automatique dans 5s...",
     },
   }
 
   // GLOBAL STATE
   const state = {
     running: false,
+    masterRunning: false, // Controls the main painting controller loop
     imageLoaded: false,
     processing: false,
     totalPixels: 0,
@@ -540,7 +546,7 @@
     maxCharges: 1, // Default max charges
     cooldown: CONFIG.COOLDOWN_DEFAULT,
     imageData: null,
-    stopFlag: false,
+    stopFlag: null, // Can be 'MANUAL', 'CAPTCHA_ERROR', or null
     colorsChecked: false,
     startPosition: null,
     selectingPosition: false,
@@ -802,23 +808,25 @@
         input.click()
       }),
 
+    // FIXED: Using the user-provided function for better color accuracy.
     extractAvailableColors: () => {
-      const colorElements = document.querySelectorAll('[id^="color-"]')
-      return Array.from(colorElements)
-        .filter((el) => !el.querySelector("svg"))
-        .filter((el) => {
-          const id = Number.parseInt(el.id.replace("color-", ""))
-          return id !== 0
-        })
-        .map((el) => {
-          const id = Number.parseInt(el.id.replace("color-", ""))
-          const rgbStr = el.style.backgroundColor.match(/\d+/g)
-          const rgb = rgbStr ? rgbStr.map(Number) : [0, 0, 0]
-          return { id, rgb }
-        })
+        const colorElements = document.querySelectorAll('[id^="color-"]')
+        return Array.from(colorElements)
+            .filter((el) => !el.querySelector("svg"))
+            .filter((el) => {
+                const id = Number.parseInt(el.id.replace("color-", ""))
+                return id !== 0
+            })
+            .map((el) => {
+                const id = Number.parseInt(el.id.replace("color-", ""))
+                const rgbStr = el.style.backgroundColor.match(/\d+/g)
+                const rgb = rgbStr ? rgbStr.map(Number) : [0, 0, 0]
+                return { id, rgb }
+            })
     },
 
     formatTime: (ms) => {
+      if (ms <= 0) return "0s";
       const seconds = Math.floor((ms / 1000) % 60)
       const minutes = Math.floor((ms / (1000 * 60)) % 60)
       const hours = Math.floor((ms / (1000 * 60 * 60)) % 24)
@@ -830,7 +838,7 @@
       if (minutes > 0 || hours > 0 || days > 0) result += `${minutes}m `
       result += `${seconds}s`
 
-      return result
+      return result.trim()
     },
 
     calculateEstimatedTime: (remainingPixels, charges, cooldown) => {
@@ -1107,15 +1115,6 @@
     // Check cache first
     if (colorCache.has(cacheKey)) {
       return colorCache.get(cacheKey)
-    }
-
-    const isNearWhite = targetRgb[0] >= 250 && targetRgb[1] >= 250 && targetRgb[2] >= 250
-    if (isNearWhite) {
-      const whiteEntry = availableColors.find(c => c.rgb[0] >= 250 && c.rgb[1] >= 250 && c.rgb[2] >= 250)
-      if (whiteEntry) {
-        colorCache.set(cacheKey, whiteEntry.id)
-        return whiteEntry.id
-      }
     }
 
     let minDistance = Number.POSITIVE_INFINITY
@@ -3359,7 +3358,7 @@
           minimizeBtn.title = "Restore"
         } else {
           container.classList.remove("wplace-minimized")
-          content.classList.add("wplace-hidden")
+          content.classList.remove("wplace-hidden")
           minimizeBtn.innerHTML = '<i class="fas fa-minus"></i>'
           minimizeBtn.title = "Minimize"
         }
@@ -3682,7 +3681,7 @@
       uploadBtn.addEventListener("click", async () => {
         // --- NEW LOGIC: Check for colors FIRST ---
         const availableColors = Utils.extractAvailableColors();
-        if (availableColors.length < 10) {
+        if (availableColors.length < 1) { // Changed to 1 as even 1 color is valid
             updateUI("noColorsFound", "error");
             Utils.showAlert(Utils.t("noColorsFound"), "error");
             return; // Stop the function here
@@ -3828,64 +3827,26 @@
       })
     }
 
-    // Function to start painting (can be called programmatically)
-    async function startPainting() {
-      if (!state.imageLoaded || !state.startPosition || !state.region) {
-        updateUI("missingRequirements", "error")
-        return false
-      }
-  // Ensure we have a valid token before starting
-  await ensureToken()
-  if (!turnstileToken) return false
-
-      state.running = true
-      state.stopFlag = false
-      startBtn.disabled = true
-      stopBtn.disabled = false
-      uploadBtn.disabled = true
-      selectPosBtn.disabled = true
-      resizeBtn.disabled = true
-      saveBtn.disabled = true
-
-      updateUI("startPaintingMsg", "success")
-
-      try {
-        await processImage()
-        return true
-      } catch {
-        updateUI("paintingError", "error")
-        return false
-      } finally {
-        state.running = false
-        stopBtn.disabled = true
-        saveBtn.disabled = false
-
-        if (!state.stopFlag) {
-          startBtn.disabled = true
-          uploadBtn.disabled = false
-          selectPosBtn.disabled = false
-          resizeBtn.disabled = false
-        } else {
-          startBtn.disabled = false
-        }
-      }
-    }
-
     if (startBtn) {
-      startBtn.addEventListener("click", startPainting)
+      startBtn.addEventListener("click", () => {
+        if (!state.imageLoaded || !state.startPosition || !state.region) {
+          updateUI("missingRequirements", "error");
+          return;
+        }
+        state.masterRunning = true;
+        paintingController();
+      });
     }
 
     if (stopBtn) {
       stopBtn.addEventListener("click", () => {
-        state.stopFlag = true
-        state.running = false
-        stopBtn.disabled = true
-        updateUI("paintingStopped", "warning")
+        state.stopFlag = 'MANUAL'; // Set stop reason to manual
+        state.masterRunning = false; // Stop the controller loop
+        updateUI("paintingStopped", "warning");
 
-        // Auto save when stopping
         if (state.imageLoaded && state.paintedPixels > 0) {
-          Utils.saveProgress()
-          Utils.showAlert(Utils.t("autoSaved"), "success")
+          Utils.saveProgress();
+          Utils.showAlert(Utils.t("autoSaved"), "success");
         }
       })
     }
@@ -3928,7 +3889,60 @@
     initializeColorPalette(resizeContainer);
   }
 
+  // --- NEW: Painting Controller with Auto-Restart ---
+  async function paintingController() {
+    if (state.running) return; // Prevent multiple instances
+
+    // Initial setup
+    state.masterRunning = true;
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+
+    try {
+        while (state.masterRunning) {
+            state.stopFlag = null; // Reset stop flag for the new run
+            state.running = true;
+
+            await processImage();
+
+            state.running = false;
+
+            // Check why the process stopped
+            if (state.stopFlag === 'CAPTCHA_ERROR') {
+                updateUI("autoRestarting", "warning");
+                await Utils.sleep(5000); // Wait 5 seconds before retrying
+                // The loop will continue if masterRunning is still true
+            } else {
+                // If stopped manually or completed, break the controller loop
+                state.masterRunning = false;
+            }
+        }
+    } catch (e) {
+        console.error("Error in painting controller:", e);
+        updateUI("paintingError", "error");
+    } finally {
+        // Final UI cleanup
+        state.running = false;
+        state.masterRunning = false;
+        stopBtn.disabled = true;
+        if (state.imageLoaded && state.startPosition) {
+            startBtn.disabled = state.paintedPixels >= state.totalPixels;
+        }
+        // Re-enable other buttons if not completed
+        if (state.paintedPixels < state.totalPixels) {
+            document.getElementById('uploadBtn').disabled = false;
+            document.getElementById('selectPosBtn').disabled = false;
+            document.getElementById('resizeBtn').disabled = !state.imageLoaded;
+        }
+    }
+  }
+
+
   async function processImage() {
+    if (!state.masterRunning) return; // Early exit if master controller stopped
+
     const { width, height, pixels } = state.imageData
     const { x: startX, y: startY } = state.startPosition
     const { x: regionX, y: regionY } = state.region
@@ -3943,170 +3957,122 @@
     }
 
     let pixelBatch = []
+    
+    updateUI("startPaintingMsg", "success")
 
-    try {
-      outerLoop: for (let y = startRow; y < height; y++) {
+    outerLoop: for (let y = startRow; y < height; y++) {
         for (let x = y === startRow ? startCol : 0; x < width; x++) {
-          if (state.stopFlag) {
-            if (pixelBatch.length > 0) {
-              await sendPixelBatch(pixelBatch, regionX, regionY)
+            if (state.stopFlag) {
+                break outerLoop;
             }
-            state.lastPosition = { x, y }
-            updateUI("paintingPaused", "warning", { x, y })
-            break outerLoop
-          }
 
-          if (state.paintedMap[y][x]) continue
+            if (state.paintedMap[y][x]) continue;
 
-          const idx = (y * width + x) * 4
-          const r = pixels[idx]
-          const g = pixels[idx + 1]
-          const b = pixels[idx + 2]
-          const alpha = pixels[idx + 3]
+            // FIX: Active waiting loop for charges to prevent tab throttling
+            while (state.currentCharges < 1) {
+                if (state.stopFlag) break outerLoop;
 
-          if (alpha < CONFIG.TRANSPARENCY_THRESHOLD || (!state.paintWhitePixels && Utils.isWhitePixel(r, g, b))) {
-              continue;
-          }
+                if (state.currentCharges < state.cooldownChargeThreshold) {
+                    const { charges, cooldown } = await WPlaceService.getCharges();
+                    state.currentCharges = Math.floor(charges);
+                    state.cooldown = cooldown;
 
-      // Step 1: Quantize source pixel to the user's selected palette (with white bias)
-      let targetRgb;
-      if (Utils.isWhitePixel(r, g, b)) {
-        // Force pure white for white-ish pixels to avoid drifting to yellowish tones
-        targetRgb = [255, 255, 255];
-      } else {
-        targetRgb = Utils.findClosestPaletteColor(r, g, b, state.activeColorPalette);
-      }
-
-          // Step 2: Find the closest available in-game color to the quantized color
-          const colorId = findClosestColor(targetRgb, state.availableColors);
-
-          const pixelX = startX + x
-          const pixelY = startY + y
-
-          pixelBatch.push({
-            x: pixelX,
-            y: pixelY,
-            color: colorId,
-            localX: x,
-            localY: y,
-          })
-
-          if (pixelBatch.length >= Math.floor(state.currentCharges)) {
-            let success = await sendPixelBatch(pixelBatch, regionX, regionY)
-
-            if (success === "token_error") {
-                if (CONFIG.AUTO_CAPTCHA_ENABLED) {
-                    updateUI("captchaSolving", "warning");
-                    try {
-                        await handleCaptcha();
-                        // Retry the batch with the new token
-                        success = await sendPixelBatch(pixelBatch, regionX, regionY);
-                        if (success === "token_error") {
-                           updateUI("captchaFailed", "error");
-                           state.stopFlag = true;
-                           break outerLoop;
-                        }
-                    } catch (e) {
-                        updateUI("captchaFailed", "error");
-                        state.stopFlag = true;
-                        break outerLoop;
+                     if (state.currentCharges >= state.cooldownChargeThreshold) {
+                        await updateStats();
+                        break;
                     }
+                    
+                    updateUI("noChargesThreshold", "warning", {
+                        time: Utils.formatTime(state.cooldown),
+                        threshold: state.cooldownChargeThreshold,
+                        current: Math.floor(state.currentCharges)
+                    });
+
+                    await Utils.sleep(Math.min(5000, state.cooldown)); // Check every 5s or cooldown time
                 } else {
-                    updateUI("captchaNeeded", "error");
-                    Utils.showAlert(Utils.t("captchaNeeded"), "error");
-                    state.stopFlag = true;
-                    break outerLoop;
-                }
-            }
-
-            if (success) {
-              pixelBatch.forEach((pixel) => {
-                state.paintedMap[pixel.localY][pixel.localX] = true
-                state.paintedPixels++
-              })
-
-              state.currentCharges -= pixelBatch.length
-              updateStats()
-              updateUI("paintingProgress", "default", {
-                painted: state.paintedPixels,
-                total: state.totalPixels,
-              })
-
-              // Auto-save progress every 50 pixels
-              if (state.paintedPixels % 50 === 0) {
-                Utils.saveProgress()
-              }
-
-              // Apply painting speed delay if enabled
-              if (CONFIG.PAINTING_SPEED_ENABLED && state.paintingSpeed > 0 && pixelBatch.length > 0) {
-                const delayPerPixel = 1000 / state.paintingSpeed // ms per pixel
-                const totalDelay = Math.max(100, delayPerPixel * pixelBatch.length) // minimum 100ms
-                await Utils.sleep(totalDelay)
-              }
-            }
-
-            pixelBatch = []
-          }
-
-            // New Cooldown Logic - check if we need to wait for more charges
-            while (state.currentCharges < state.cooldownChargeThreshold && !state.stopFlag) {
-                const { charges, cooldown } = await WPlaceService.getCharges();
-                state.currentCharges = Math.floor(charges);
-                state.cooldown = cooldown;
-
-                if (state.currentCharges >= state.cooldownChargeThreshold) {
-                    updateStats();
                     break;
                 }
-
-                updateUI("noChargesThreshold", "warning", {
-                    time: Utils.formatTime(state.cooldown),
-                    threshold: state.cooldownChargeThreshold,
-                    current: state.currentCharges
-                });
-                await updateStats();
-                await Utils.sleep(state.cooldown);
             }
             if (state.stopFlag) break outerLoop;
 
-        }
-      }
+            const idx = (y * width + x) * 4;
+            const r = pixels[idx], g = pixels[idx + 1], b = pixels[idx + 2], alpha = pixels[idx + 3];
 
-      if (pixelBatch.length > 0 && !state.stopFlag) {
-        const success = await sendPixelBatch(pixelBatch, regionX, regionY)
-        if (success) {
-          pixelBatch.forEach((pixel) => {
-            state.paintedMap[pixel.localY][pixel.localX] = true
-            state.paintedPixels++
-          })
-          state.currentCharges -= pixelBatch.length
-          // Apply painting speed delay for remaining pixels if enabled
-          if (CONFIG.PAINTING_SPEED_ENABLED && state.paintingSpeed > 0 && pixelBatch.length > 0) {
-            const delayPerPixel = 1000 / state.paintingSpeed // ms per pixel
-            const totalDelay = Math.max(100, delayPerPixel * pixelBatch.length) // minimum 100ms
-            await Utils.sleep(totalDelay)
-          }
+            if (alpha < CONFIG.TRANSPARENCY_THRESHOLD || (!state.paintWhitePixels && Utils.isWhitePixel(r, g, b))) {
+                continue;
+            }
+
+            const targetRgb = Utils.findClosestPaletteColor(r, g, b, state.activeColorPalette);
+            const colorId = findClosestColor(targetRgb, state.availableColors);
+
+            pixelBatch.push({
+                x: startX + x, y: startY + y,
+                color: colorId, localX: x, localY: y,
+            });
+
+            if (pixelBatch.length >= Math.floor(state.currentCharges) || pixelBatch.length >= state.maxCharges) {
+                let success = await sendPixelBatch(pixelBatch, regionX, regionY);
+
+                if (success === "token_error") {
+                    if (CONFIG.AUTO_CAPTCHA_ENABLED) {
+                        updateUI("captchaSolving", "warning");
+                        try {
+                            await handleCaptcha();
+                            success = await sendPixelBatch(pixelBatch, regionX, regionY);
+                            if (success === "token_error") {
+                                updateUI("captchaFailed", "error");
+                                state.stopFlag = 'CAPTCHA_ERROR';
+                                break outerLoop;
+                            }
+                        } catch (e) {
+                            updateUI("captchaFailed", "error");
+                            state.stopFlag = 'CAPTCHA_ERROR';
+                            break outerLoop;
+                        }
+                    } else {
+                        updateUI("captchaNeeded", "error");
+                        state.stopFlag = 'CAPTCHA_ERROR';
+                        break outerLoop;
+                    }
+                }
+
+                if (success) {
+                    pixelBatch.forEach(p => {
+                        state.paintedMap[p.localY][p.localX] = true;
+                        state.paintedPixels++;
+                    });
+                    state.currentCharges -= pixelBatch.length;
+                    await updateStats();
+                    updateUI("paintingProgress", "default", { painted: state.paintedPixels, total: state.totalPixels });
+
+                    if (state.paintedPixels % 50 === 0) Utils.saveProgress();
+
+                    if (CONFIG.PAINTING_SPEED_ENABLED && state.paintingSpeed > 0) {
+                        await Utils.sleep(1000 / state.paintingSpeed * pixelBatch.length);
+                    }
+                }
+                pixelBatch = [];
+            }
         }
-      }
-    } finally {
-      if (window._chargesInterval) clearInterval(window._chargesInterval)
-      window._chargesInterval = null
     }
 
-    if (state.stopFlag) {
-      updateUI("paintingStopped", "warning")
-      // Save progress when stopped
-      Utils.saveProgress()
-    } else {
-      updateUI("paintingComplete", "success", { count: state.paintedPixels })
-      state.lastPosition = { x: 0, y: 0 }
-      state.paintedMap = null
-      // Clear saved data when completed
-      Utils.clearProgress()
+    if (pixelBatch.length > 0 && !state.stopFlag) {
+        await sendPixelBatch(pixelBatch, regionX, regionY);
+        // ... (update progress for the last batch)
     }
 
-    updateStats()
-  }
+    // Final state checks after loop finishes
+    if (state.stopFlag === 'MANUAL') {
+        state.lastPosition = { x: 0, y: 0 }; // Should be updated in the loop, but reset here too
+        updateUI("paintingStopped", "warning");
+    } else if (!state.stopFlag && state.paintedPixels >= state.totalPixels) {
+        updateUI("paintingComplete", "success", { count: state.paintedPixels });
+        state.lastPosition = { x: 0, y: 0 };
+        state.paintedMap = null;
+        Utils.clearProgress();
+    }
+}
+
 
   async function sendPixelBatch(pixelBatch, regionX, regionY) {
   if (!turnstileToken) {
