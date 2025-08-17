@@ -10,10 +10,7 @@
       MAX: 1000,       // Maximum 1000 pixels per second
       DEFAULT: 5,      // Default 5 pixels per second
     },
-    // --- START: New Auto-Restart Config ---
-    MAX_AUTO_RESTART_ATTEMPTS: 3, // Number of times to try restarting after an error
-    AUTO_RESTART_DELAY: 5000,     // Delay in milliseconds before attempting a restart
-    // --- END: New Auto-Restart Config ---
+    // --- REMOVED: Auto-Restart limit and delay constants are no longer needed ---
     PAINTING_SPEED_ENABLED: false,
     AUTO_CAPTCHA_ENABLED: false, // Disabled by default
     COOLDOWN_CHARGE_THRESHOLD: 1, // Default wait threshold
@@ -179,7 +176,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-    title: "WPlace Auto-Image",
+    title: "WPlace Auto-Image TEST",
     scanColors: "Scan Colors",
     uploadImage: "Upload Image",
     resizeImage: "Resize Image",
@@ -247,9 +244,8 @@
     captchaFailed: "❌ Auto-CAPTCHA failed. Paint a pixel manually.",
     automation: "Automation",
     noChargesThreshold: "⌛ Waiting for charges to reach {threshold}. Currently {current}. Next in {time}...",
-    // --- New Auto-Restart Text ---
-    errorAndRestarting: "❗ Error detected. Auto-restarting in {time}s... (Attempt {attempt}/{max})",
-    autoRestartFailed: "❌ Auto-restart failed after {max} attempts. Manual start required.",
+    // --- MODIFIED: Simplified Auto-Restart Text ---
+    errorRestarting: "❗ Error detected. Attempting to restart immediately...",
   },
   ru: {
     title: "WPlace Авто-Изображение",
@@ -320,9 +316,8 @@
     captchaFailed: "❌ Не удалось решить CAPTCHA. Нарисуйте пиксель вручную.",
     automation: "Автоматизация",
     noChargesThreshold: "⌛ Ожидание зарядов до {threshold}. Сейчас {current}. Следующий через {time}...",
-    // --- New Auto-Restart Text ---
-    errorAndRestarting: "❗ Обнаружена ошибка. Автоперезапуск через {time}с... (Попытка {attempt}/{max})",
-    autoRestartFailed: "❌ Автоперезапуск не удался после {max} попыток. Требуется ручной запуск.",
+    // --- MODIFIED: Simplified Auto-Restart Text ---
+    errorRestarting: "❗ Обнаружена ошибка. Немедленный перезапуск...",
 },
   pt: {
     title: "WPlace Auto-Image",
@@ -393,9 +388,8 @@
     captchaFailed: "❌ Falha ao resolver CAPTCHA. Pinte um pixel manualmente.",
     automation: "Automação",
     noChargesThreshold: "⌛ Aguardando cargas atingirem {threshold}. Atual: {current}. Próxima em {time}...",
-    // --- New Auto-Restart Text ---
-    errorAndRestarting: "❗ Erro detectado. Reiniciando automaticamente em {time}s... (Tentativa {attempt}/{max})",
-    autoRestartFailed: "❌ Falha ao reiniciar automaticamente após {max} tentativas. Início manual necessário.",
+    // --- MODIFIED: Simplified Auto-Restart Text ---
+    errorRestarting: "❗ Erro detectado. Tentando reiniciar imediatamente...",
   },
   vi: {
     title: "WPlace Auto-Image",
@@ -466,9 +460,8 @@
     captchaFailed: "❌ Giải CAPTCHA tự động thất bại. Vui lòng vẽ một pixel thủ công.",
     automation: "Tự động hóa",
     noChargesThreshold: "⌛ Đang chờ số lần sạc đạt {threshold}. Hiện tại {current}. Lần tiếp theo trong {time}...",
-    // --- New Auto-Restart Text ---
-    errorAndRestarting: "❗ Đã phát hiện lỗi. Tự động khởi động lại sau {time} giây... (Lần thử {attempt}/{max})",
-    autoRestartFailed: "❌ Tự động khởi động lại thất bại sau {max} lần thử. Cần khởi động thủ công.",
+    // --- MODIFIED: Simplified Auto-Restart Text ---
+    errorRestarting: "❗ Đã phát hiện lỗi. Đang cố gắng khởi động lại ngay lập tức...",
     },
   fr: {
     title: "WPlace Auto-Image",
@@ -539,9 +532,8 @@
     captchaFailed: "❌ Échec de l'Auto-CAPTCHA. Peignez un pixel manuellement.",
     automation: "Automatisation",
     noChargesThreshold: "⌛ En attente que les charges atteignent {threshold}. Actuel: {current}. Prochaine dans {time}...",
-    // --- New Auto-Restart Text ---
-    errorAndRestarting: "❗ Erreur détectée. Redémarrage auto dans {time}s... (Essai {attempt}/{max})",
-    autoRestartFailed: "❌ Le redémarrage auto a échoué après {max} essais. Démarrage manuel requis.",
+    // --- MODIFIED: Simplified Auto-Restart Text ---
+    errorRestarting: "❗ Erreur détectée. Tentative de redémarrage immédiat...",
     },
   }
 
@@ -570,8 +562,7 @@
     language: "en",
     paintingSpeed: CONFIG.PAINTING_SPEED.DEFAULT, // pixels per second
     cooldownChargeThreshold: CONFIG.COOLDOWN_CHARGE_THRESHOLD,
-    // --- New Auto-Restart State ---
-    autoRestartAttempts: 0,
+    // --- REMOVED: Auto-Restart state is no longer needed ---
   }
 
   // Placeholder for the resize preview update function
@@ -3879,10 +3870,8 @@
       await processImage();
     }
 
-    // --- MODIFIED: The start button listener now resets the auto-restart counter. ---
     if (startBtn) {
         startBtn.addEventListener("click", () => {
-            state.autoRestartAttempts = 0; // Reset counter on any manual start
             startPainting().catch(err => {
                 // This catch prevents an unhandled promise rejection if startPainting throws an error (like the CAPTCHA one)
                 // The actual error handling and restart logic is now in `processImage`'s `finally` block.
@@ -3895,8 +3884,7 @@
       stopBtn.addEventListener("click", () => {
         state.stopFlag = true
         state.running = false
-        stopBtn.disabled = true
-        // The rest of the logic is now handled in the processImage finally block
+        // The actual UI updates and logic are now handled in the processImage finally block
       })
     }
 
@@ -3938,13 +3926,12 @@
     initializeColorPalette(resizeContainer);
   }
 
-  // --- HEAVILY REWORKED: processImage function with intelligent finally block ---
+  // --- MODIFIED: processImage function with new immediate, unlimited, and conditional autostart logic ---
   async function processImage() {
     const { width, height, pixels } = state.imageData
     const { x: startX, y: startY } = state.startPosition
     const { x: regionX, y: regionY } = state.region
     
-    // UI elements are queried once in createUI, let's just reference them
     const uploadBtn = document.getElementById("uploadBtn");
     const resizeBtn = document.getElementById("resizeBtn");
     const selectPosBtn = document.getElementById("selectPosBtn");
@@ -3957,9 +3944,7 @@
       const startCol = state.lastPosition.x || 0
 
       if (!state.paintedMap) {
-        state.paintedMap = Array(height)
-          .fill()
-          .map(() => Array(width).fill(false))
+        state.paintedMap = Array(height).fill().map(() => Array(width).fill(false))
       }
 
       let pixelBatch = []
@@ -3974,72 +3959,37 @@
           if (state.paintedMap[y][x]) continue
 
           const idx = (y * width + x) * 4
-          const r = pixels[idx]
-          const g = pixels[idx + 1]
-          const b = pixels[idx + 2]
-          const alpha = pixels[idx + 3]
+          const [r, g, b, alpha] = [pixels[idx], pixels[idx + 1], pixels[idx + 2], pixels[idx + 3]]
 
-          if (alpha < CONFIG.TRANSPARENCY_THRESHOLD || (!state.paintWhitePixels && Utils.isWhitePixel(r, g, b))) {
-              continue;
-          }
+          if (alpha < CONFIG.TRANSPARENCY_THRESHOLD || (!state.paintWhitePixels && Utils.isWhitePixel(r, g, b))) continue;
 
-          let targetRgb;
-          if (Utils.isWhitePixel(r, g, b)) {
-            targetRgb = [255, 255, 255];
-          } else {
-            targetRgb = Utils.findClosestPaletteColor(r, g, b, state.activeColorPalette);
-          }
-
+          let targetRgb = Utils.isWhitePixel(r, g, b) ? [255, 255, 255] : Utils.findClosestPaletteColor(r, g, b, state.activeColorPalette);
           const colorId = findClosestColor(targetRgb, state.availableColors);
-          const pixelX = startX + x
-          const pixelY = startY + y
-
+          const pixelX = startX + x, pixelY = startY + y;
           pixelBatch.push({ x: pixelX, y: pixelY, color: colorId, localX: x, localY: y })
 
           if (pixelBatch.length >= Math.floor(state.currentCharges)) {
-            let success = await sendPixelBatch(pixelBatch, regionX, regionY)
-
+            let success = await sendPixelBatch(pixelBatch, regionX, regionY);
             if (success === "token_error") {
                 if (CONFIG.AUTO_CAPTCHA_ENABLED) {
                     updateUI("captchaSolving", "warning");
                     try {
                         await handleCaptcha();
                         success = await sendPixelBatch(pixelBatch, regionX, regionY);
-                        if (success === "token_error") {
-                           updateUI("captchaFailed", "error");
-                           throw new Error("Auto-CAPTCHA recovery failed."); // Throw error to trigger restart
-                        }
-                    } catch (e) {
-                        updateUI("captchaFailed", "error");
-                        throw new Error("Auto-CAPTCHA process failed."); // Throw error to trigger restart
-                    }
-                } else {
-                    updateUI("captchaNeeded", "error");
-                    Utils.showAlert(Utils.t("captchaNeeded"), "error");
-                    throw new Error("Manual CAPTCHA token required."); // Throw error to trigger restart
-                }
+                        if (success === "token_error") throw new Error("Auto-CAPTCHA recovery failed.");
+                    } catch (e) { throw new Error("Auto-CAPTCHA process failed."); }
+                } else { throw new Error("Manual CAPTCHA token required."); }
             }
-
             if (success) {
-              pixelBatch.forEach((pixel) => {
-                state.paintedMap[pixel.localY][pixel.localX] = true
-                state.paintedPixels++
-              })
-
-              state.currentCharges -= pixelBatch.length
-              updateStats()
-              updateUI("paintingProgress", "default", { painted: state.paintedPixels, total: state.totalPixels, })
-
-              if (state.paintedPixels % 50 === 0) { Utils.saveProgress() }
-              if (CONFIG.PAINTING_SPEED_ENABLED && state.paintingSpeed > 0 && pixelBatch.length > 0) {
-                const delayPerPixel = 1000 / state.paintingSpeed
-                const totalDelay = Math.max(100, delayPerPixel * pixelBatch.length)
-                await Utils.sleep(totalDelay)
-              }
+              pixelBatch.forEach(p => { state.paintedMap[p.localY][p.localX] = true; state.paintedPixels++ });
+              state.currentCharges -= pixelBatch.length;
+              updateStats();
+              updateUI("paintingProgress", "default", { painted: state.paintedPixels, total: state.totalPixels });
+              if (state.paintedPixels % 50 === 0) Utils.saveProgress();
+              if (CONFIG.PAINTING_SPEED_ENABLED) await Utils.sleep(Math.max(100, (1000 / state.paintingSpeed) * pixelBatch.length));
             }
-            pixelBatch = []
+            pixelBatch = [];
           }
-
           while (state.currentCharges < state.cooldownChargeThreshold && !state.stopFlag) {
             const { charges, cooldown } = await WPlaceService.getCharges();
             state.currentCharges = Math.floor(charges);
@@ -4052,73 +4002,59 @@
           if (state.stopFlag) break outerLoop;
         }
       }
-
       if (pixelBatch.length > 0 && !state.stopFlag) {
-        const success = await sendPixelBatch(pixelBatch, regionX, regionY)
-        if (success) {
-          pixelBatch.forEach((pixel) => { state.paintedMap[pixel.localY][pixel.localX] = true; state.paintedPixels++ })
-          state.currentCharges -= pixelBatch.length
-          if (CONFIG.PAINTING_SPEED_ENABLED && state.paintingSpeed > 0 && pixelBatch.length > 0) {
-            const delayPerPixel = 1000 / state.paintingSpeed
-            const totalDelay = Math.max(100, delayPerPixel * pixelBatch.length)
-            await Utils.sleep(totalDelay)
-          }
+        if (await sendPixelBatch(pixelBatch, regionX, regionY)) {
+          pixelBatch.forEach(p => { state.paintedMap[p.localY][p.localX] = true; state.paintedPixels++ });
+          state.currentCharges -= pixelBatch.length;
+          if (CONFIG.PAINTING_SPEED_ENABLED) await Utils.sleep(Math.max(100, (1000 / state.paintingSpeed) * pixelBatch.length));
         }
       }
     } catch(err) {
       console.error("Error during painting process:", err.message);
-      // The error is caught here, but the finally block will execute next and handle the restart logic.
-      // This catch block prevents an unhandled promise rejection error from appearing in the console.
     } finally {
         state.running = false;
         const paintingIsComplete = state.paintedPixels >= state.totalPixels;
 
-        // CASE 1: Bot was stopped by the user clicking the stop button
+        // CASE 1: Bot was stopped by the user.
         if (state.stopFlag) {
             updateUI("paintingStopped", "warning");
-            Utils.saveProgress(); // Save progress on manual stop
-            // Re-enable controls for the user
+            Utils.saveProgress();
             stopBtn.disabled = true;
             startBtn.disabled = false;
             uploadBtn.disabled = false;
             selectPosBtn.disabled = false;
             resizeBtn.disabled = false;
             saveBtn.disabled = false;
-            state.autoRestartAttempts = 0; // Reset counter on manual stop
         }
-        // CASE 2: Painting is successfully finished
+        // CASE 2: Painting finished successfully.
         else if (paintingIsComplete) {
             updateUI("paintingComplete", "success", { count: state.paintedPixels });
-            Utils.clearProgress(); // Clear saved data on completion
-            // Re-enable controls, but keep start disabled since it's done
+            Utils.clearProgress();
             stopBtn.disabled = true;
             startBtn.disabled = true;
             uploadBtn.disabled = false;
             selectPosBtn.disabled = false;
             resizeBtn.disabled = false;
             saveBtn.disabled = true;
-            state.autoRestartAttempts = 0; // Reset counter on success
         }
-        // CASE 3: Painting stopped due to an error (e.g., CAPTCHA) and is not finished
+        // CASE 3: An error occurred, and we need to decide whether to restart.
         else {
-            Utils.saveProgress(); // Save progress before attempting restart
-            if (state.autoRestartAttempts < CONFIG.MAX_AUTO_RESTART_ATTEMPTS) {
-                state.autoRestartAttempts++;
-                const delaySeconds = CONFIG.AUTO_RESTART_DELAY / 1000;
-                updateUI("errorAndRestarting", "error", { time: delaySeconds, attempt: state.autoRestartAttempts, max: CONFIG.MAX_AUTO_RESTART_ATTEMPTS });
-                Utils.showAlert(`Auto-restarting in ${delaySeconds}s...`, "warning");
-                
-                // Keep UI locked and schedule a restart
+            Utils.saveProgress();
+            // --- NEW SAFETY CHECK ---
+            // Only auto-restart if at least one pixel has been successfully painted in this session.
+            if (state.paintedPixels > 0) {
+                updateUI("errorRestarting", "error");
+                // Schedule an immediate restart on the next tick of the event loop.
                 setTimeout(() => {
-                    console.log(`[Auto-Restart] Attempting to restart, attempt #${state.autoRestartAttempts}`);
-                    startPainting().catch(err => console.error("Auto-restart failed:", err));
-                }, CONFIG.AUTO_RESTART_DELAY);
-
-            } else {
-                // Max restart attempts reached. Give up.
-                updateUI("autoRestartFailed", "error", { max: CONFIG.MAX_AUTO_RESTART_ATTEMPTS });
-                Utils.showAlert(`Auto-restart failed after ${CONFIG.MAX_AUTO_RESTART_ATTEMPTS} attempts.`, "error");
-                // Re-enable controls for the user to take over
+                    console.log("[Auto-Restart] Immediate restart triggered.");
+                    startPainting().catch(err => console.error("Auto-restart execution failed:", err));
+                }, 0);
+            } 
+            // If it failed before the first pixel, stop to prevent an error loop.
+            else {
+                updateUI("paintingError", "error");
+                Utils.showAlert("Initial painting failed. Please check setup and start manually.", "error");
+                // Re-enable controls for the user.
                 stopBtn.disabled = true;
                 startBtn.disabled = false;
                 uploadBtn.disabled = false;
