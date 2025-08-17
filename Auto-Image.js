@@ -10,7 +10,6 @@
       MAX: 1000,       // Maximum 1000 pixels per second
       DEFAULT: 5,      // Default 5 pixels per second
     },
-    // --- REMOVED: Auto-Restart limit and delay constants are no longer needed ---
     PAINTING_SPEED_ENABLED: false,
     AUTO_CAPTCHA_ENABLED: false, // Disabled by default
     COOLDOWN_CHARGE_THRESHOLD: 1, // Default wait threshold
@@ -176,7 +175,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-    title: "WPlace Auto-Image TEST",
+    title: "WPlace Auto-Image",
     scanColors: "Scan Colors",
     uploadImage: "Upload Image",
     resizeImage: "Resize Image",
@@ -198,7 +197,7 @@
     noCharges: "⌛ No charges. Waiting {time}...",
     paintingStopped: "⏹️ Painting stopped by user",
     paintingComplete: "✅ Painting complete! {count} pixels painted.",
-    paintingError: "❌ Error during painting",
+    paintingError: "❌ Initial painting failed. Manual start required.",
     missingRequirements: "❌ Load an image and select a position first",
     progress: "Progress",
     pixels: "Pixels",
@@ -244,7 +243,6 @@
     captchaFailed: "❌ Auto-CAPTCHA failed. Paint a pixel manually.",
     automation: "Automation",
     noChargesThreshold: "⌛ Waiting for charges to reach {threshold}. Currently {current}. Next in {time}...",
-    // --- MODIFIED: Simplified Auto-Restart Text ---
     errorRestarting: "❗ Error detected. Attempting to restart immediately...",
   },
   ru: {
@@ -270,7 +268,7 @@
     noCharges: "⌛ Нет зарядов. Ожидание {time}...",
     paintingStopped: "⏹️ Рисование остановлено пользователем",
     paintingComplete: "✅ Рисование завершено! Нарисовано пикселей: {count}.",
-    paintingError: "❌ Ошибка во время рисования",
+    paintingError: "❌ Ошибка при запуске. Требуется ручной запуск.",
     missingRequirements: "❌ Сначала загрузите изображение и выберите позицию",
     progress: "Прогресс",
     pixels: "Пиксели",
@@ -316,7 +314,6 @@
     captchaFailed: "❌ Не удалось решить CAPTCHA. Нарисуйте пиксель вручную.",
     automation: "Автоматизация",
     noChargesThreshold: "⌛ Ожидание зарядов до {threshold}. Сейчас {current}. Следующий через {time}...",
-    // --- MODIFIED: Simplified Auto-Restart Text ---
     errorRestarting: "❗ Обнаружена ошибка. Немедленный перезапуск...",
 },
   pt: {
@@ -329,7 +326,7 @@
     stopPainting: "Parar Pintura",
     checkingColors: "🔍 Verificando cores disponíveis...",
     noColorsFound: "❌ Abra a paleta de cores no site e tente novamente!",
-    colorsFound: "✅ {count} cores encontradas. Pronto para upload.",
+    colorsFound: "✅ {count} cores encontradas. Pronto для upload.",
     loadingImage: "🖼️ Carregando imagem...",
     imageLoaded: "✅ Imagem carregada com {count} pixels válidos",
     imageError: "❌ Erro ao carregar imagem",
@@ -342,7 +339,7 @@
     noCharges: "⌛ Sem cargas. Aguardando {time}...",
     paintingStopped: "⏹️ Pintura interromпида pelo usuário",
     paintingComplete: "✅ Pintura concluída! {count} pixels pintados.",
-    paintingError: "❌ Erro durante a pintura",
+    paintingError: "❌ Falha inicial na pintura. Início manual necessário.",
     missingRequirements: "❌ Carregue uma imagem e selecione uma posição primeiro",
     progress: "Progresso",
     pixels: "Pixels",
@@ -350,7 +347,7 @@
     estimatedTime: "Tempo estimado",
     initMessage: "Clique em 'Upload da Imagem' para começar",
     waitingInit: "Aguardando inicialização...",
-    resizeSuccess: "✅ Imagem redimensionada для {width}x{height}",
+    resizeSuccess: "✅ Imagem redimensionada para {width}x{height}",
     paintingPaused: "⏸️ Pintura pausada na posição X: {x}, Y: {y}",
     captchaNeeded: "❗ Token CAPTCHA necessário. Pinte um pixel manualmente para continuar.",
     saveData: "Salvar Progresso",
@@ -388,7 +385,6 @@
     captchaFailed: "❌ Falha ao resolver CAPTCHA. Pinte um pixel manualmente.",
     automation: "Automação",
     noChargesThreshold: "⌛ Aguardando cargas atingirem {threshold}. Atual: {current}. Próxima em {time}...",
-    // --- MODIFIED: Simplified Auto-Restart Text ---
     errorRestarting: "❗ Erro detectado. Tentando reiniciar imediatamente...",
   },
   vi: {
@@ -414,7 +410,7 @@
     noCharges: "⌛ Không có điện tích. Đang chờ {time}...",
     paintingStopped: "⏹️ Người dùng đã dừng vẽ",
     paintingComplete: "✅ Hoàn thành vẽ! Đã vẽ {count} pixel.",
-    paintingError: "❌ Lỗi trong quá trình vẽ",
+    paintingError: "❌ Vẽ ban đầu thất bại. Yêu cầu bắt đầu thủ công.",
     missingRequirements: "❌ Hãy tải lên hình ảnh và chọn vị trí trước",
     progress: "Tiến trình",
     pixels: "Pixel",
@@ -460,7 +456,6 @@
     captchaFailed: "❌ Giải CAPTCHA tự động thất bại. Vui lòng vẽ một pixel thủ công.",
     automation: "Tự động hóa",
     noChargesThreshold: "⌛ Đang chờ số lần sạc đạt {threshold}. Hiện tại {current}. Lần tiếp theo trong {time}...",
-    // --- MODIFIED: Simplified Auto-Restart Text ---
     errorRestarting: "❗ Đã phát hiện lỗi. Đang cố gắng khởi động lại ngay lập tức...",
     },
   fr: {
@@ -486,7 +481,7 @@
     noCharges: "⌛ Aucune charge. En attente {time}...",
     paintingStopped: "⏹️ Peinture arrêtée par l'utilisateur",
     paintingComplete: "✅ Peinture terminée! {count} pixels peints.",
-    paintingError: "❌ Erreur pendant la peinture",
+    paintingError: "❌ Échec de la peinture initiale. Démarrage manuel requis.",
     missingRequirements: "❌ Veuillez charger une image et sélectionner une position d'abord",
     progress: "Progrès",
     pixels: "Pixels",
@@ -532,7 +527,6 @@
     captchaFailed: "❌ Échec de l'Auto-CAPTCHA. Peignez un pixel manuellement.",
     automation: "Automatisation",
     noChargesThreshold: "⌛ En attente que les charges atteignent {threshold}. Actuel: {current}. Prochaine dans {time}...",
-    // --- MODIFIED: Simplified Auto-Restart Text ---
     errorRestarting: "❗ Erreur détectée. Tentative de redémarrage immédiat...",
     },
   }
@@ -562,7 +556,8 @@
     language: "en",
     paintingSpeed: CONFIG.PAINTING_SPEED.DEFAULT, // pixels per second
     cooldownChargeThreshold: CONFIG.COOLDOWN_CHARGE_THRESHOLD,
-    // --- REMOVED: Auto-Restart state is no longer needed ---
+    // --- NEW: Session-specific pixel counter for restart logic ---
+    pixelsPaintedThisSession: 0,
   }
 
   // Placeholder for the resize preview update function
@@ -3664,6 +3659,7 @@
             state.imageData.totalPixels = totalValidPixels;
             state.totalPixels = totalValidPixels;
             state.paintedPixels = 0;
+            state.pixelsPaintedThisSession = 0; // Also reset session counter
 
             updateStats();
             updateUI("resizeSuccess", "success", { width: newWidth, height: newHeight });
@@ -3692,15 +3688,13 @@
 
     if (uploadBtn) {
       uploadBtn.addEventListener("click", async () => {
-        // --- NEW LOGIC: Check for colors FIRST ---
         const availableColors = Utils.extractAvailableColors();
         if (availableColors.length < 10) {
             updateUI("noColorsFound", "error");
             Utils.showAlert(Utils.t("noColorsFound"), "error");
-            return; // Stop the function here
+            return;
         }
 
-        // --- If check passes, run the rest of the logic ---
         if (!state.colorsChecked) {
             state.availableColors = availableColors;
             state.colorsChecked = true;
@@ -3712,7 +3706,7 @@
         try {
           updateUI("loadingImage", "default")
           const imageSrc = await Utils.createImageUploader()
-          if (!imageSrc) { // User cancelled the file dialog
+          if (!imageSrc) {
               updateUI("colorsFound", "success", { count: state.availableColors.length });
               return;
           }
@@ -3732,26 +3726,17 @@
               }
           }
 
-          state.imageData = {
-            width,
-            height,
-            pixels,
-            totalPixels: totalValidPixels,
-            processor,
-          }
-
+          state.imageData = { width, height, pixels, totalPixels: totalValidPixels, processor, }
           state.totalPixels = totalValidPixels
           state.paintedPixels = 0
+          state.pixelsPaintedThisSession = 0; // Reset session counter
           state.imageLoaded = true
           state.lastPosition = { x: 0, y: 0 }
-
           resizeBtn.disabled = false
           saveBtn.disabled = false
 
-          if (state.startPosition) {
-            startBtn.disabled = false
-          }
-
+          if (state.startPosition) startBtn.disabled = false;
+          
           updateStats()
           updateDataButtons()
           updateUI("imageLoaded", "success", { count: totalValidPixels })
@@ -3797,24 +3782,16 @@
               if (data?.painted === 1) {
                 const regionMatch = url.match(/\/pixel\/(\d+)\/(\d+)/)
                 if (regionMatch && regionMatch.length >= 3) {
-                  state.region = {
-                    x: Number.parseInt(regionMatch[1]),
-                    y: Number.parseInt(regionMatch[2]),
-                  }
+                  state.region = { x: Number.parseInt(regionMatch[1]), y: Number.parseInt(regionMatch[2]), }
                 }
 
                 const payload = JSON.parse(options.body)
                 if (payload?.coords && Array.isArray(payload.coords)) {
-                  state.startPosition = {
-                    x: payload.coords[0],
-                    y: payload.coords[1],
-                  }
+                  state.startPosition = { x: payload.coords[0], y: payload.coords[1], }
                   state.lastPosition = { x: 0, y: 0 }
 
-                  if (state.imageLoaded) {
-                    startBtn.disabled = false
-                  }
-
+                  if (state.imageLoaded) startBtn.disabled = false;
+                  
                   window.fetch = originalFetch
                   state.selectingPosition = false
                   updateUI("positionSet", "success")
@@ -3822,9 +3799,7 @@
               }
 
               return response
-            } catch {
-              return originalFetch(url, options)
-            }
+            } catch { return originalFetch(url, options) }
           }
           return originalFetch(url, options)
         }
@@ -3840,42 +3815,38 @@
       })
     }
 
-    // Function to start painting (can be called programmatically)
+    // --- MODIFIED: The core start function that now resets the session counter ---
     async function startPainting() {
       if (!state.imageLoaded || !state.startPosition || !state.region) {
-        updateUI("missingRequirements", "error")
-        return false
+        updateUI("missingRequirements", "error");
+        return;
       }
-      // Ensure we have a valid token before starting
-      await ensureToken()
+
+      await ensureToken();
       if (!turnstileToken) {
-          // If ensureToken fails and we still don't have a token, we must stop here.
-          // The error message is already shown by ensureToken. The autostart will attempt to recover.
-          // This call needs to throw to be caught by the autostart logic.
           throw new Error("CAPTCHA token unavailable, cannot start painting.");
       }
+      
+      // --- NEW: Reset the session counter every time a new painting session is started ---
+      state.pixelsPaintedThisSession = 0;
 
-      state.running = true
-      state.stopFlag = false // Critical to reset the stop flag on every start
-      startBtn.disabled = true
-      stopBtn.disabled = false
-      uploadBtn.disabled = true
-      selectPosBtn.disabled = true
-      resizeBtn.disabled = true
-      saveBtn.disabled = true
+      state.running = true;
+      state.stopFlag = false;
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+      uploadBtn.disabled = true;
+      selectPosBtn.disabled = true;
+      resizeBtn.disabled = true;
+      saveBtn.disabled = true;
 
-      updateUI("startPaintingMsg", "success")
-
-      // No try/catch here; we let the exception bubble up to be handled by processImage's final block
+      updateUI("startPaintingMsg", "success");
       await processImage();
     }
 
     if (startBtn) {
         startBtn.addEventListener("click", () => {
             startPainting().catch(err => {
-                // This catch prevents an unhandled promise rejection if startPainting throws an error (like the CAPTCHA one)
-                // The actual error handling and restart logic is now in `processImage`'s `finally` block.
-                console.error("Manual start failed:", err);
+                console.error("Manual start failed:", err.message);
             });
         });
     }
@@ -3884,7 +3855,6 @@
       stopBtn.addEventListener("click", () => {
         state.stopFlag = true
         state.running = false
-        // The actual UI updates and logic are now handled in the processImage finally block
       })
     }
 
@@ -3904,69 +3874,54 @@
         )
       }
     }
-
-    // Check for saved progress after a short delay to let UI settle
     setTimeout(checkSavedProgress, 1000)
-
-    // Cooldown slider event listener
-    if (cooldownSlider && cooldownValue) {
-        cooldownSlider.addEventListener("input", (e) => {
+    if (document.getElementById("cooldownSlider") && document.getElementById("cooldownValue")) {
+        document.getElementById("cooldownSlider").addEventListener("input", (e) => {
             const threshold = parseInt(e.target.value);
             state.cooldownChargeThreshold = threshold;
-            cooldownValue.textContent = threshold;
-            saveBotSettings(); // Save immediately on change for convenience
+            document.getElementById("cooldownValue").textContent = threshold;
+            saveBotSettings();
         });
     }
 
-    // Settings listeners are inside the settings button block...
-    // Let's call loadBotSettings here to apply saved settings.
     loadBotSettings();
-    
-    // --- Initialize Color Palette UI ---
     initializeColorPalette(resizeContainer);
   }
 
-  // --- MODIFIED: processImage function with new immediate, unlimited, and conditional autostart logic ---
+  // --- MODIFIED: `processImage` now uses the session counter for restart decisions ---
   async function processImage() {
-    const { width, height, pixels } = state.imageData
-    const { x: startX, y: startY } = state.startPosition
-    const { x: regionX, y: regionY } = state.region
+    const { width, height, pixels } = state.imageData;
+    const { x: startX, y: startY } = state.startPosition;
+    const { x: regionX, y: regionY } = state.region;
     
-    const uploadBtn = document.getElementById("uploadBtn");
-    const resizeBtn = document.getElementById("resizeBtn");
-    const selectPosBtn = document.getElementById("selectPosBtn");
-    const startBtn = document.getElementById("startBtn");
-    const stopBtn = document.getElementById("stopBtn");
-    const saveBtn = document.getElementById("saveBtn");
+    const uploadBtn = document.getElementById("uploadBtn"), resizeBtn = document.getElementById("resizeBtn"),
+          selectPosBtn = document.getElementById("selectPosBtn"), startBtn = document.getElementById("startBtn"),
+          stopBtn = document.getElementById("stopBtn"), saveBtn = document.getElementById("saveBtn");
 
     try {
-      const startRow = state.lastPosition.y || 0
-      const startCol = state.lastPosition.x || 0
+      const startRow = state.lastPosition.y || 0;
+      const startCol = state.lastPosition.x || 0;
 
       if (!state.paintedMap) {
-        state.paintedMap = Array(height).fill().map(() => Array(width).fill(false))
+        state.paintedMap = Array(height).fill().map(() => Array(width).fill(false));
       }
-
-      let pixelBatch = []
+      let pixelBatch = [];
 
       outerLoop: for (let y = startRow; y < height; y++) {
         for (let x = y === startRow ? startCol : 0; x < width; x++) {
           if (state.stopFlag) {
-            state.lastPosition = { x, y }
-            break outerLoop
+            state.lastPosition = { x, y };
+            break outerLoop;
           }
+          if (state.paintedMap[y][x]) continue;
 
-          if (state.paintedMap[y][x]) continue
-
-          const idx = (y * width + x) * 4
-          const [r, g, b, alpha] = [pixels[idx], pixels[idx + 1], pixels[idx + 2], pixels[idx + 3]]
-
+          const idx = (y * width + x) * 4;
+          const [r, g, b, alpha] = [pixels[idx], pixels[idx + 1], pixels[idx + 2], pixels[idx + 3]];
           if (alpha < CONFIG.TRANSPARENCY_THRESHOLD || (!state.paintWhitePixels && Utils.isWhitePixel(r, g, b))) continue;
 
           let targetRgb = Utils.isWhitePixel(r, g, b) ? [255, 255, 255] : Utils.findClosestPaletteColor(r, g, b, state.activeColorPalette);
           const colorId = findClosestColor(targetRgb, state.availableColors);
-          const pixelX = startX + x, pixelY = startY + y;
-          pixelBatch.push({ x: pixelX, y: pixelY, color: colorId, localX: x, localY: y })
+          pixelBatch.push({ x: startX + x, y: startY + y, color: colorId, localX: x, localY: y });
 
           if (pixelBatch.length >= Math.floor(state.currentCharges)) {
             let success = await sendPixelBatch(pixelBatch, regionX, regionY);
@@ -3977,16 +3932,18 @@
                         await handleCaptcha();
                         success = await sendPixelBatch(pixelBatch, regionX, regionY);
                         if (success === "token_error") throw new Error("Auto-CAPTCHA recovery failed.");
-                    } catch (e) { throw new Error("Auto-CAPTCHA process failed."); }
+                    } catch (e) { throw new Error(`Auto-CAPTCHA process failed: ${e.message}`); }
                 } else { throw new Error("Manual CAPTCHA token required."); }
             }
             if (success) {
-              pixelBatch.forEach(p => { state.paintedMap[p.localY][p.localX] = true; state.paintedPixels++ });
+              pixelBatch.forEach(p => { state.paintedMap[p.localY][p.localX] = true; state.paintedPixels++; state.pixelsPaintedThisSession++; });
               state.currentCharges -= pixelBatch.length;
               updateStats();
               updateUI("paintingProgress", "default", { painted: state.paintedPixels, total: state.totalPixels });
               if (state.paintedPixels % 50 === 0) Utils.saveProgress();
               if (CONFIG.PAINTING_SPEED_ENABLED) await Utils.sleep(Math.max(100, (1000 / state.paintingSpeed) * pixelBatch.length));
+            } else if(!state.stopFlag) { // Add a check to not throw an error if the batch fails due to user stop
+                throw new Error("Pixel batch failed to paint.");
             }
             pixelBatch = [];
           }
@@ -4004,7 +3961,7 @@
       }
       if (pixelBatch.length > 0 && !state.stopFlag) {
         if (await sendPixelBatch(pixelBatch, regionX, regionY)) {
-          pixelBatch.forEach(p => { state.paintedMap[p.localY][p.localX] = true; state.paintedPixels++ });
+          pixelBatch.forEach(p => { state.paintedMap[p.localY][p.localX] = true; state.paintedPixels++; state.pixelsPaintedThisSession++; });
           state.currentCharges -= pixelBatch.length;
           if (CONFIG.PAINTING_SPEED_ENABLED) await Utils.sleep(Math.max(100, (1000 / state.paintingSpeed) * pixelBatch.length));
         }
@@ -4015,52 +3972,29 @@
         state.running = false;
         const paintingIsComplete = state.paintedPixels >= state.totalPixels;
 
-        // CASE 1: Bot was stopped by the user.
         if (state.stopFlag) {
             updateUI("paintingStopped", "warning");
             Utils.saveProgress();
-            stopBtn.disabled = true;
-            startBtn.disabled = false;
-            uploadBtn.disabled = false;
-            selectPosBtn.disabled = false;
-            resizeBtn.disabled = false;
-            saveBtn.disabled = false;
+            [stopBtn.disabled, startBtn.disabled, uploadBtn.disabled, selectPosBtn.disabled, resizeBtn.disabled, saveBtn.disabled] = [true, false, false, false, false, false];
         }
-        // CASE 2: Painting finished successfully.
         else if (paintingIsComplete) {
             updateUI("paintingComplete", "success", { count: state.paintedPixels });
             Utils.clearProgress();
-            stopBtn.disabled = true;
-            startBtn.disabled = true;
-            uploadBtn.disabled = false;
-            selectPosBtn.disabled = false;
-            resizeBtn.disabled = false;
-            saveBtn.disabled = true;
+            [stopBtn.disabled, startBtn.disabled, uploadBtn.disabled, selectPosBtn.disabled, resizeBtn.disabled, saveBtn.disabled] = [true, true, false, false, false, true];
         }
-        // CASE 3: An error occurred, and we need to decide whether to restart.
         else {
             Utils.saveProgress();
-            // --- NEW SAFETY CHECK ---
-            // Only auto-restart if at least one pixel has been successfully painted in this session.
-            if (state.paintedPixels > 0) {
+            if (state.pixelsPaintedThisSession > 0) {
                 updateUI("errorRestarting", "error");
-                // Schedule an immediate restart on the next tick of the event loop.
                 setTimeout(() => {
-                    console.log("[Auto-Restart] Immediate restart triggered.");
+                    console.log("[Auto-Restart] Immediate restart triggered after successful session paints.");
                     startPainting().catch(err => console.error("Auto-restart execution failed:", err));
                 }, 0);
             } 
-            // If it failed before the first pixel, stop to prevent an error loop.
             else {
                 updateUI("paintingError", "error");
                 Utils.showAlert("Initial painting failed. Please check setup and start manually.", "error");
-                // Re-enable controls for the user.
-                stopBtn.disabled = true;
-                startBtn.disabled = false;
-                uploadBtn.disabled = false;
-                selectPosBtn.disabled = false;
-                resizeBtn.disabled = false;
-                saveBtn.disabled = false;
+                [stopBtn.disabled, startBtn.disabled, uploadBtn.disabled, selectPosBtn.disabled, resizeBtn.disabled, saveBtn.disabled] = [true, false, false, false, false, false];
             }
         }
         updateStats();
@@ -4073,40 +4007,32 @@
     return "token_error"
   }
 
-    // Pre-allocate arrays for performance
-    const coords = new Array(pixelBatch.length * 2)
-    const colors = new Array(pixelBatch.length)
+    const coords = new Array(pixelBatch.length * 2);
+    const colors = new Array(pixelBatch.length);
     for (let i = 0; i < pixelBatch.length; i++) {
-      const pixel = pixelBatch[i]
-      coords[i * 2] = pixel.x
-      coords[i * 2 + 1] = pixel.y
-      colors[i] = pixel.color
+      const pixel = pixelBatch[i];
+      coords[i * 2] = pixel.x;
+      coords[i * 2 + 1] = pixel.y;
+      colors[i] = pixel.color;
     }
 
     try {
-  const payload = { coords, colors, t: turnstileToken }
-
+      const payload = { coords, colors, t: turnstileToken }
       const res = await fetch(`https://backend.wplace.live/s0/pixel/${regionX}/${regionY}`, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=UTF-8" },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      })
+        method: "POST", headers: { "Content-Type": "text/plain;charset=UTF-8" }, credentials: "include", body: JSON.stringify(payload),
+      });
 
       if (res.status === 403) {
-        let data = null
-        try { data = await res.json() } catch (_) {}
-        console.error("❌ 403 Forbidden. Turnstile token might be invalid or expired.")
-        // Reset token & create new promise to await fresh token
-        turnstileToken = null
-        tokenPromise = new Promise((resolve) => { _resolveToken = resolve })
-        return "token_error"
+        console.error("❌ 403 Forbidden. Turnstile token might be invalid or expired.");
+        turnstileToken = null;
+        tokenPromise = new Promise((resolve) => { _resolveToken = resolve });
+        return "token_error";
       }
-      const data = await res.json()
-      return data?.painted === pixelBatch.length
+      const data = await res.json();
+      return data?.painted >= 1;
     } catch (e) {
-      console.error("Batch paint request failed:", e)
-      return false
+      console.error("Batch paint request failed:", e);
+      return false;
     }
   }
 
@@ -4118,10 +4044,8 @@
                 autoCaptchaEnabled: document.getElementById('enableAutoCaptchaToggle')?.checked,
                 cooldownChargeThreshold: state.cooldownChargeThreshold,
             };
-            // Update global config from UI elements before saving
             CONFIG.PAINTING_SPEED_ENABLED = settings.paintingSpeedEnabled;
             CONFIG.AUTO_CAPTCHA_ENABLED = settings.autoCaptchaEnabled;
-
             localStorage.setItem("wplace-bot-settings", JSON.stringify(settings));
         } catch (e) {
             console.warn("Could not save bot settings:", e);
@@ -4134,13 +4058,11 @@
             if (!saved) return;
             const settings = JSON.parse(saved);
 
-            // Apply settings
             state.paintingSpeed = settings.paintingSpeed || CONFIG.PAINTING_SPEED.DEFAULT;
             state.cooldownChargeThreshold = settings.cooldownChargeThreshold || CONFIG.COOLDOWN_CHARGE_THRESHOLD;
             CONFIG.PAINTING_SPEED_ENABLED = settings.paintingSpeedEnabled ?? false;
             CONFIG.AUTO_CAPTCHA_ENABLED = settings.autoCaptchaEnabled ?? false;
 
-            // Update UI elements after they are created
             const speedSlider = document.getElementById('speedSlider');
             if (speedSlider) speedSlider.value = state.paintingSpeed;
             const speedValue = document.getElementById('speedValue');
@@ -4156,7 +4078,6 @@
             if (cooldownSlider) cooldownSlider.value = state.cooldownChargeThreshold;
             const cooldownValue = document.getElementById('cooldownValue');
             if (cooldownValue) cooldownValue.textContent = state.cooldownChargeThreshold;
-
         } catch (e) {
             console.warn("Could not load bot settings:", e);
         }
@@ -4164,3 +4085,5 @@
 
   createUI()
 })()
+
+```
