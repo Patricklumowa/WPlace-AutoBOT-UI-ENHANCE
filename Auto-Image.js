@@ -12,6 +12,7 @@
     },
     PAINTING_SPEED_ENABLED: false,
     AUTO_CAPTCHA_ENABLED: false, // Disabled by default
+    COLOR_SKIP_ENABLED: true, // Feature flag for color skipping
     COOLDOWN_CHARGE_THRESHOLD: 1, // Default wait threshold
     // --- START: Color data from colour-converter.js ---
     COLOR_PALETTE: [
@@ -235,6 +236,8 @@
     languageSelectDesc: "Select your preferred language. Changes will take effect immediately.",
     autoCaptcha: "Auto-CAPTCHA Solver",
     autoCaptchaDesc: "Automatically attempts to solve the CAPTCHA by simulating a manual pixel placement when the token expires.",
+    colorSkip: "Skip Correct Pixels",
+    colorSkipDesc: "If a pixel on the canvas is already the target color, it will be skipped, saving a charge.",
     applySettings: "Apply Settings",
     settingsSaved: "✅ Settings saved successfully!",
     cooldownSettings: "Cooldown Settings",
@@ -306,6 +309,8 @@
     languageSelectDesc: "Выберите предпочтительный язык. Изменения вступят в силу немедленно.",
     autoCaptcha: "Авто-решение CAPTCHA",
     autoCaptchaDesc: "Автоматически пытается решить CAPTCHA, симулируя ручное размещение пикселя, когда токен истекает.",
+    colorSkip: "Пропускать правильные пиксели",
+    colorSkipDesc: "Если пиксель на холсте уже нужного цвета, он будет пропущен, экономя заряд.",
     applySettings: "Применить настройки",
     settingsSaved: "✅ Настройки успешно сохранены!",
     cooldownSettings: "Настройки перезарядки",
@@ -326,18 +331,18 @@
     stopPainting: "Parar Pintura",
     checkingColors: "🔍 Verificando cores disponíveis...",
     noColorsFound: "❌ Abra a paleta de cores no site e tente novamente!",
-    colorsFound: "✅ {count} cores encontradas. Pronto для upload.",
+    colorsFound: "✅ {count} cores encontradas. Pronto para upload.",
     loadingImage: "🖼️ Carregando imagem...",
     imageLoaded: "✅ Imagem carregada com {count} pixels válidos",
     imageError: "❌ Erro ao carregar imagem",
-    selectPositionAlert: "Pinte o primeiro pixel на localização onde deseja que a arte comece!",
+    selectPositionAlert: "Pinte o primeiro pixel na localização onde deseja que a arte comece!",
     waitingPosition: "👆 Aguardando você pintar o pixel de referência...",
     positionSet: "✅ Posição definida com sucesso!",
     positionTimeout: "❌ Tempo esgotado para selecionar posição",
     startPaintingMsg: "🎨 Iniciando pintura...",
     paintingProgress: "🧱 Progresso: {painted}/{total} pixels...",
     noCharges: "⌛ Sem cargas. Aguardando {time}...",
-    paintingStopped: "⏹️ Pintura interromпида pelo usuário",
+    paintingStopped: "⏹️ Pintura interrompida pelo usuário",
     paintingComplete: "✅ Pintura concluída! {count} pixels pintados.",
     paintingError: "❌ Falha inicial na pintura. Início manual necessário.",
     missingRequirements: "❌ Carregue uma imagem e selecione uma posição primeiro",
@@ -377,6 +382,8 @@
     languageSelectDesc: "Selecione seu idioma preferido. As alterações terão efeito imediatamente.",
     autoCaptcha: "Resolvedor de CAPTCHA Automático",
     autoCaptchaDesc: "Tenta resolver o CAPTCHA automaticamente simulando a colocação manual de um pixel quando o token expira.",
+    colorSkip: "Pular Pixels Corretos",
+    colorSkipDesc: "Se um pixel na tela já estiver com a cor alvo, ele será pulado, economizando uma carga.",
     applySettings: "Aplicar Configurações",
     settingsSaved: "✅ Configurações salvas com sucesso!",
     cooldownSettings: "Configurações de Cooldown",
@@ -448,6 +455,8 @@
     languageSelectDesc: "Chọn ngôn ngữ ưa thích. Thay đổi sẽ có hiệu lực ngay lập tức.",
     autoCaptcha: "Tự động giải CAPTCHA",
     autoCaptchaDesc: "Tự động cố gắng giải CAPTCHA bằng cách mô phỏng việc đặt pixel thủ công khi token hết hạn.",
+    colorSkip: "Bỏ qua các pixel chính xác",
+    colorSkipDesc: "Nếu một pixel trên canvas đã có màu mục tiêu, nó sẽ bị bỏ qua, tiết kiệm một lần sạc.",
     applySettings: "Áp dụng cài đặt",
     settingsSaved: "✅ Đã lưu cài đặt thành công!",
     cooldownSettings: "Cài đặt thời gian chờ",
@@ -497,7 +506,7 @@
     saveToFile: "Sauvegarder dans un fichier",
     loadFromFile: "Charger depuis un fichier",
     dataManager: "Données",
-    autoSaved: "✅ Progrès sauvegardé automatiquement",
+    autoSaved: "✅ Progrès sauvegardé automatically",
     dataLoaded: "✅ Progrès chargé avec succès",
     fileSaved: "✅ Sauvegardé dans un fichier avec succès",
     fileLoaded: "✅ Chargé depuis un fichier avec succès",
@@ -519,6 +528,8 @@
     languageSelectDesc: "Sélectionnez votre langue préférée. Les changements prendront effet immédiatement.",
     autoCaptcha: "Résolveur de CAPTCHA automatique",
     autoCaptchaDesc: "Tente automatiquement de résoudre le CAPTCHA en simulant un placement manuel de pixel lorsque le jeton expire.",
+    colorSkip: "Sauter les pixels corrects",
+    colorSkipDesc: "Si un pixel sur la toile est déjà de la bonne couleur, il sera sauté, économisant une charge.",
     applySettings: "Appliquer les paramètres",
     settingsSaved: "✅ Paramètres enregistrés avec succès !",
     cooldownSettings: "Paramètres de recharge",
@@ -624,8 +635,12 @@
     waitForSelector: async (selector, interval = 200, timeout = 5000) => {
         const start = Date.now();
         while (Date.now() - start < timeout) {
-            const el = document.querySelector(selector);
-            if (el) return el;
+            const els = document.querySelectorAll(selector);
+            for (const el of els) {
+                if (el.offsetParent !== null) {
+                    return el;
+                }
+            }
             await Utils.sleep(interval);
         }
         return null;
@@ -1057,6 +1072,8 @@
 
   // WPLACE API SERVICE
   const WPlaceService = {
+    _canvasCache: null, 
+
     async paintPixelInRegion(regionX, regionY, pixelX, pixelY, color) {
       try {
         await ensureToken()
@@ -1102,6 +1119,28 @@
         }
       }
     },
+
+    // NEW: Function to get the color of a pixel on the live canvas
+    async getCanvasPixelColor(x, y) {
+        try {
+            if (!this._canvasCache) {
+                // The main canvas is usually the only one without specific IDs/classes inside the game container
+                this._canvasCache = await Utils.waitForSelector('.absolute > canvas');
+                if (!this._canvasCache) {
+                    console.error("Could not find the main game canvas.");
+                    return null;
+                }
+            }
+            const ctx = this._canvasCache.getContext('2d', { willReadFrequently: true });
+            const pixelData = ctx.getImageData(x, y, 1, 1).data;
+            return [pixelData[0], pixelData[1], pixelData[2]];
+        } catch (e) {
+            console.error(`Error reading pixel color at (${x}, ${y}):`, e);
+            // Invalidate cache on error in case the canvas was replaced
+            this._canvasCache = null;
+            return null;
+        }
+  },
   }
 
   // COLOR MATCHING FUNCTION - Optimized with caching
@@ -2693,12 +2732,20 @@
             ${Utils.t("automation")}
           </label>
           <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 18px; border: 1px solid rgba(255,255,255,0.1);">
-              <label for="enableAutoCaptchaToggle" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+              <label for="enableAutoCaptchaToggle" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; margin-bottom: 15px;">
                   <div>
                       <span style="font-weight: 500;">${Utils.t("autoCaptcha")}</span>
                       <p style="font-size: 12px; color: rgba(255,255,255,0.7); margin: 4px 0 0 0;">${Utils.t("autoCaptchaDesc")}</p>
                   </div>
                   <input type="checkbox" id="enableAutoCaptchaToggle" ${CONFIG.AUTO_CAPTCHA_ENABLED ? 'checked' : ''} style="cursor: pointer; width: 20px; height: 20px;"/>
+              </label>
+              <hr style="border: none; height: 1px; background: rgba(255,255,255,0.1); margin: 15px 0;">
+              <label for="enableColorSkipToggle" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                  <div>
+                      <span style="font-weight: 500;">${Utils.t("colorSkip")}</span>
+                      <p style="font-size: 12px; color: rgba(255,255,255,0.7); margin: 4px 0 0 0;">${Utils.t("colorSkipDesc")}</p>
+                  </div>
+                  <input type="checkbox" id="enableColorSkipToggle" ${CONFIG.COLOR_SKIP_ENABLED ? 'checked' : ''} style="cursor: pointer; width: 20px; height: 20px;"/>
               </label>
           </div>
         </div>
@@ -3888,7 +3935,7 @@
     initializeColorPalette(resizeContainer);
   }
 
-  // --- MODIFIED: `processImage` now uses the session counter for restart decisions ---
+  // --- MODIFIED: `processImage` now uses the session counter for restart decisions and includes live pixel skip ---
   async function processImage() {
     const { width, height, pixels } = state.imageData;
     const { x: startX, y: startY } = state.startPosition;
@@ -3908,6 +3955,7 @@
       let pixelBatch = [];
 
       outerLoop: for (let y = startRow; y < height; y++) {
+        if (!state.paintedMap[y]) state.paintedMap[y] = Array(width).fill(false);
         for (let x = y === startRow ? startCol : 0; x < width; x++) {
           if (state.stopFlag) {
             state.lastPosition = { x, y };
@@ -3919,9 +3967,29 @@
           const [r, g, b, alpha] = [pixels[idx], pixels[idx + 1], pixels[idx + 2], pixels[idx + 3]];
           if (alpha < CONFIG.TRANSPARENCY_THRESHOLD || (!state.paintWhitePixels && Utils.isWhitePixel(r, g, b))) continue;
 
-          let targetRgb = Utils.isWhitePixel(r, g, b) ? [255, 255, 255] : Utils.findClosestPaletteColor(r, g, b, state.activeColorPalette);
+          const targetRgb = Utils.findClosestPaletteColor(r, g, b, state.activeColorPalette);
+          const pixelX = startX + x;
+          const pixelY = startY + y;
+
+          // --- NEW: Live Pixel Skip Logic ---
+          if (CONFIG.COLOR_SKIP_ENABLED) {
+            const canvasRgb = await WPlaceService.getCanvasPixelColor(pixelX, pixelY);
+            if (canvasRgb) {
+                const isSameRgb = canvasRgb[0] === targetRgb[0] &&
+                                  canvasRgb[1] === targetRgb[1] &&
+                                  canvasRgb[2] === targetRgb[2];
+                if (isSameRgb) {
+                    state.paintedMap[y][x] = true;
+                    state.paintedPixels++;
+                    updateStats();
+                    continue; 
+                }
+            }
+          }
+          // --- END: Live Pixel Skip Logic ---
+
           const colorId = findClosestColor(targetRgb, state.availableColors);
-          pixelBatch.push({ x: startX + x, y: startY + y, color: colorId, localX: x, localY: y });
+          pixelBatch.push({ x: pixelX, y: pixelY, color: colorId, localX: x, localY: y });
 
           if (pixelBatch.length >= Math.floor(state.currentCharges)) {
             let success = await sendPixelBatch(pixelBatch, regionX, regionY);
@@ -3942,7 +4010,7 @@
               updateUI("paintingProgress", "default", { painted: state.paintedPixels, total: state.totalPixels });
               if (state.paintedPixels % 50 === 0) Utils.saveProgress();
               if (CONFIG.PAINTING_SPEED_ENABLED) await Utils.sleep(Math.max(100, (1000 / state.paintingSpeed) * pixelBatch.length));
-            } else if(!state.stopFlag) { // Add a check to not throw an error if the batch fails due to user stop
+            } else if(!state.stopFlag) {
                 throw new Error("Pixel batch failed to paint.");
             }
             pixelBatch = [];
@@ -4042,10 +4110,12 @@
                 paintingSpeed: state.paintingSpeed,
                 paintingSpeedEnabled: document.getElementById('enableSpeedToggle')?.checked,
                 autoCaptchaEnabled: document.getElementById('enableAutoCaptchaToggle')?.checked,
+                colorSkipEnabled: document.getElementById('enableColorSkipToggle')?.checked,
                 cooldownChargeThreshold: state.cooldownChargeThreshold,
             };
             CONFIG.PAINTING_SPEED_ENABLED = settings.paintingSpeedEnabled;
             CONFIG.AUTO_CAPTCHA_ENABLED = settings.autoCaptchaEnabled;
+            CONFIG.COLOR_SKIP_ENABLED = settings.colorSkipEnabled;
             localStorage.setItem("wplace-bot-settings", JSON.stringify(settings));
         } catch (e) {
             console.warn("Could not save bot settings:", e);
@@ -4062,7 +4132,8 @@
             state.cooldownChargeThreshold = settings.cooldownChargeThreshold || CONFIG.COOLDOWN_CHARGE_THRESHOLD;
             CONFIG.PAINTING_SPEED_ENABLED = settings.paintingSpeedEnabled ?? false;
             CONFIG.AUTO_CAPTCHA_ENABLED = settings.autoCaptchaEnabled ?? false;
-
+            CONFIG.COLOR_SKIP_ENABLED = settings.colorSkipEnabled ?? true;
+            
             const speedSlider = document.getElementById('speedSlider');
             if (speedSlider) speedSlider.value = state.paintingSpeed;
             const speedValue = document.getElementById('speedValue');
@@ -4073,11 +4144,15 @@
             
             const enableAutoCaptchaToggle = document.getElementById('enableAutoCaptchaToggle');
             if (enableAutoCaptchaToggle) enableAutoCaptchaToggle.checked = CONFIG.AUTO_CAPTCHA_ENABLED;
+
+            const enableColorSkipToggle = document.getElementById('enableColorSkipToggle');
+            if (enableColorSkipToggle) enableColorSkipToggle.checked = CONFIG.COLOR_SKIP_ENABLED;
             
             const cooldownSlider = document.getElementById('cooldownSlider');
             if (cooldownSlider) cooldownSlider.value = state.cooldownChargeThreshold;
             const cooldownValue = document.getElementById('cooldownValue');
             if (cooldownValue) cooldownValue.textContent = state.cooldownChargeThreshold;
+
         } catch (e) {
             console.warn("Could not load bot settings:", e);
         }
