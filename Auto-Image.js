@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-    title: "WPlace Auto-test",
+    title: "WPlace Auto-Image",
     toggleOverlay: "Toggle Overlay",
     scanColors: "Scan Colors",
     uploadImage: "Upload Image",
@@ -1139,31 +1139,52 @@ window.addEventListener('message', (event) => {
 
     extractAvailableColors: () => {
       const colorElements = document.querySelectorAll('[id^="color-"]')
-      const availableColors = Array.from(colorElements)
-        .filter((el) => !el.querySelector("svg"))
-        .filter((el) => {
-          const id = Number.parseInt(el.id.replace("color-", ""))
-          return id !== 0
-        })
-        .map((el) => {
-          const id = Number.parseInt(el.id.replace("color-", ""))
-          const rgbStr = el.style.backgroundColor.match(/\d+/g)
-          const rgb = rgbStr ? rgbStr.map(Number) : [0, 0, 0]
-          
-          // Find color name from COLOR_MAP
-          const colorInfo = Object.values(CONFIG.COLOR_MAP).find(color => color.id === id)
-          const name = colorInfo ? colorInfo.name : `Unknown Color ${id}`
-          
-          return { id, name, rgb }
-        })
+      
+      // Separate available and unavailable colors
+      const availableColors = []
+      const unavailableColors = []
+      
+      Array.from(colorElements).forEach((el) => {
+        const id = Number.parseInt(el.id.replace("color-", ""))
+        if (id === 0) return // Skip transparent color
+        
+        const rgbStr = el.style.backgroundColor.match(/\d+/g)
+        const rgb = rgbStr ? rgbStr.map(Number) : [0, 0, 0]
+        
+        // Find color name from COLOR_MAP
+        const colorInfo = Object.values(CONFIG.COLOR_MAP).find(color => color.id === id)
+        const name = colorInfo ? colorInfo.name : `Unknown Color ${id}`
+        
+        const colorData = { id, name, rgb }
+        
+        // Check if color is available (no SVG overlay means available)
+        if (!el.querySelector("svg")) {
+          availableColors.push(colorData)
+        } else {
+          unavailableColors.push(colorData)
+        }
+      })
       
       // Console log detailed color information
       console.log("=== CAPTURED COLORS STATUS ===")
-      console.log(`Total available colors found: ${availableColors.length}`)
-      console.log("Color details:")
-      availableColors.forEach((color, index) => {
-        console.log(`${index + 1}. ID: ${color.id}, Name: "${color.name}", RGB: (${color.rgb[0]}, ${color.rgb[1]}, ${color.rgb[2]})`)
-      })
+      console.log(`Total available colors: ${availableColors.length}`)
+      console.log(`Total unavailable colors: ${unavailableColors.length}`)
+      console.log(`Total colors scanned: ${availableColors.length + unavailableColors.length}`)
+      
+      if (availableColors.length > 0) {
+        console.log("\n--- AVAILABLE COLORS ---")
+        availableColors.forEach((color, index) => {
+          console.log(`${index + 1}. ID: ${color.id}, Name: "${color.name}", RGB: (${color.rgb[0]}, ${color.rgb[1]}, ${color.rgb[2]})`)
+        })
+      }
+      
+      if (unavailableColors.length > 0) {
+        console.log("\n--- UNAVAILABLE COLORS ---")
+        unavailableColors.forEach((color, index) => {
+          console.log(`${index + 1}. ID: ${color.id}, Name: "${color.name}", RGB: (${color.rgb[0]}, ${color.rgb[1]}, ${color.rgb[2]}) [LOCKED]`)
+        })
+      }
+      
       console.log("=== END COLOR STATUS ===")
       
       return availableColors
