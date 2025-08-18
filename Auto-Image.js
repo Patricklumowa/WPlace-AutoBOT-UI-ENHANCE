@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-    title: "WPlace Auto-Image",
+    title: "WPlace Auto-test",
     toggleOverlay: "Toggle Overlay",
     scanColors: "Scan Colors",
     uploadImage: "Upload Image",
@@ -1139,7 +1139,7 @@ window.addEventListener('message', (event) => {
 
     extractAvailableColors: () => {
       const colorElements = document.querySelectorAll('[id^="color-"]')
-      return Array.from(colorElements)
+      const availableColors = Array.from(colorElements)
         .filter((el) => !el.querySelector("svg"))
         .filter((el) => {
           const id = Number.parseInt(el.id.replace("color-", ""))
@@ -1149,8 +1149,24 @@ window.addEventListener('message', (event) => {
           const id = Number.parseInt(el.id.replace("color-", ""))
           const rgbStr = el.style.backgroundColor.match(/\d+/g)
           const rgb = rgbStr ? rgbStr.map(Number) : [0, 0, 0]
-          return { id, rgb }
+          
+          // Find color name from COLOR_MAP
+          const colorInfo = Object.values(CONFIG.COLOR_MAP).find(color => color.id === id)
+          const name = colorInfo ? colorInfo.name : `Unknown Color ${id}`
+          
+          return { id, name, rgb }
         })
+      
+      // Console log detailed color information
+      console.log("=== CAPTURED COLORS STATUS ===")
+      console.log(`Total available colors found: ${availableColors.length}`)
+      console.log("Color details:")
+      availableColors.forEach((color, index) => {
+        console.log(`${index + 1}. ID: ${color.id}, Name: "${color.name}", RGB: (${color.rgb[0]}, ${color.rgb[1]}, ${color.rgb[2]})`)
+      })
+      console.log("=== END COLOR STATUS ===")
+      
+      return availableColors
     },
 
     formatTime: (ms) => {
@@ -4009,7 +4025,6 @@ window.addEventListener('message', (event) => {
     if (uploadBtn) {
       uploadBtn.addEventListener("click", async () => {
         const availableColors = Utils.extractAvailableColors();
-        console.log("Captured available colors:", availableColors); // Debug log
         if (availableColors.length < 10) {
             updateUI("noColorsFound", "error");
             Utils.showAlert(Utils.t("noColorsFound"), "error");
