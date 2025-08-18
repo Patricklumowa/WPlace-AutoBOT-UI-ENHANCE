@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-    title: "WPlace Auto-dawr",
+    title: "WPlace Auto-Image",
     toggleOverlay: "Toggle Overlay",
     scanColors: "Scan Colors",
     uploadImage: "Upload Image",
@@ -1255,7 +1255,11 @@ window.addEventListener('message', (event) => {
 
           console.log("Resize panel - Available colors:", state.availableColors); // Debug log
           console.log("Resize panel - First few available colors with RGB:", 
-              state.availableColors.slice(0, 5).map(c => ({id: c.id, rgb: c.rgb}))
+              state.availableColors.slice(0, 5).map(c => ({
+                  id: c.id, 
+                  rgb: c.rgb,
+                  rgbValues: `[${c.rgb[0]}, ${c.rgb[1]}, ${c.rgb[2]}]`
+              }))
           ); // Debug log
 
           // Convert COLOR_MAP to array and filter out transparent
@@ -1277,6 +1281,9 @@ window.addEventListener('message', (event) => {
                   console.log(`Color ${name} (ID:${id}) RGB(${rgb.r},${rgb.g},${rgb.b}): available = ${isAvailable}`);
                   if (!isAvailable) {
                       console.log(`  No match found for RGB(${rgb.r},${rgb.g},${rgb.b}) in available colors`);
+                      // Show what RGB values are actually available
+                      const availableRGBs = state.availableColors.slice(0, 3).map(c => `[${c.rgb[0]},${c.rgb[1]},${c.rgb[2]}]`);
+                      console.log(`  First few available RGBs: ${availableRGBs.join(', ')}`);
                   }
               }
 
