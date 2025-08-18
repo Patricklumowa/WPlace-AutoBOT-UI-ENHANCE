@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-    title: "WPlace Auto-draw",
+    title: "WPlace Auto-Image",
     toggleOverlay: "Toggle Overlay",
     scanColors: "Scan Colors",
     uploadImage: "Upload Image",
@@ -1251,8 +1251,12 @@ window.addEventListener('message', (event) => {
       function populateColors(showUnavailable = false) {
           colorsContainer.innerHTML = '';
 
+          console.log("Resize panel - Available colors:", state.availableColors); // Debug log
+          console.log("Resize panel - First few available colors:", state.availableColors.slice(0, 5)); // Debug log
+
           // Convert COLOR_MAP to array and filter out transparent
           const allColors = Object.values(CONFIG.COLOR_MAP).filter(color => color.rgb !== null);
+          console.log("Resize panel - All colors from COLOR_MAP:", allColors.length); // Debug log
 
           allColors.forEach(colorData => {
               const { id, name, rgb } = colorData;
@@ -1262,6 +1266,15 @@ window.addEventListener('message', (event) => {
               const isAvailable = state.availableColors.some(c => 
                   c.rgb[0] === rgb.r && c.rgb[1] === rgb.g && c.rgb[2] === rgb.b
               );
+
+              // Debug: Log a few color comparisons
+              if (id <= 5) {
+                  console.log(`Color ${name} (${rgb.r},${rgb.g},${rgb.b}): available = ${isAvailable}`);
+                  const matchingColors = state.availableColors.filter(c => 
+                      c.rgb[0] === rgb.r && c.rgb[1] === rgb.g && c.rgb[2] === rgb.b
+                  );
+                  console.log(`  Matching colors found: ${matchingColors.length}`, matchingColors);
+              }
 
               // If not showing all colors and this color is not available, skip it
               if (!showUnavailable && !isAvailable) {
@@ -3732,6 +3745,7 @@ window.addEventListener('message', (event) => {
     if (uploadBtn) {
       uploadBtn.addEventListener("click", async () => {
         const availableColors = Utils.extractAvailableColors();
+        console.log("Captured available colors:", availableColors); // Debug log
         if (availableColors.length < 10) {
             updateUI("noColorsFound", "error");
             Utils.showAlert(Utils.t("noColorsFound"), "error");
