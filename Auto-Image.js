@@ -229,6 +229,8 @@
       waitingPosition: "👆 Waiting for you to paint the reference pixel...",
       positionSet: "✅ Position set successfully!",
       positionTimeout: "❌ Timeout for position selection",
+      scanComplete: "🔍 Scan complete! Total: {total}, Need painting: {needPainting}, Already correct: {alreadyCorrect} ({efficiency}% efficiency)",
+      scanFailed: "⚠️ Auto-scan failed, will paint all pixels",
       startPaintingMsg: "🎨 Starting smart painting - only painting needed pixels...",
       paintingProgress: "🧱 Progress: {painted}/{total} pixels...",
       noCharges: "⌛ No charges. Waiting {time}...",
@@ -301,6 +303,8 @@
       waitingPosition: "👆 Ожидание, пока вы нарисуете опорный пиксель...",
       positionSet: "✅ Позиция успешно установлена!",
       positionTimeout: "❌ Время ожидания выбора позиции истекло",
+      scanComplete: "🔍 Сканирование завершено! Всего: {total}, Нужно покрасить: {needPainting}, Уже правильно: {alreadyCorrect} ({efficiency}% эффективность)",
+      scanFailed: "⚠️ Авто-сканирование не удалось, будем красить все пиксели",
       startPaintingMsg: "🎨 Начинаем рисование...",
       paintingProgress: "🧱 Прогресс: {painted}/{total} пикселей...",
       noCharges: "⌛ Нет зарядов. Ожидание {time}...",
@@ -371,6 +375,8 @@
       waitingPosition: "👆 Aguardando você pintar o pixel de referência...",
       positionSet: "✅ Posição definida com sucesso!",
       positionTimeout: "❌ Tempo esgotado para selecionar posição",
+      scanComplete: "🔍 Varredura completa! Total: {total}, Precisa pintar: {needPainting}, Já correto: {alreadyCorrect} ({efficiency}% eficiência)",
+      scanFailed: "⚠️ Auto-varredura falhou, pintará todos os pixels",
       startPaintingMsg: "🎨 Iniciando pintura...",
       paintingProgress: "🧱 Progresso: {painted}/{total} pixels...",
       noCharges: "⌛ Sem cargas. Aguardando {time}...",
@@ -441,6 +447,8 @@
       waitingPosition: "👆 Đang chờ bạn vẽ pixel tham chiếu...",
       positionSet: "✅ Đã đặt vị trí thành công!",
       positionTimeout: "❌ Hết thời gian chọn vị trí",
+      scanComplete: "🔍 Quét hoàn tất! Tổng: {total}, Cần vẽ: {needPainting}, Đã đúng: {alreadyCorrect} ({efficiency}% hiệu quả)",
+      scanFailed: "⚠️ Tự động quét thất bại, sẽ vẽ tất cả pixel",
       startPaintingMsg: "🎨 Bắt đầu vẽ thông minh - chỉ vẽ pixel cần thiết...",
       paintingProgress: "🧱 Tiến trình: {painted}/{total} pixel...",
       noCharges: "⌛ Không có điện tích. Đang chờ {time}...",
@@ -513,6 +521,8 @@
       waitingPosition: "👆 En attente que vous peigniez le pixel de référence...",
       positionSet: "✅ Position définie avec succès!",
       positionTimeout: "❌ Délai d'attente pour la sélection de position",
+      scanComplete: "🔍 Scan terminé! Total: {total}, À peindre: {needPainting}, Déjà correct: {alreadyCorrect} ({efficiency}% d'efficacité)",
+      scanFailed: "⚠️ Scan automatique échoué, peindra tous les pixels",
       startPaintingMsg: "🎨 Début de la peinture...",
       paintingProgress: "🧱 Progrès: {painted}/{total} pixels...",
       noCharges: "⌛ Aucune charge. En attente {time}...",
@@ -583,6 +593,8 @@
       waitingPosition: "👆 Menunggu Anda melukis piksel referensi...",
       positionSet: "✅ Posisi berhasil diatur!",
       positionTimeout: "❌ Waktu habis untuk memilih posisi",
+      scanComplete: "🔍 Pemindaian selesai! Total: {total}, Perlu dicat: {needPainting}, Sudah benar: {alreadyCorrect} ({efficiency}% efisiensi)",
+      scanFailed: "⚠️ Pemindaian otomatis gagal, akan melukis semua piksel",
       startPaintingMsg: "🎨 Mulai melukis...",
       paintingProgress: "🧱 Progres: {painted}/{total} piksel...",
       noCharges: "⌛ Tidak ada muatan. Menunggu {time}...",
@@ -665,6 +677,8 @@
     overlayOpacity: CONFIG.OVERLAY.OPACITY_DEFAULT,
     blueMarbleEnabled: CONFIG.OVERLAY.BLUE_MARBLE_DEFAULT,
     tileManager: null, // Will be initialized in createUI
+    lastScanTime: null, // Timestamp of last auto-scan
+    cachedMismatchedPixels: null, // Cached scan results
   }
 
   // Placeholder for the resize preview update function
@@ -1560,6 +1574,59 @@
       
       console.log(`Found ${mismatched.length} mismatched pixels out of ${templateWidth * templateHeight} total pixels`);
       return mismatched;
+    }
+  }
+
+  // AUTO SCAN FUNCTIONALITY
+  async function performAutoScan() {
+    if (!state.imageLoaded || !state.startPosition || !state.region) {
+      return;
+    }
+
+    try {
+      updateUI("loadingImage", "default");
+      console.log("🔍 Auto-scanning canvas for correct pixels...");
+      
+      const { width, height } = state.imageData;
+      await state.tileManager.loadTiles(state.startPosition, state.region, width, height);
+      
+      const mismatchedPixels = state.tileManager.getMismatchedPixels(
+        state.imageData,
+        state.startPosition,
+        state.region
+      );
+      
+      const totalPixels = width * height;
+      const alreadyCorrect = totalPixels - mismatchedPixels.length;
+      const efficiencyGain = Math.round((alreadyCorrect / totalPixels) * 100);
+      
+      // Update state with corrected pixel counts
+      state.totalPixels = mismatchedPixels.length; // Only count pixels that need painting
+      state.paintedPixels = 0; // Reset painted count
+      
+      // Cache the results for processImage function
+      state.cachedMismatchedPixels = mismatchedPixels;
+      state.lastScanTime = Date.now();
+      
+      console.log(`📊 Auto-scan complete:`);
+      console.log(`   • Total template pixels: ${totalPixels}`);
+      console.log(`   • Pixels needing paint: ${mismatchedPixels.length}`);
+      console.log(`   • Pixels already correct: ${alreadyCorrect}`);
+      console.log(`   • Efficiency gain: ${efficiencyGain}%`);
+      
+      updateUI("scanComplete", "success", { 
+        total: totalPixels,
+        needPainting: mismatchedPixels.length,
+        alreadyCorrect: alreadyCorrect,
+        efficiency: efficiencyGain
+      });
+      
+      // Update the progress display
+      updateStats();
+      
+    } catch (error) {
+      console.warn("Auto-scan failed:", error);
+      updateUI("scanFailed", "warning");
     }
   }
 
@@ -3931,6 +3998,12 @@
           const alreadyCorrect = (width * height) - mismatchedPixels.length;
           const efficiencyGain = Math.round((alreadyCorrect / (width * height)) * 100);
           
+          // Update state with fresh scan results
+          state.totalPixels = mismatchedPixels.length;
+          state.paintedPixels = 0;
+          state.cachedMismatchedPixels = mismatchedPixels;
+          state.lastScanTime = Date.now();
+          
           Utils.showAlert(
             `Canvas analysis complete!\n\n` +
             `• Total pixels: ${width * height}\n` +
@@ -4444,6 +4517,11 @@
                   if (state.imageLoaded) {
                     startBtn.disabled = false
                     refreshCanvasBtn.disabled = false
+                    
+                    // Auto-scan for correct pixels when position is set
+                    setTimeout(() => {
+                      performAutoScan();
+                    }, 500); // Small delay to ensure UI is updated
                   }
 
                   window.fetch = originalFetch
@@ -4572,26 +4650,45 @@
     const { x: startX, y: startY } = state.startPosition
     const { x: regionX, y: regionY } = state.region
 
-    // Step 1: Load current canvas tiles for comparison
-    updateUI("loadingImage", "default");
-    console.log("🔍 Loading current canvas tiles for smart pixel detection...");
+    // Step 1: Load current canvas tiles for comparison (if not already done)
+    console.log("🔍 Checking for recent scan results...");
     
-    try {
-      await state.tileManager.loadTiles(state.startPosition, state.region, width, height);
-    } catch (error) {
-      console.warn("Failed to load tiles, proceeding with blind painting:", error);
-      Utils.showAlert("Warning: Could not load canvas state. Painting blindly.", "warning");
-    }
+    let mismatchedPixels;
+    const currentTime = Date.now();
+    
+    // Check if we have recent scan results (within last 30 seconds)
+    if (state.lastScanTime && (currentTime - state.lastScanTime) < 30000 && 
+        state.cachedMismatchedPixels && state.cachedMismatchedPixels.length >= 0) {
+      
+      console.log("📋 Using cached scan results from auto-scan");
+      mismatchedPixels = state.cachedMismatchedPixels;
+      
+    } else {
+      // Perform fresh scan
+      updateUI("loadingImage", "default");
+      console.log("🔍 Loading current canvas tiles for smart pixel detection...");
+      
+      try {
+        await state.tileManager.loadTiles(state.startPosition, state.region, width, height);
+      } catch (error) {
+        console.warn("Failed to load tiles, proceeding with blind painting:", error);
+        Utils.showAlert("Warning: Could not load canvas state. Painting blindly.", "warning");
+      }
 
-    // Step 2: Get only mismatched pixels that need painting
-    updateUI("checkingColors", "default");
-    console.log("🎯 Analyzing pixels to find mismatches...");
-    
-    const mismatchedPixels = state.tileManager.getMismatchedPixels(
-      { width, height, pixels }, 
-      state.startPosition, 
-      state.region
-    );
+      // Step 2: Get only mismatched pixels that need painting
+      updateUI("checkingColors", "default");
+      console.log("🎯 Analyzing pixels to find mismatches...");
+      
+      mismatchedPixels = state.tileManager.getMismatchedPixels(
+        { width, height, pixels }, 
+        state.startPosition, 
+        state.region
+      );
+      
+      // Cache the results
+      state.cachedMismatchedPixels = mismatchedPixels;
+      state.lastScanTime = currentTime;
+    }
 
     if (mismatchedPixels.length === 0) {
       updateUI("paintingComplete", "success", { count: 0 });
