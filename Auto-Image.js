@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-      title: "WPlace Auto-balls",
+      title: "WPlace Auto-Image",
       toggleOverlay: "Toggle Overlay",
       scanColors: "Scan Colors",
       uploadImage: "Upload Image",
@@ -1568,6 +1568,19 @@
       console.log(`📍 Start Position: (${startPosition.x}, ${startPosition.y})`);
       console.log(`🗺️ Region: (${region.x}, ${region.y})`);
       
+      // Debug available colors
+      console.log(`🎨 Available colors debug:`);
+      console.log(`   • Available colors count: ${state.availableColors ? state.availableColors.length : 'undefined'}`);
+      if (state.availableColors && state.availableColors.length > 0) {
+        console.log(`   • First 3 available colors:`);
+        for (let i = 0; i < Math.min(3, state.availableColors.length); i++) {
+          const color = state.availableColors[i];
+          console.log(`     Color ${i}: ID ${color.id} RGB(${color.rgb.r},${color.rgb.g},${color.rgb.b})`);
+        }
+      } else {
+        console.log(`   ⚠️ NO AVAILABLE COLORS LOADED!`);
+      }
+      
       // Log first few pixels of template data for debugging
       console.log(`📊 Template data debug:`);
       console.log(`   • Total pixels in template: ${pixels.length / 4}`);
@@ -1629,10 +1642,22 @@
           
           // Get template color ID
           const templateColorId = findClosestColor([r, g, b], state.availableColors);
-          if (shouldLog) console.log(`  🎨 Template color ID: ${templateColorId}`);
+          if (shouldLog) {
+            console.log(`  🎨 Template color ID: ${templateColorId}`);
+            console.log(`  🎨 Available colors count: ${state.availableColors ? state.availableColors.length : 'undefined'}`);
+            console.log(`  🎨 Has color access: ${this.hasColor(templateColorId)}`);
+            if (state.availableColors && state.availableColors.length > 0) {
+              console.log(`  🎨 First available color: ID ${state.availableColors[0].id} RGB(${state.availableColors[0].rgb.r},${state.availableColors[0].rgb.g},${state.availableColors[0].rgb.b})`);
+            }
+          }
           
           if (!templateColorId || !this.hasColor(templateColorId)) {
-            if (shouldLog) console.log(`  ⏭️ SKIPPED: No valid color ID or user doesn't have access`);
+            if (shouldLog) {
+              console.log(`  ⏭️ SKIPPED: No valid color ID or user doesn't have access`);
+              console.log(`    - templateColorId: ${templateColorId}`);
+              console.log(`    - hasColor result: ${this.hasColor(templateColorId)}`);
+              console.log(`    - availableColors length: ${state.availableColors ? state.availableColors.length : 'undefined'}`);
+            }
             skippedNoColor++;
             continue;
           }
