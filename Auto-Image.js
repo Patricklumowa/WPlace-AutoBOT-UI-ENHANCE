@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-      title: "WPlace Auto-testp",
+      title: "WPlace Auto-Image",
       toggleOverlay: "Toggle Overlay",
       scanColors: "Scan Colors",
       uploadImage: "Upload Image",
@@ -1597,9 +1597,9 @@
           if (shouldLog) {
             console.log(`🔸 Pixel (${x},${y}) -> Canvas(${canvasX},${canvasY}) -> Tile(${targetTx},${targetTy}) -> Local(${localPx},${localPy}) RGB(${r},${g},${b}) Alpha:${alpha}`);
             if (startPosition.x <= 3999 && startPosition.y <= 3999) {
-              console.log(`  � Regional: region(${region.x},${region.y}) * 4000 + startPos(${startPosition.x},${startPosition.y}) + template(${x},${y}) = (${absolutePixelX},${absolutePixelY})`);
+              // Fixed: Removed broken regional coordinate log
             } else {
-              console.log(`  📐 Absolute: startPos(${startPosition.x},${startPosition.y}) + template(${x},${y}) = (${absolutePixelX},${absolutePixelY})`);
+              // Fixed: Removed broken absolute coordinate log
             }
             detailedLogCount++;
           }
