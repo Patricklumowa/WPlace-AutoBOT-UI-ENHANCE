@@ -1,35 +1,38 @@
 ;(async () => {
   // WPLACE TILE BORDER VISUALIZER
-  // Captures tile coordinates from WPlace network requests and visualizes tile borders
+  // Uses base tile coordinates (x:1624, y:896) to visualize 1000x1000px tile borders
   
   const CONFIG = {
     TILE_SIZE: 1000,
+    BASE_TILE_X: 1624,
+    BASE_TILE_Y: 896,
     GRID_COLOR: 'rgba(0, 255, 0, 0.8)',
     GRID_WIDTH: 2,
     COORDINATE_COLOR: 'rgba(255, 255, 0, 0.9)',
-    HIGHLIGHT_COLOR: 'rgba(255, 0, 0, 0.6)'
+    HIGHLIGHT_COLOR: 'rgba(255, 0, 0, 0.6)',
+    BASE_HIGHLIGHT_COLOR: 'rgba(0, 255, 255, 0.7)'
   };
 
   // WPlace Tile Visualizer Class
   class WPlaceTileVisualizer {
     constructor() {
-      this.lastTileCoords = null;
+      this.baseTileCoords = { x: CONFIG.BASE_TILE_X, y: CONFIG.BASE_TILE_Y };
       this.canvas = null;
       this.ctx = null;
       this.container = null;
       this.isEnabled = false;
       this.gridOpacity = 0.8;
       this.showCoordinates = true;
-      this.highlightLastTile = true;
-      this.capturedTiles = new Set();
+      this.showBaseTile = true;
+      this.gridExtent = 5; // How many tiles to show around the base tile
     }
 
     // Initialize the visualizer
     init() {
       this.createUI();
       this.attachEventListeners();
-      this.interceptNetworkRequests();
       this.createOverlayCanvas();
+      console.log(`🔲 Base tile coordinates set to: (${this.baseTileCoords.x}, ${this.baseTileCoords.y})`);
     }
 
     // Create the user interface
@@ -93,9 +96,18 @@
 
           <div style="margin-bottom: 12px;">
             <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #a0aec0; cursor: pointer;">
-              <input type="checkbox" id="highlight-last" checked style="margin: 0;">
-              🎯 Highlight Last Tile
+              <input type="checkbox" id="show-base-tile" checked style="margin: 0;">
+              🎯 Highlight Base Tile (${CONFIG.BASE_TILE_X}, ${CONFIG.BASE_TILE_Y})
             </label>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label style="display: block; margin-bottom: 5px; font-size: 12px; color: #a0aec0;">
+              📏 Grid Extent: <span id="extent-value">${this.gridExtent}</span> tiles
+            </label>
+            <input type="range" id="grid-extent" min="3" max="10" step="1" value="${this.gridExtent}" style="
+              width: 100%;
+            ">
           </div>
 
           <div style="margin-bottom: 12px;">
@@ -107,21 +119,6 @@
             ">
           </div>
 
-          <div style="margin-bottom: 12px;">
-            <button id="clear-tiles" style="
-              width: 100%;
-              padding: 8px;
-              background: rgba(239, 68, 68, 0.8);
-              border: none;
-              border-radius: 4px;
-              color: white;
-              cursor: pointer;
-              font-size: 12px;
-            ">
-              🗑️ Clear Captured Tiles
-            </button>
-          </div>
-
           <div id="tile-info" style="
             background: rgba(255,255,255,0.05);
             padding: 8px;
@@ -131,21 +128,9 @@
             border-left: 3px solid #63b3ed;
             line-height: 1.4;
           ">
-            🎯 Waiting for tile requests...
-          </div>
-
-          <div id="captured-tiles-list" style="
-            max-height: 150px;
-            overflow-y: auto;
-            margin-top: 10px;
-            background: rgba(255,255,255,0.02);
-            border-radius: 4px;
-            padding: 5px;
-            font-size: 10px;
-            color: #a0aec0;
-          ">
-            <div style="font-weight: bold; margin-bottom: 3px;">Captured Tiles:</div>
-            <div id="tiles-list">None yet</div>
+            🎯 Base tile: (${CONFIG.BASE_TILE_X}, ${CONFIG.BASE_TILE_Y})<br>
+            📏 Tile size: ${CONFIG.TILE_SIZE}×${CONFIG.TILE_SIZE}px<br>
+            📊 Ready to visualize
           </div>
         </div>
       `;
@@ -214,9 +199,21 @@
         }
       });
 
-      // Highlight last tile toggle
-      document.getElementById('highlight-last').addEventListener('change', (e) => {
-        this.highlightLastTile = e.target.checked;
+      // Show base tile toggle
+      document.getElementById('show-base-tile').addEventListener('change', (e) => {
+        this.showBaseTile = e.target.checked;
+        if (this.isEnabled) {
+          this.updateOverlay();
+        }
+      });
+
+      // Grid extent
+      const extentSlider = document.getElementById('grid-extent');
+      const extentValue = document.getElementById('extent-value');
+
+      extentSlider.addEventListener('input', (e) => {
+        this.gridExtent = parseInt(e.target.value);
+        extentValue.textContent = this.gridExtent;
         if (this.isEnabled) {
           this.updateOverlay();
         }
@@ -233,70 +230,6 @@
           this.updateOverlay();
         }
       });
-
-      // Clear tiles
-      document.getElementById('clear-tiles').addEventListener('click', () => {
-        this.capturedTiles.clear();
-        this.lastTileCoords = null;
-        this.updateTilesList();
-        this.updateInfo('🗑️ Captured tiles cleared');
-        if (this.isEnabled) {
-          this.updateOverlay();
-        }
-      });
-    }
-
-    // Intercept network requests to capture tile coordinates
-    interceptNetworkRequests() {
-      // Intercept fetch requests
-      const originalFetch = window.fetch;
-      window.fetch = async (...args) => {
-        const response = await originalFetch(...args);
-        this.checkTileRequest(args[0]);
-        return response;
-      };
-
-      // Intercept XMLHttpRequest
-      const originalXHROpen = XMLHttpRequest.prototype.open;
-      XMLHttpRequest.prototype.open = function(method, url, ...args) {
-        this.addEventListener('loadend', () => {
-          visualizer.checkTileRequest(url);
-        });
-        return originalXHROpen.call(this, method, url, ...args);
-      };
-
-      // Also listen for postMessage events that might contain tile data
-      window.addEventListener('message', (event) => {
-        if (event.data && event.data.source === 'auto-image-tile') {
-          this.checkTileRequest(event.data.endpoint);
-        }
-      });
-    }
-
-    // Check if request is for a tile and extract coordinates
-    checkTileRequest(url) {
-      if (!url || typeof url !== 'string') return;
-
-      // Look for tile patterns like: /tiles/123/456.png or similar
-      const tilePattern = /tiles?\/(\d+)\/(\d+)\.png/i;
-      const match = url.match(tilePattern);
-
-      if (match) {
-        const tileX = parseInt(match[1], 10);
-        const tileY = parseInt(match[2], 10);
-        
-        this.lastTileCoords = { x: tileX, y: tileY };
-        this.capturedTiles.add(`${tileX},${tileY}`);
-        
-        this.updateInfo(`📍 Last tile: (${tileX}, ${tileY})`);
-        this.updateTilesList();
-        
-        if (this.isEnabled) {
-          this.updateOverlay();
-        }
-        
-        console.log(`🔲 Captured tile coordinates: (${tileX}, ${tileY})`);
-      }
     }
 
     // Update the overlay canvas
@@ -306,8 +239,6 @@
       // Clear canvas
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-      if (!this.lastTileCoords) return;
-
       // Try to find the canvas element that WPlace uses
       const wplaceCanvas = this.findWPlaceCanvas();
       if (!wplaceCanvas) {
@@ -316,7 +247,7 @@
       }
 
       const canvasRect = wplaceCanvas.getBoundingClientRect();
-      this.drawTileGrid(canvasRect);
+      this.drawTileGrid(canvasRect, wplaceCanvas);
     }
 
     // Find WPlace canvas element
@@ -343,76 +274,106 @@
       return null;
     }
 
-    // Draw tile grid overlay
-    drawTileGrid(canvasRect) {
-      if (!this.lastTileCoords) return;
-
+    // Draw tile grid overlay based on base tile coordinates
+    drawTileGrid(canvasRect, wplaceCanvas) {
       this.ctx.save();
       
-      // Calculate approximate tile size on screen
-      // This is a rough estimation - you might need to adjust based on zoom level
-      const approximateTileSize = Math.min(canvasRect.width, canvasRect.height) / 10;
+      // Get the current zoom/scale of the WPlace canvas
+      const canvasStyle = window.getComputedStyle(wplaceCanvas);
+      const transform = canvasStyle.transform;
+      let scale = 1;
       
-      // Calculate grid offset based on last tile coordinates
-      const { x: lastTileX, y: lastTileY } = this.lastTileCoords;
+      if (transform && transform !== 'none') {
+        const matrix = transform.match(/matrix.*\((.+)\)/);
+        if (matrix) {
+          const values = matrix[1].split(', ');
+          scale = parseFloat(values[0]) || 1;
+        }
+      }
+
+      // Calculate tile size on screen considering zoom
+      const tileSize = CONFIG.TILE_SIZE * scale;
       
-      // Draw grid lines
+      // Calculate the position of the base tile on screen
+      // This is approximate - you may need to adjust based on WPlace's coordinate system
+      const baseTileScreenX = canvasRect.left + (canvasRect.width / 2);
+      const baseTileScreenY = canvasRect.top + (canvasRect.height / 2);
+      
+      // Draw grid lines around the base tile
       this.ctx.strokeStyle = CONFIG.GRID_COLOR.replace(/[\d.]+(?=\))/, this.gridOpacity);
       this.ctx.lineWidth = CONFIG.GRID_WIDTH;
       
-      // Calculate starting positions
-      const startX = canvasRect.left;
-      const startY = canvasRect.top;
-      const endX = canvasRect.right;
-      const endY = canvasRect.bottom;
+      // Calculate grid bounds
+      const gridSize = this.gridExtent * 2 + 1; // Total tiles to show
+      const startOffsetX = -this.gridExtent * tileSize;
+      const startOffsetY = -this.gridExtent * tileSize;
       
       // Draw vertical lines
-      for (let x = startX; x <= endX; x += approximateTileSize) {
-        this.ctx.beginPath();
-        this.ctx.moveTo(x, startY);
-        this.ctx.lineTo(x, endY);
-        this.ctx.stroke();
+      for (let i = 0; i <= gridSize; i++) {
+        const x = baseTileScreenX + startOffsetX + (i * tileSize);
+        if (x >= canvasRect.left && x <= canvasRect.right) {
+          this.ctx.beginPath();
+          this.ctx.moveTo(x, Math.max(canvasRect.top, baseTileScreenY + startOffsetY));
+          this.ctx.lineTo(x, Math.min(canvasRect.bottom, baseTileScreenY + startOffsetY + (gridSize * tileSize)));
+          this.ctx.stroke();
+        }
       }
       
       // Draw horizontal lines
-      for (let y = startY; y <= endY; y += approximateTileSize) {
-        this.ctx.beginPath();
-        this.ctx.moveTo(startX, y);
-        this.ctx.lineTo(endX, y);
-        this.ctx.stroke();
+      for (let i = 0; i <= gridSize; i++) {
+        const y = baseTileScreenY + startOffsetY + (i * tileSize);
+        if (y >= canvasRect.top && y <= canvasRect.bottom) {
+          this.ctx.beginPath();
+          this.ctx.moveTo(Math.max(canvasRect.left, baseTileScreenX + startOffsetX), y);
+          this.ctx.lineTo(Math.min(canvasRect.right, baseTileScreenX + startOffsetX + (gridSize * tileSize)), y);
+          this.ctx.stroke();
+        }
       }
 
-      // Highlight last captured tile
-      if (this.highlightLastTile) {
-        const centerX = canvasRect.left + canvasRect.width / 2;
-        const centerY = canvasRect.top + canvasRect.height / 2;
-        
-        this.ctx.fillStyle = CONFIG.HIGHLIGHT_COLOR;
+      // Highlight base tile
+      if (this.showBaseTile) {
+        this.ctx.fillStyle = CONFIG.BASE_HIGHLIGHT_COLOR;
         this.ctx.fillRect(
-          centerX - approximateTileSize / 2,
-          centerY - approximateTileSize / 2,
-          approximateTileSize,
-          approximateTileSize
+          baseTileScreenX - tileSize / 2,
+          baseTileScreenY - tileSize / 2,
+          tileSize,
+          tileSize
         );
       }
 
       // Draw coordinates if enabled
       if (this.showCoordinates) {
         this.ctx.fillStyle = CONFIG.COORDINATE_COLOR;
-        this.ctx.font = '12px monospace';
+        this.ctx.font = `${Math.max(10, 12 * scale)}px monospace`;
         this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
         
-        const centerX = canvasRect.left + canvasRect.width / 2;
-        const centerY = canvasRect.top + canvasRect.height / 2;
-        
-        this.ctx.fillText(
-          `(${lastTileX}, ${lastTileY})`,
-          centerX,
-          centerY
-        );
+        // Draw coordinates for visible tiles
+        for (let i = -this.gridExtent; i <= this.gridExtent; i++) {
+          for (let j = -this.gridExtent; j <= this.gridExtent; j++) {
+            const tileX = this.baseTileCoords.x + i;
+            const tileY = this.baseTileCoords.y + j;
+            const screenX = baseTileScreenX + (i * tileSize);
+            const screenY = baseTileScreenY + (j * tileSize);
+            
+            // Only draw if within canvas bounds
+            if (screenX >= canvasRect.left && screenX <= canvasRect.right &&
+                screenY >= canvasRect.top && screenY <= canvasRect.bottom) {
+              this.ctx.fillText(
+                `${tileX},${tileY}`,
+                screenX,
+                screenY
+              );
+            }
+          }
+        }
       }
 
       this.ctx.restore();
+      
+      // Update info
+      const totalTiles = (this.gridExtent * 2 + 1) ** 2;
+      this.updateInfo(`🔲 Showing ${totalTiles} tiles around base (${this.baseTileCoords.x}, ${this.baseTileCoords.y})`);
     }
 
     // Update info panel
@@ -420,22 +381,6 @@
       const infoPanel = document.getElementById('tile-info');
       if (infoPanel) {
         infoPanel.innerHTML = message;
-      }
-    }
-
-    // Update captured tiles list
-    updateTilesList() {
-      const tilesList = document.getElementById('tiles-list');
-      if (tilesList) {
-        if (this.capturedTiles.size === 0) {
-          tilesList.textContent = 'None yet';
-        } else {
-          const tiles = Array.from(this.capturedTiles).slice(-10); // Show last 10
-          tilesList.innerHTML = tiles.map(coord => `<div>${coord}</div>`).join('');
-          if (this.capturedTiles.size > 10) {
-            tilesList.innerHTML += `<div style="color: #666;">...and ${this.capturedTiles.size - 10} more</div>`;
-          }
-        }
       }
     }
 
@@ -454,5 +399,7 @@
   const visualizer = new WPlaceTileVisualizer();
   visualizer.init();
 
-  console.log('🔲 WPlace Tile Border Visualizer loaded! It will capture tile coordinates from network requests.');
+  console.log('🔲 WPlace Tile Border Visualizer loaded!');
+  console.log(`📍 Base tile coordinates: (${CONFIG.BASE_TILE_X}, ${CONFIG.BASE_TILE_Y})`);
+  console.log(`📏 Tile size: ${CONFIG.TILE_SIZE}×${CONFIG.TILE_SIZE}px`);
 })();
