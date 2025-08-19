@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-      title: "WPlace Auto-tes",
+      title: "WPlace Auto-Image",
       toggleOverlay: "Toggle Overlay",
       scanColors: "Scan Colors",
       uploadImage: "Upload Image",
@@ -1644,8 +1644,8 @@
             }
             tileErrors++;
             mismatched.push({
-              x: localPx,
-              y: localPy,
+              x: canvasX,
+              y: canvasY,
               color: templateColorId,
               localX: x,
               localY: y,
@@ -1666,8 +1666,8 @@
           if (templateColorId !== currentColorId) {
             if (shouldLog) console.log(`  🎯 MISMATCH! Adding to paint list`);
             mismatched.push({
-              x: localPx,
-              y: localPy,
+              x: canvasX,
+              y: canvasY,
               color: templateColorId,
               localX: x,
               localY: y,
