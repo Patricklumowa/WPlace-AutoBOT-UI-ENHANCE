@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-      title: "WPlace Auto-Image",
+      title: "WPlace Auto-balls",
       toggleOverlay: "Toggle Overlay",
       scanColors: "Scan Colors",
       uploadImage: "Upload Image",
@@ -1567,6 +1567,15 @@
       console.log(`📝 Detailed pixel logging enabled for first ${MAX_DETAILED_LOGS} pixels`);
       console.log(`📍 Start Position: (${startPosition.x}, ${startPosition.y})`);
       console.log(`🗺️ Region: (${region.x}, ${region.y})`);
+      
+      // Log first few pixels of template data for debugging
+      console.log(`📊 Template data debug:`);
+      console.log(`   • Total pixels in template: ${pixels.length / 4}`);
+      console.log(`   • First 5 pixels (RGBA):`);
+      for (let i = 0; i < Math.min(20, pixels.length); i += 4) {
+        const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2], a = pixels[i + 3];
+        console.log(`     Pixel ${i/4}: RGB(${r},${g},${b}) Alpha:${a}`);
+      }
       
       // Log tile information
       console.log(`📦 Loaded tiles information:`);
