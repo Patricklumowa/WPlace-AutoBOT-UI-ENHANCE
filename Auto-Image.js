@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-      title: "WPlace Auto-Image",
+      title: "WPlace Auto-tes",
       toggleOverlay: "Toggle Overlay",
       scanColors: "Scan Colors",
       uploadImage: "Upload Image",
@@ -1456,9 +1456,11 @@
     async loadTiles(startPosition, region, templateWidth, templateHeight) {
       this.tiles.clear();
       
-      // startPosition contains canvas coordinates - use them directly
-      const startAbsX = startPosition.x;
-      const startAbsY = startPosition.y;
+      // region contains the tile coordinates (e.g. 1734, 1015)
+      // startPosition contains local coordinates within that tile (e.g. 4, 442)
+      // Convert to absolute canvas coordinates
+      const startAbsX = region.x * 1000 + startPosition.x;
+      const startAbsY = region.y * 1000 + startPosition.y;
       const endAbsX = startAbsX + templateWidth - 1;
       const endAbsY = startAbsY + templateHeight - 1;
       
@@ -1468,7 +1470,8 @@
       const endTx = Math.floor(endAbsX / 1000);
       const endTy = Math.floor(endAbsY / 1000);
 
-      console.log(`📦 Loading tiles for coords (${startAbsX},${startAbsY}) to (${endAbsX},${endAbsY})`);
+      console.log(`📦 Converting local pos (${startPosition.x},${startPosition.y}) in tile (${region.x},${region.y}) to absolute (${startAbsX},${startAbsY})`);
+      console.log(`📦 Template area: (${startAbsX},${startAbsY}) to (${endAbsX},${endAbsY})`);
       console.log(`📦 Tile range: (${startTx},${startTy}) to (${endTx},${endTy})`);
       
       const tilePromises = [];
@@ -1583,9 +1586,9 @@
           
           const shouldLog = detailedLogCount < MAX_DETAILED_LOGS;
           
-          // Calculate canvas coordinates and tile position  
-          const canvasX = startPosition.x + x;
-          const canvasY = startPosition.y + y;
+          // Calculate absolute canvas coordinates from local position + tile coordinates
+          const canvasX = region.x * 1000 + startPosition.x + x;
+          const canvasY = region.y * 1000 + startPosition.y + y;
           const targetTx = Math.floor(canvasX / 1000);
           const targetTy = Math.floor(canvasY / 1000);
           const localPx = canvasX % 1000;
