@@ -1,3 +1,4 @@
+
 (async () => {
   // CONFIGURATION CONSTANTS
   const CONFIG = {
@@ -211,7 +212,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-      title: "WPlace Auto-test",
+      title: "WPlace Fix Test",
       toggleOverlay: "Toggle Overlay",
       scanColors: "Scan Colors",
       uploadImage: "Upload Image",
@@ -1814,7 +1815,7 @@
       #wplace-image-bot-container {
         position: fixed;
         top: 20px;
-        right: 20px;
+        left: 20px;
         width: ${CONFIG.currentTheme === "Neon Retro" ? "280px" : "280px"};
         max-height: calc(100vh - 40px);
         background: ${CONFIG.currentTheme === "Classic Autobot"
@@ -1896,7 +1897,7 @@
       #wplace-stats-container {
         position: fixed;
         top: 20px;
-        left: 20px;
+        left: 330px;
         width: ${CONFIG.currentTheme === "Neon Retro" ? "280px" : "280px"};
         max-height: calc(100vh - 40px);
         background: ${CONFIG.currentTheme === "Classic Autobot"
@@ -3570,6 +3571,11 @@
         })
       }
     }
+    if (statsContainer && statsBtn) {
+      statsContainer.style.display = "block";
+      statsBtn.innerHTML = '<i class="fas fa-chart-line"></i>';
+      statsBtn.title = "Hide Stats";
+    }
 
     const settingsBtn = container.querySelector("#settingsBtn")
     const closeSettingsBtn = settingsContainer.querySelector("#closeSettingsBtn")
@@ -4457,9 +4463,9 @@
                 Utils.saveProgress()
               }
 
-              if (CONFIG.PAINTING_SPEED_ENABLED && state.paintingSpeed > 0 && pixelBatch.length > 0) {
+              if (CONFIG.PAINTING_SPEED_ENABLED && state.paintingSpeed > 0 && pixelBatch.pixels.length > 0) {
                 const delayPerPixel = 1000 / state.paintingSpeed // ms per pixel
-                const totalDelay = Math.max(100, delayPerPixel * pixelBatch.length) // minimum 100ms
+                const totalDelay = Math.max(100, delayPerPixel * pixelBatch.pixels.length) // minimum 100ms
                 await Utils.sleep(totalDelay)
               }
             }
@@ -4500,7 +4506,7 @@
           state.currentCharges -= pixelBatch.pixels.length;
           if (CONFIG.PAINTING_SPEED_ENABLED && state.paintingSpeed > 0 && pixelBatch.length > 0) {
             const delayPerPixel = 1000 / state.paintingSpeed // ms per pixel
-            const totalDelay = Math.max(100, delayPerPixel * pixelBatch.length) // minimum 100ms
+            const totalDelay = Math.max(100, delayPerPixel * pixelBatch.pixels.length) // minimum 100ms
             await Utils.sleep(totalDelay)
           }
         }
