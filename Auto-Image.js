@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-      title: "WPlace Auto-Image",
+      title: "WPlace Auto-testo",
       toggleOverlay: "Toggle Overlay",
       scanColors: "Scan Colors",
       uploadImage: "Upload Image",
@@ -1420,6 +1420,7 @@
       // First try to find exact match in available colors
       for (const color of state.availableColors) {
         if (color.rgb && color.rgb.r === r && color.rgb.g === g && color.rgb.b === b) {
+          console.log(`    🎨 RGB(${r},${g},${b}) -> Color ID ${color.id} (exact match)`);
           return color.id;
         }
       }
@@ -1430,11 +1431,13 @@
         if (color.rgb) {
           const colorRgb = [color.rgb.r, color.rgb.g, color.rgb.b];
           if (colorRgb[0] === targetRgb[0] && colorRgb[1] === targetRgb[1] && colorRgb[2] === targetRgb[2]) {
+            console.log(`    🎨 RGB(${r},${g},${b}) -> Color ID ${color.id} (fallback match)`);
             return color.id;
           }
         }
       }
       
+      console.log(`    ❌ RGB(${r},${g},${b}) -> No matching color found, returning 0`);
       return 0; // Transparent/unknown
     }
 
@@ -1551,8 +1554,17 @@
       let skippedWhite = 0;
       let skippedNoColor = 0;
       let tileErrors = 0;
+      let detailedLogCount = 0;
+      const MAX_DETAILED_LOGS = 25; // Limit detailed logging to prevent console spam
       
       console.log(`🔍 Starting pixel analysis for ${templateWidth}x${templateHeight} template`);
+      console.log(`📝 Detailed pixel logging enabled for first ${MAX_DETAILED_LOGS} pixels`);
+      
+      // Log tile information
+      console.log(`📦 Loaded tiles information:`);
+      for (const [tileKey, tile] of this.tiles.entries()) {
+        console.log(`  - Tile ${tileKey}: ${tile.width}x${tile.height} pixels`);
+      }
       
       for (let y = 0; y < templateHeight; y++) {
         for (let x = 0; x < templateWidth; x++) {
@@ -1564,26 +1576,7 @@
           
           totalChecked++;
           
-          // Skip transparent pixels
-          if (alpha < CONFIG.TRANSPARENCY_THRESHOLD) {
-            skippedTransparent++;
-            continue;
-          }
-          
-          // Skip white pixels if disabled
-          if (!state.paintWhitePixels && Utils.isWhitePixel(r, g, b)) {
-            skippedWhite++;
-            continue;
-          }
-          
-          // Get template color ID
-          const templateColorId = findClosestColor([r, g, b], state.availableColors);
-          if (!templateColorId || !this.hasColor(templateColorId)) {
-            skippedNoColor++;
-            continue;
-          }
-          
-          // Calculate global position
+          // Calculate global position first for logging
           const globalPx = startPosition.x + x;
           const globalPy = startPosition.y + y;
           const targetTx = region.x + Math.floor(globalPx / 1000);
@@ -1591,12 +1584,51 @@
           const localPx = globalPx % 1000;
           const localPy = globalPy % 1000;
           
+          const shouldLog = detailedLogCount < MAX_DETAILED_LOGS;
+          
+          if (shouldLog) {
+            console.log(`🔸 Pixel (${x},${y}) -> Global(${globalPx},${globalPy}) -> Tile(${targetTx},${targetTy}) -> Local(${localPx},${localPy}) RGB(${r},${g},${b}) Alpha:${alpha}`);
+            detailedLogCount++;
+          }
+          
+          // Skip transparent pixels
+          if (alpha < CONFIG.TRANSPARENCY_THRESHOLD) {
+            if (shouldLog) console.log(`  ⏭️ SKIPPED: Transparent (alpha ${alpha} < ${CONFIG.TRANSPARENCY_THRESHOLD})`);
+            skippedTransparent++;
+            continue;
+          }
+          
+          // Skip white pixels if disabled
+          if (!state.paintWhitePixels && Utils.isWhitePixel(r, g, b)) {
+            if (shouldLog) console.log(`  ⏭️ SKIPPED: White pixel (paintWhitePixels disabled)`);
+            skippedWhite++;
+            continue;
+          }
+          
+          // Get template color ID
+          const templateColorId = findClosestColor([r, g, b], state.availableColors);
+          if (shouldLog) console.log(`  🎨 Template color ID: ${templateColorId}`);
+          
+          if (!templateColorId || !this.hasColor(templateColorId)) {
+            if (shouldLog) console.log(`  ⏭️ SKIPPED: No valid color ID or user doesn't have access`);
+            skippedNoColor++;
+            continue;
+          }
+          
           // Get current tile color
           const tileKey = `${targetTx}_${targetTy}`;
           const tile = this.tiles.get(tileKey);
           
           if (!tile || !tile.data || localPx >= tile.width || localPy >= tile.height || !tile.data[localPx]) {
             // If we can't load the tile or access the pixel, assume it needs painting
+            if (shouldLog) {
+              console.log(`  ❌ TILE ERROR: Cannot access tile ${tileKey} at local position (${localPx},${localPy})`);
+              console.log(`    - Tile exists: ${!!tile}`);
+              console.log(`    - Tile data exists: ${!!(tile && tile.data)}`);
+              console.log(`    - Tile dimensions: ${tile ? tile.width + 'x' + tile.height : 'N/A'}`);
+              console.log(`    - Local bounds check: ${localPx} < ${tile ? tile.width : 'N/A'} && ${localPy} < ${tile ? tile.height : 'N/A'}`);
+              console.log(`    - Data array exists: ${!!(tile && tile.data && tile.data[localPx])}`);
+            }
             tileErrors++;
             mismatched.push({
               x: localPx,
@@ -1607,13 +1639,19 @@
               regionX: targetTx,
               regionY: targetTy
             });
+            if (shouldLog) console.log(`  🎯 ADDED TO PAINT LIST (tile error)`);
             continue;
           }
           
           const currentColorId = tile.data[localPx][localPy];
+          if (shouldLog) {
+            console.log(`  🔍 Canvas current color ID: ${currentColorId}`);
+            console.log(`  🎨 Template wants color ID: ${templateColorId}`);
+          }
           
           // Only add if colors don't match
           if (templateColorId !== currentColorId) {
+            if (shouldLog) console.log(`  🎯 MISMATCH! Adding to paint list`);
             mismatched.push({
               x: localPx,
               y: localPy,
@@ -1623,6 +1661,8 @@
               regionX: targetTx,
               regionY: targetTy
             });
+          } else {
+            if (shouldLog) console.log(`  ✅ MATCH! Pixel already correct`);
           }
         }
       }
@@ -1634,6 +1674,10 @@
       console.log(`   • Skipped no color: ${skippedNoColor}`);
       console.log(`   • Tile access errors: ${tileErrors}`);
       console.log(`   • Mismatched pixels: ${mismatched.length}`);
+      console.log(`   • Detailed logs shown: ${Math.min(detailedLogCount, MAX_DETAILED_LOGS)}/${totalChecked} pixels`);
+      if (detailedLogCount >= MAX_DETAILED_LOGS) {
+        console.log(`   ⚠️ Detailed logging was limited to ${MAX_DETAILED_LOGS} pixels to prevent console spam`);
+      }
       
       return mismatched;
     }
