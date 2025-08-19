@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-      title: "WPlace Auto-testo",
+      title: "WPlace Auto-Image",
       toggleOverlay: "Toggle Overlay",
       scanColors: "Scan Colors",
       uploadImage: "Upload Image",
@@ -1559,6 +1559,8 @@
       
       console.log(`🔍 Starting pixel analysis for ${templateWidth}x${templateHeight} template`);
       console.log(`📝 Detailed pixel logging enabled for first ${MAX_DETAILED_LOGS} pixels`);
+      console.log(`📍 Start Position: (${startPosition.x}, ${startPosition.y})`);
+      console.log(`🗺️ Region: (${region.x}, ${region.y})`);
       
       // Log tile information
       console.log(`📦 Loaded tiles information:`);
@@ -1576,7 +1578,7 @@
           
           totalChecked++;
           
-          // Calculate global position first for logging
+          // Calculate coordinates - need to understand if startPosition is absolute or region-relative
           const globalPx = startPosition.x + x;
           const globalPy = startPosition.y + y;
           const targetTx = region.x + Math.floor(globalPx / 1000);
@@ -1588,6 +1590,9 @@
           
           if (shouldLog) {
             console.log(`🔸 Pixel (${x},${y}) -> Global(${globalPx},${globalPy}) -> Tile(${targetTx},${targetTy}) -> Local(${localPx},${localPy}) RGB(${r},${g},${b}) Alpha:${alpha}`);
+            console.log(`  📐 Calculation: startPos(${startPosition.x},${startPosition.y}) + template(${x},${y}) = global(${globalPx},${globalPy})`);
+            console.log(`  🗺️ Tile calc: region(${region.x},${region.y}) + floor(global/1000) = tile(${targetTx},${targetTy})`);
+            console.log(`  📍 Local calc: global(${globalPx},${globalPy}) % 1000 = local(${localPx},${localPy})`);
             detailedLogCount++;
           }
           
@@ -4635,10 +4640,22 @@
 
                 const payload = JSON.parse(options.body)
                 if (payload?.coords && Array.isArray(payload.coords)) {
+                  const paintedX = payload.coords[0];
+                  const paintedY = payload.coords[1];
+                  
                   state.startPosition = {
-                    x: payload.coords[0],
-                    y: payload.coords[1],
+                    x: paintedX,
+                    y: paintedY,
                   }
+                  console.log(`🎯 Position detected from paint: (${paintedX}, ${paintedY})`);
+                  console.log(`🗺️ Current region: (${state.region.x}, ${state.region.y})`);
+                  console.log(`📐 Region base coordinates: (${state.region.x * 1000}, ${state.region.y * 1000})`);
+                  
+                  // Calculate what this position means relative to region
+                  const regionRelativeX = paintedX - (state.region.x * 1000);
+                  const regionRelativeY = paintedY - (state.region.y * 1000);
+                  console.log(`📍 Region-relative position: (${regionRelativeX}, ${regionRelativeY})`);
+                  
                   state.lastPosition = { x: 0, y: 0 }
 
                   await overlayManager.setPosition(state.startPosition, state.region);
