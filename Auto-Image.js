@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-      title: "WPlace Auto-test",
+      title: "WPlace Auto-Image",
       toggleOverlay: "Toggle Overlay",
       scanColors: "Scan Colors",
       uploadImage: "Upload Image",
@@ -1456,21 +1456,46 @@
     async loadTiles(startPosition, region, templateWidth, templateHeight) {
       this.tiles.clear();
       
-      // startPosition contains absolute canvas coordinates
-      // Calculate the range of tiles needed
-      const startAbsX = startPosition.x;
-      const startAbsY = startPosition.y;
-      const endAbsX = startAbsX + templateWidth - 1;
-      const endAbsY = startAbsY + templateHeight - 1;
+      let startTx, startTy, endTx, endTy;
       
-      // Determine which tiles are needed
-      const startTx = Math.floor(startAbsX / 1000);
-      const startTy = Math.floor(startAbsY / 1000);
-      const endTx = Math.floor(endAbsX / 1000);
-      const endTy = Math.floor(endAbsY / 1000);
-
-      console.log(`📦 Loading tiles for absolute coords (${startAbsX},${startAbsY}) to (${endAbsX},${endAbsY})`);
-      console.log(`📦 Tile range: (${startTx},${startTy}) to (${endTx},${endTy})`);
+      if (startPosition.x <= 3999 && startPosition.y <= 3999) {
+        // REGIONAL COORDINATES (0-3999)
+        const startRegionalX = startPosition.x;
+        const startRegionalY = startPosition.y;
+        const endRegionalX = startRegionalX + templateWidth - 1;
+        const endRegionalY = startRegionalY + templateHeight - 1;
+        
+        // Find which tiles within the region are needed
+        const startTileXInRegion = Math.floor(startRegionalX / 1000);
+        const startTileYInRegion = Math.floor(startRegionalY / 1000);
+        const endTileXInRegion = Math.floor(endRegionalX / 1000);
+        const endTileYInRegion = Math.floor(endRegionalY / 1000);
+        
+        // Convert to global tile coordinates
+        startTx = region.x * 2 + startTileXInRegion;
+        startTy = region.y * 2 + startTileYInRegion;
+        endTx = region.x * 2 + endTileXInRegion;
+        endTy = region.y * 2 + endTileYInRegion;
+        
+        console.log(`📦 Loading tiles for regional coords (${startRegionalX},${startRegionalY}) to (${endRegionalX},${endRegionalY})`);
+        console.log(`📦 Regional tile range: (${startTileXInRegion},${startTileYInRegion}) to (${endTileXInRegion},${endTileYInRegion})`);
+        console.log(`📦 Global tile range: (${startTx},${startTy}) to (${endTx},${endTy})`);
+        
+      } else {
+        // ABSOLUTE COORDINATES (>3999)
+        const startAbsX = startPosition.x;
+        const startAbsY = startPosition.y;
+        const endAbsX = startAbsX + templateWidth - 1;
+        const endAbsY = startAbsY + templateHeight - 1;
+        
+        startTx = Math.floor(startAbsX / 1000);
+        startTy = Math.floor(startAbsY / 1000);
+        endTx = Math.floor(endAbsX / 1000);
+        endTy = Math.floor(endAbsY / 1000);
+        
+        console.log(`📦 Loading tiles for absolute coords (${startAbsX},${startAbsY}) to (${endAbsX},${endAbsY})`);
+        console.log(`📦 Tile range: (${startTx},${startTy}) to (${endTx},${endTy})`);
+      }
       
       const tilePromises = [];
       let totalTiles = 0;
@@ -1582,29 +1607,54 @@
           
           totalChecked++;
           
-          // startPosition contains ABSOLUTE canvas coordinates (e.g., 3200, 2320)
-          // We need to convert them to local tile coordinates properly
-          
-          // Calculate absolute canvas position for this template pixel
-          const absoluteCanvasX = startPosition.x + x;
-          const absoluteCanvasY = startPosition.y + y;
-          
-          // Extract tile coordinates (which tile this pixel belongs to)
-          const targetTx = Math.floor(absoluteCanvasX / 1000);
-          const targetTy = Math.floor(absoluteCanvasY / 1000);
-          
-          // Extract local coordinates within that tile (0-999 range)
-          const localPx = absoluteCanvasX % 1000;
-          const localPy = absoluteCanvasY % 1000;
-          
           const shouldLog = detailedLogCount < MAX_DETAILED_LOGS;
           
-          if (shouldLog) {
-            console.log(`🔸 Pixel (${x},${y}) -> AbsCanvas(${absoluteCanvasX},${absoluteCanvasY}) -> Tile(${targetTx},${targetTy}) -> Local(${localPx},${localPy}) RGB(${r},${g},${b}) Alpha:${alpha}`);
-            console.log(`  📐 AbsCanvas: startPos(${startPosition.x},${startPosition.y}) + template(${x},${y}) = (${absoluteCanvasX},${absoluteCanvasY})`);
-            console.log(`  🗺️ Tile: floor(absCanvas/1000) = tile(${targetTx},${targetTy})`);
-            console.log(`  📍 Local: absCanvas % 1000 = local(${localPx},${localPy})`);
-            detailedLogCount++;
+          // Handle coordinate calculation based on whether startPosition is regional or absolute
+          let targetTx, targetTy, localPx, localPy;
+          
+          if (startPosition.x <= 3999 && startPosition.y <= 3999) {
+            // REGIONAL COORDINATES (0-3999)
+            const templatePixelX = startPosition.x + x;
+            const templatePixelY = startPosition.y + y;
+            
+            // Find which tile within the region (0-1 for each axis in 2x2 grid)
+            const tileXInRegion = Math.floor(templatePixelX / 1000);
+            const tileYInRegion = Math.floor(templatePixelY / 1000);
+            
+            // Convert to global tile coordinates
+            targetTx = region.x * 2 + tileXInRegion;
+            targetTy = region.y * 2 + tileYInRegion;
+            
+            // Local coordinates within tile (remove first digit as you said)
+            localPx = templatePixelX % 1000;
+            localPy = templatePixelY % 1000;
+            
+            if (shouldLog) {
+              console.log(`🔸 Pixel (${x},${y}) -> RegionalPixel(${templatePixelX},${templatePixelY}) -> Tile(${targetTx},${targetTy}) -> Local(${localPx},${localPy}) RGB(${r},${g},${b}) Alpha:${alpha}`);
+              console.log(`  📐 Regional: startPos(${startPosition.x},${startPosition.y}) + template(${x},${y}) = (${templatePixelX},${templatePixelY})`);
+              console.log(`  🗺️ Tile in region: floor(regional/1000) = (${tileXInRegion},${tileYInRegion})`);
+              console.log(`  🌍 Global tile: region(${region.x},${region.y}) * 2 + tileInRegion = (${targetTx},${targetTy})`);
+              console.log(`  📍 Local: regional % 1000 = local(${localPx},${localPy})`);
+              detailedLogCount++;
+            }
+            
+          } else {
+            // ABSOLUTE COORDINATES (>3999)
+            const absoluteCanvasX = startPosition.x + x;
+            const absoluteCanvasY = startPosition.y + y;
+            
+            targetTx = Math.floor(absoluteCanvasX / 1000);
+            targetTy = Math.floor(absoluteCanvasY / 1000);
+            localPx = absoluteCanvasX % 1000;
+            localPy = absoluteCanvasY % 1000;
+            
+            if (shouldLog) {
+              console.log(`🔸 Pixel (${x},${y}) -> AbsCanvas(${absoluteCanvasX},${absoluteCanvasY}) -> Tile(${targetTx},${targetTy}) -> Local(${localPx},${localPy}) RGB(${r},${g},${b}) Alpha:${alpha}`);
+              console.log(`  📐 Absolute: startPos(${startPosition.x},${startPosition.y}) + template(${x},${y}) = (${absoluteCanvasX},${absoluteCanvasY})`);
+              console.log(`  🗺️ Tile: floor(absolute/1000) = tile(${targetTx},${targetTy})`);
+              console.log(`  📍 Local: absolute % 1000 = local(${localPx},${localPy})`);
+              detailedLogCount++;
+            }
           }
           
           // Skip transparent pixels
@@ -4661,15 +4711,39 @@
                   console.log(`🎯 Position detected from paint: (${paintedX}, ${paintedY})`);
                   console.log(`🗺️ Current region: (${state.region.x}, ${state.region.y})`);
                   
-                  // Show tile extraction based on your correction
-                  const extractedTileX = Math.floor(paintedX / 1000);
-                  const extractedTileY = Math.floor(paintedY / 1000);
-                  const localPosX = paintedX % 1000;
-                  const localPosY = paintedY % 1000;
-                  
-                  console.log(`📐 Tile extraction: floor(${paintedX}/1000) = ${extractedTileX}, floor(${paintedY}/1000) = ${extractedTileY}`);
-                  console.log(`📍 Local position: ${paintedX}%1000 = ${localPosX}, ${paintedY}%1000 = ${localPosY}`);
-                  console.log(`🎯 So we're at tile (${extractedTileX},${extractedTileY}) position (${localPosX},${localPosY})`);
+                  // Check if these are regional coordinates (0-3999) or absolute coordinates
+                  if (paintedX <= 3999 && paintedY <= 3999) {
+                    console.log(`📍 These appear to be REGIONAL coordinates (0-3999 range)`);
+                    
+                    // Convert regional coordinates to local tile coordinates by removing first digit
+                    const localTileX = paintedX % 1000;
+                    const localTileY = paintedY % 1000;
+                    
+                    console.log(`🔢 Regional coord ${paintedX} → Local tile coord ${localTileX}`);
+                    console.log(`🔢 Regional coord ${paintedY} → Local tile coord ${localTileY}`);
+                    
+                    // Determine which tile within the region based on regional coords
+                    const tileXInRegion = Math.floor(paintedX / 1000);
+                    const tileYInRegion = Math.floor(paintedY / 1000);
+                    console.log(`🗺️ Tile within region: (${tileXInRegion}, ${tileYInRegion})`);
+                    
+                    // Map to global tile coordinates
+                    const globalTileX = state.region.x * 2 + tileXInRegion;
+                    const globalTileY = state.region.y * 2 + tileYInRegion;
+                    console.log(`🌍 Global tile coordinates: (${globalTileX}, ${globalTileY})`);
+                    
+                  } else {
+                    console.log(`📍 These appear to be ABSOLUTE coordinates (>3999)`);
+                    
+                    // Original absolute coordinate logic
+                    const extractedTileX = Math.floor(paintedX / 1000);
+                    const extractedTileY = Math.floor(paintedY / 1000);
+                    const localPosX = paintedX % 1000;
+                    const localPosY = paintedY % 1000;
+                    
+                    console.log(`📐 Tile extraction: floor(${paintedX}/1000) = ${extractedTileX}, floor(${paintedY}/1000) = ${extractedTileY}`);
+                    console.log(`📍 Local position: ${paintedX}%1000 = ${localPosX}, ${paintedY}%1000 = ${localPosY}`);
+                  }
                   
                   state.lastPosition = { x: 0, y: 0 }
 
