@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-      title: "WPlace Auto-test",
+      title: "WPlace Auto-Image",
       toggleOverlay: "Toggle Overlay",
       scanColors: "Scan Colors",
       uploadImage: "Upload Image",
@@ -1411,12 +1411,30 @@
 
     // Convert RGB string to color ID
     rgbToColorId(r, g, b) {
-      const rgbKey = `${r},${g},${b}`;
-      for (const [mapIndex, colorData] of Object.entries(CONFIG.COLOR_MAP)) {
-        if (colorData.rgb && colorData.rgb.r === r && colorData.rgb.g === g && colorData.rgb.b === b) {
-          return colorData.id;
+      // Check if we have available colors loaded
+      if (!state.availableColors || state.availableColors.length === 0) {
+        console.warn("No available colors loaded for RGB conversion");
+        return 0;
+      }
+      
+      // First try to find exact match in available colors
+      for (const color of state.availableColors) {
+        if (color.rgb && color.rgb.r === r && color.rgb.g === g && color.rgb.b === b) {
+          return color.id;
         }
       }
+      
+      // Fallback: use the same logic as findClosestColor but for exact matches
+      const targetRgb = [r, g, b];
+      for (const color of state.availableColors) {
+        if (color.rgb) {
+          const colorRgb = [color.rgb.r, color.rgb.g, color.rgb.b];
+          if (colorRgb[0] === targetRgb[0] && colorRgb[1] === targetRgb[1] && colorRgb[2] === targetRgb[2]) {
+            return color.id;
+          }
+        }
+      }
+      
       return 0; // Transparent/unknown
     }
 
@@ -1445,7 +1463,10 @@
       const endTx = startTx + Math.floor(endPx / 1000);
       const endTy = startTy + Math.floor(endPy / 1000);
 
+      console.log(`📦 Loading tiles from (${startTx},${startTy}) to (${endTx},${endTy})`);
+      
       const tilePromises = [];
+      let totalTiles = 0;
       
       for (let currentTx = startTx; currentTx <= endTx; currentTx++) {
         for (let currentTy = startTy; currentTy <= endTy; currentTy++) {
@@ -1454,11 +1475,20 @@
           
           const promise = this.loadSingleTile(tileUrl, tileKey);
           tilePromises.push(promise);
+          totalTiles++;
         }
       }
       
       await Promise.all(tilePromises);
-      console.log(`Loaded ${this.tiles.size} tiles for comparison`);
+      const loadedTiles = this.tiles.size;
+      
+      console.log(`📊 Tile loading result: ${loadedTiles}/${totalTiles} tiles loaded successfully`);
+      
+      if (loadedTiles === 0) {
+        console.error("❌ No tiles could be loaded!");
+        return false;
+      }
+      
       return true;
     }
 
@@ -1466,7 +1496,10 @@
     async loadSingleTile(tileUrl, tileKey) {
       try {
         const response = await fetch(tileUrl, { credentials: 'include' });
-        if (!response.ok) return;
+        if (!response.ok) {
+          console.warn(`Failed to fetch tile ${tileKey}: ${response.status} ${response.statusText}`);
+          return;
+        }
         
         const blob = await response.blob();
         const imageBitmap = await createImageBitmap(blob);
@@ -1479,7 +1512,7 @@
         const tileData = {
           width: canvas.width,
           height: canvas.height,
-          data: Array.from({ length: canvas.width }, () => [])
+          data: Array.from({ length: canvas.width }, () => new Array(canvas.height))
         };
         
         // Convert pixels to color IDs
@@ -1502,8 +1535,10 @@
         }
         
         this.tiles.set(tileKey, tileData);
+        console.log(`✅ Loaded tile ${tileKey} (${canvas.width}x${canvas.height})`);
+        
       } catch (error) {
-        console.warn(`Failed to load tile ${tileKey}:`, error);
+        console.warn(`❌ Failed to load tile ${tileKey}:`, error);
       }
     }
 
@@ -1511,6 +1546,13 @@
     getMismatchedPixels(templateData, startPosition, region) {
       const mismatched = [];
       const { width: templateWidth, height: templateHeight, pixels } = templateData;
+      let totalChecked = 0;
+      let skippedTransparent = 0;
+      let skippedWhite = 0;
+      let skippedNoColor = 0;
+      let tileErrors = 0;
+      
+      console.log(`🔍 Starting pixel analysis for ${templateWidth}x${templateHeight} template`);
       
       for (let y = 0; y < templateHeight; y++) {
         for (let x = 0; x < templateWidth; x++) {
@@ -1520,15 +1562,26 @@
           const b = pixels[idx + 2];
           const alpha = pixels[idx + 3];
           
+          totalChecked++;
+          
           // Skip transparent pixels
-          if (alpha < CONFIG.TRANSPARENCY_THRESHOLD) continue;
+          if (alpha < CONFIG.TRANSPARENCY_THRESHOLD) {
+            skippedTransparent++;
+            continue;
+          }
           
           // Skip white pixels if disabled
-          if (!state.paintWhitePixels && Utils.isWhitePixel(r, g, b)) continue;
+          if (!state.paintWhitePixels && Utils.isWhitePixel(r, g, b)) {
+            skippedWhite++;
+            continue;
+          }
           
           // Get template color ID
           const templateColorId = findClosestColor([r, g, b], state.availableColors);
-          if (!templateColorId || !this.hasColor(templateColorId)) continue;
+          if (!templateColorId || !this.hasColor(templateColorId)) {
+            skippedNoColor++;
+            continue;
+          }
           
           // Calculate global position
           const globalPx = startPosition.x + x;
@@ -1541,8 +1594,10 @@
           // Get current tile color
           const tileKey = `${targetTx}_${targetTy}`;
           const tile = this.tiles.get(tileKey);
-          if (!tile || !tile.data[localPx] || localPx >= tile.width || localPy >= tile.height) {
-            // If we can't load the tile, assume it needs painting
+          
+          if (!tile || !tile.data || localPx >= tile.width || localPy >= tile.height || !tile.data[localPx]) {
+            // If we can't load the tile or access the pixel, assume it needs painting
+            tileErrors++;
             mismatched.push({
               x: localPx,
               y: localPy,
@@ -1572,7 +1627,14 @@
         }
       }
       
-      console.log(`Found ${mismatched.length} mismatched pixels out of ${templateWidth * templateHeight} total pixels`);
+      console.log(`📊 Pixel analysis complete:`);
+      console.log(`   • Total pixels checked: ${totalChecked}`);
+      console.log(`   • Skipped transparent: ${skippedTransparent}`);
+      console.log(`   • Skipped white: ${skippedWhite}`);
+      console.log(`   • Skipped no color: ${skippedNoColor}`);
+      console.log(`   • Tile access errors: ${tileErrors}`);
+      console.log(`   • Mismatched pixels: ${mismatched.length}`);
+      
       return mismatched;
     }
   }
@@ -1580,6 +1642,18 @@
   // AUTO SCAN FUNCTIONALITY
   async function performAutoScan() {
     if (!state.imageLoaded || !state.startPosition || !state.region) {
+      console.warn("Cannot perform auto-scan: Missing requirements", {
+        imageLoaded: state.imageLoaded,
+        startPosition: !!state.startPosition,
+        region: !!state.region
+      });
+      return;
+    }
+
+    // Check if colors have been scanned
+    if (!state.colorsChecked || !state.availableColors || state.availableColors.length === 0) {
+      console.warn("Colors not scanned yet. Please scan colors first.");
+      updateUI("noColorsFound", "warning");
       return;
     }
 
@@ -1588,7 +1662,18 @@
       console.log("🔍 Auto-scanning canvas for correct pixels...");
       
       const { width, height } = state.imageData;
-      await state.tileManager.loadTiles(state.startPosition, state.region, width, height);
+      console.log(`📏 Template size: ${width}x${height} pixels`);
+      console.log(`📍 Start position: (${state.startPosition.x}, ${state.startPosition.y})`);
+      console.log(`🗺️ Region: (${state.region.x}, ${state.region.y})`);
+      console.log(`🎨 Available colors: ${state.availableColors.length}`);
+      
+      // Load tiles with better error handling
+      const tilesLoaded = await state.tileManager.loadTiles(state.startPosition, state.region, width, height);
+      if (!tilesLoaded) {
+        console.warn("Failed to load tiles for scanning");
+        updateUI("scanFailed", "warning");
+        return;
+      }
       
       const mismatchedPixels = state.tileManager.getMismatchedPixels(
         state.imageData,
