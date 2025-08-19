@@ -3,13 +3,37 @@
 
 javascript:(function() {
   
-  // Account Switcher Configuration
-  const ACCOUNTS = {
-    'Account 1': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIwNDE5ODEsInNlc3Npb25JZCI6IjNZNE9NcU1HeEdKQVE5VngyR0JPR0VsXzBuMENKazYtWVNGamZNNGJQVEk9IiwiaXNzIjoid3BsYWNlIiwiZXhwIjoxNzU4MTU3MzQ5LCJpYXQiOjE3NTU1NjUzNDl9.kmmeX0QwoBS0Tu0uvXcP3xEgzJWatxSSelW-4A1FT8U',
-    'Account 2': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIwOTg4NDMsInNlc3Npb25JZCI6Ik9fNm5DakxBcjQycWwxZWdSU2pSQk82Q1Y5NU9BTjBJQTRjRkJ5alFTdHM9IiwiaXNzIjoid3BsYWNlIiwiZXhwIjoxNzU4MTMzNjE3LCJpYXQiOjE3NTU1NDE2MTd9.SvS3Kiu23uKmpmzFk-_namRdsENOExDzJ1HnEudmv1w', 
-    'Account 3': 'your_j_cookie_value_3_here'
-    // Add more accounts as needed
-  };
+  // Account Switcher Configuration - Now using localStorage
+  function getStoredAccounts() {
+    try {
+      const stored = localStorage.getItem('wplace_accounts');
+      return stored ? JSON.parse(stored) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveAccount(name, cookie) {
+    try {
+      const accounts = getStoredAccounts();
+      accounts[name] = cookie;
+      localStorage.setItem('wplace_accounts', JSON.stringify(accounts));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function removeAccount(name) {
+    try {
+      const accounts = getStoredAccounts();
+      delete accounts[name];
+      localStorage.setItem('wplace_accounts', JSON.stringify(accounts));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 
   // Create Account Switcher UI
   function createAccountSwitcher() {
@@ -72,8 +96,10 @@ javascript:(function() {
           outline: none;
         ">
           <option value="">Select Account...</option>
-          ${Object.keys(ACCOUNTS).map(name => 
-            `<option value="${name}" style="background: #2d3748; color: white;">${name}</option>`
+          ${Object.keys(getStoredAccounts()).map(name => 
+            `      ].map(lang =>
+        `<option value="${lang.value}" ${state.language === lang.value ? 'selected' : ''} style="background: #2d3748; color: white;">${lang.text}</option>`
+      ).join(''),`
           ).join('')}
         </select>
       </div>
@@ -138,8 +164,9 @@ javascript:(function() {
     const jCookie = getCookie('J');
     if (!jCookie) return 'Not logged in';
     
-    // Try to find matching account name
-    for (const [name, cookie] of Object.entries(ACCOUNTS)) {
+    // Try to find matching account name from stored accounts
+    const accounts = getStoredAccounts();
+    for (const [name, cookie] of Object.entries(accounts)) {
       if (cookie === jCookie) return name;
     }
     
@@ -154,11 +181,16 @@ javascript:(function() {
     return null;
   }
 
-  function setCookie(name, value, days = 30) {
+  function setCookieBothDomains(name, value, days = 30) {
     const expires = new Date();
     expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
-    const domain = window.location.hostname;
-    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;domain=.${domain}`;
+    const expiresStr = expires.toUTCString();
+    
+    // Set cookie for main domain
+    document.cookie = `${name}=${value};expires=${expiresStr};path=/;domain=.wplace.live`;
+    
+    // Set cookie for backend domain
+    document.cookie = `${name}=${value};expires=${expiresStr};path=/;domain=.backend.wplace.live`;
   }
 
   // Show status message
@@ -226,17 +258,21 @@ javascript:(function() {
 
   // Switch account function
   function switchAccount(accountName) {
-    if (!ACCOUNTS[accountName]) {
+    const accounts = getStoredAccounts();
+    if (!accounts[accountName]) {
       showStatus('Account not found!', 'error');
       return;
     }
 
     try {
-      // Set the new J cookie
-      setCookie('J', ACCOUNTS[accountName]);
+      // Set the new J cookie on both domains
+      setCookieBothDomains('J', accounts[accountName]);
       
       // Update current account display
-      document.getElementById('current-account').textContent = accountName;
+      const currentAccountEl = document.getElementById('current-account');
+      if (currentAccountEl) {
+        currentAccountEl.textContent = accountName;
+      }
       
       // Reinitialize page state
       setTimeout(() => {
@@ -250,15 +286,24 @@ javascript:(function() {
   }
 
   // Apply cookie directly
-  function applyCookie(cookieValue) {
+  function applyCookie(cookieValue, accountName = null) {
     if (!cookieValue.trim()) {
       showStatus('Please enter a cookie value!', 'error');
       return;
     }
 
     try {
-      setCookie('J', cookieValue.trim());
-      document.getElementById('current-account').textContent = 'Custom Account';
+      setCookieBothDomains('J', cookieValue.trim());
+      
+      // Save the account if name is provided
+      if (accountName && accountName.trim()) {
+        saveAccount(accountName.trim(), cookieValue.trim());
+      }
+      
+      const currentAccountEl = document.getElementById('current-account');
+      if (currentAccountEl) {
+        currentAccountEl.textContent = accountName || 'Custom Account';
+      }
       
       setTimeout(() => {
         reinitializePage();
@@ -297,7 +342,8 @@ javascript:(function() {
 
     document.getElementById('apply-cookie').addEventListener('click', () => {
       const cookieInput = document.getElementById('cookie-input');
-      applyCookie(cookieInput.value);
+      const accountName = prompt('Enter a name for this account (optional):');
+      applyCookie(cookieInput.value, accountName);
       cookieInput.value = '';
     });
 
