@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-      title: "WPlace Auto-Image",
+      title: "WPlace Auto-testp",
       toggleOverlay: "Toggle Overlay",
       scanColors: "Scan Colors",
       uploadImage: "Upload Image",
@@ -1480,7 +1480,7 @@
       for (let currentTx = startTx; currentTx <= endTx; currentTx++) {
         for (let currentTy = startTy; currentTy <= endTy; currentTy++) {
           const tileKey = `${currentTx}_${currentTy}`;
-          const tileUrl = `https://backend.wplace.live/files/s0/tiles/${currentTx}/${currentTy}.png?t=${Date.now()}`;
+          const tileUrl = `https://backend.wplace.live/files/s0/tiles/${currentTx}/${currentTy}.png`;
           
           const promise = this.loadSingleTile(tileUrl, tileKey);
           tilePromises.push(promise);
@@ -1504,7 +1504,7 @@
     // Load a single tile and convert to color ID data
     async loadSingleTile(tileUrl, tileKey) {
       try {
-        const response = await fetch(tileUrl, { credentials: 'include' });
+        const response = await fetch(tileUrl);
         if (!response.ok) {
           console.warn(`Failed to fetch tile ${tileKey}: ${response.status} ${response.statusText}`);
           return;
