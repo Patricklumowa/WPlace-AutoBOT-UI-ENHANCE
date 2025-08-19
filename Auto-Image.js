@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-      title: "WPlace Auto-test",
+      title: "WPlace Auto-Image",
       toggleOverlay: "Toggle Overlay",
       scanColors: "Scan Colors",
       uploadImage: "Upload Image",
@@ -1456,32 +1456,19 @@
     async loadTiles(startPosition, region, templateWidth, templateHeight) {
       this.tiles.clear();
       
-      // Convert regional coordinates to absolute coordinates if needed
-      let absoluteX, absoluteY;
+      // startPosition contains canvas coordinates - use them directly
+      const startAbsX = startPosition.x;
+      const startAbsY = startPosition.y;
+      const endAbsX = startAbsX + templateWidth - 1;
+      const endAbsY = startAbsY + templateHeight - 1;
       
-      if (startPosition.x <= 3999 && startPosition.y <= 3999) {
-        // REGIONAL COORDINATES - convert to absolute
-        absoluteX = region.x * 4000 + startPosition.x;
-        absoluteY = region.y * 4000 + startPosition.y;
-        console.log(`📦 Converting regional coords (${startPosition.x},${startPosition.y}) in region (${region.x},${region.y}) to absolute (${absoluteX},${absoluteY})`);
-      } else {
-        // ABSOLUTE COORDINATES - use as is
-        absoluteX = startPosition.x;
-        absoluteY = startPosition.y;
-        console.log(`📦 Using absolute coords (${absoluteX},${absoluteY})`);
-      }
-      
-      // Calculate the range of tiles needed based on absolute coordinates
-      const endAbsX = absoluteX + templateWidth - 1;
-      const endAbsY = absoluteY + templateHeight - 1;
-      
-      const startTx = Math.floor(absoluteX / 1000);
-      const startTy = Math.floor(absoluteY / 1000);
+      // Determine which tiles are needed
+      const startTx = Math.floor(startAbsX / 1000);
+      const startTy = Math.floor(startAbsY / 1000);
       const endTx = Math.floor(endAbsX / 1000);
       const endTy = Math.floor(endAbsY / 1000);
-      
-      console.log(`📦 Template area: (${absoluteX},${absoluteY}) to (${endAbsX},${endAbsY})`);
-      console.log(`📦 Tile range: (${startTx},${startTy}) to (${endTx},${endTy})`)
+
+      console.log(`📦 Loading tiles for coords (${startAbsX},${startAbsY}) to (${endAbsX},${endAbsY})`);
       console.log(`📦 Tile range: (${startTx},${startTy}) to (${endTx},${endTy})`);
       
       const tilePromises = [];
@@ -1596,27 +1583,16 @@
           
           const shouldLog = detailedLogCount < MAX_DETAILED_LOGS;
           
-          // Handle coordinate calculation - convert to absolute coordinates first
-          let absolutePixelX, absolutePixelY;
-          
-          if (startPosition.x <= 3999 && startPosition.y <= 3999) {
-            // REGIONAL COORDINATES - convert to absolute
-            absolutePixelX = (region.x * 4000) + startPosition.x + x;
-            absolutePixelY = (region.y * 4000) + startPosition.y + y;
-          } else {
-            // ABSOLUTE COORDINATES - use as is
-            absolutePixelX = startPosition.x + x;
-            absolutePixelY = startPosition.y + y;
-          }
-          
-          // Calculate tile and local coordinates from absolute coordinates
-          const targetTx = Math.floor(absolutePixelX / 1000);
-          const targetTy = Math.floor(absolutePixelY / 1000);
-          const localPx = absolutePixelX % 1000;
-          const localPy = absolutePixelY % 1000;
+          // Calculate canvas coordinates and tile position  
+          const canvasX = startPosition.x + x;
+          const canvasY = startPosition.y + y;
+          const targetTx = Math.floor(canvasX / 1000);
+          const targetTy = Math.floor(canvasY / 1000);
+          const localPx = canvasX % 1000;
+          const localPy = canvasY % 1000;
           
           if (shouldLog) {
-            console.log(`🔸 Pixel (${x},${y}) -> AbsolutePixel(${absolutePixelX},${absolutePixelY}) -> Tile(${targetTx},${targetTy}) -> Local(${localPx},${localPy}) RGB(${r},${g},${b}) Alpha:${alpha}`);
+            console.log(`🔸 Pixel (${x},${y}) -> Canvas(${canvasX},${canvasY}) -> Tile(${targetTx},${targetTy}) -> Local(${localPx},${localPy}) RGB(${r},${g},${b}) Alpha:${alpha}`);
             if (startPosition.x <= 3999 && startPosition.y <= 3999) {
               console.log(`  � Regional: region(${region.x},${region.y}) * 4000 + startPos(${startPosition.x},${startPosition.y}) + template(${x},${y}) = (${absolutePixelX},${absolutePixelY})`);
             } else {
