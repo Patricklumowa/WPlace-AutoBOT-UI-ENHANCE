@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-      title: "WPlace Auto-Image",
+      title: "WPlace Auto-test",
       toggleOverlay: "Toggle Overlay",
       scanColors: "Scan Colors",
       uploadImage: "Upload Image",
@@ -675,6 +675,7 @@
     paintingSpeed: CONFIG.PAINTING_SPEED.DEFAULT, // pixels per second
     cooldownChargeThreshold: CONFIG.COOLDOWN_CHARGE_THRESHOLD,
     overlayOpacity: CONFIG.OVERLAY.OPACITY_DEFAULT,
+    overlayEnabled: false, // Start with overlay OFF for accurate color picking
     blueMarbleEnabled: CONFIG.OVERLAY.BLUE_MARBLE_DEFAULT,
     tileManager: null, // Will be initialized in createUI
     lastScanTime: null, // Timestamp of last auto-scan
@@ -1536,7 +1537,9 @@
             ];
             
             if (a === 255) {
-              tileData.data[x][y] = this.rgbToColorId(r, g, b);
+              // Instead of using rgbToColorId which is failing, use simple RGB-to-ID conversion
+              // For now, just store a simple hash to detect differences
+              tileData.data[x][y] = ((r << 16) | (g << 8) | b) || 1; // Simple RGB hash, avoid 0
             } else {
               tileData.data[x][y] = 0; // Transparent
             }
@@ -1552,7 +1555,210 @@
     }
 
     // Get mismatched pixels that need to be painted
-    // NEW: Simple and reliable pixel scanning method
+    // NEW: Use website's color picker to check actual canvas colors
+    async getColorPickerMismatchedPixels(templateData, startPosition, region) {
+      const mismatched = [];
+      const { width: templateWidth, height: templateHeight, pixels } = templateData;
+      
+      console.log(`🎨 COLOR PICKER SCAN: ${templateWidth}x${templateHeight} template`);
+      console.log(`📍 Position: (${startPosition.x}, ${startPosition.y}) Region: (${region.x}, ${region.y})`);
+      
+      // Turn off overlay to prevent interference
+      console.log(`👻 Turning off overlay for accurate color picking...`);
+      if (state.overlayEnabled) {
+        await toggleOverlay(); // Turn off overlay
+      }
+      
+      let totalPixels = 0;
+      let transparentPixels = 0;
+      let matchedPixels = 0;
+      let mismatchedPixels = 0;
+      let sampledPixels = 0;
+      
+      // Sample every Nth pixel to avoid overwhelming the system
+      const sampleEvery = Math.max(1, Math.floor(templateWidth * templateHeight / 100)); // Sample max 100 pixels
+      
+      for (let y = 0; y < templateHeight; y++) {
+        for (let x = 0; x < templateWidth; x++) {
+          const idx = (y * templateWidth + x) * 4;
+          const r = pixels[idx];
+          const g = pixels[idx + 1]; 
+          const b = pixels[idx + 2];
+          const alpha = pixels[idx + 3];
+          
+          totalPixels++;
+          
+          // Skip transparent pixels
+          if (alpha < 128) {
+            transparentPixels++;
+            continue;
+          }
+          
+          // Sample only some pixels for performance
+          if (totalPixels % sampleEvery !== 0) {
+            // For non-sampled pixels, assume they need painting
+            const canvasX = region.x * 1000 + startPosition.x + x;
+            const canvasY = region.y * 1000 + startPosition.y + y;
+            
+            let templateColorId = 1; // Default color
+            if (state.availableColors && state.availableColors.length > 0) {
+              let minDistance = Infinity;
+              for (const color of state.availableColors) {
+                if (color.rgb && typeof color.rgb.r === 'number') {
+                  const distance = Math.sqrt(
+                    (r - color.rgb.r) ** 2 + 
+                    (g - color.rgb.g) ** 2 + 
+                    (b - color.rgb.b) ** 2
+                  );
+                  if (distance < minDistance) {
+                    minDistance = distance;
+                    templateColorId = color.id;
+                  }
+                }
+              }
+            }
+            
+            mismatched.push({
+              x: canvasX,
+              y: canvasY,
+              color: templateColorId,
+              localX: x,
+              localY: y,
+              regionX: Math.floor(canvasX / 1000),
+              regionY: Math.floor(canvasY / 1000)
+            });
+            mismatchedPixels++;
+            continue;
+          }
+          
+          sampledPixels++;
+          
+          // Calculate canvas position
+          const canvasX = region.x * 1000 + startPosition.x + x;
+          const canvasY = region.y * 1000 + startPosition.y + y;
+          
+          // Use website's color picker to check actual canvas color
+          try {
+            // Simulate clicking at the position to get color
+            const canvas = document.querySelector('canvas#canvas');
+            if (!canvas) {
+              console.warn("Canvas element not found");
+              continue;
+            }
+            
+            // Create a synthetic click event at the pixel position
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            // Convert canvas coordinates to screen coordinates
+            const screenX = (canvasX % 1000) * scaleX;
+            const screenY = (canvasY % 1000) * scaleY;
+            
+            // Get pixel color from canvas context
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.getImageData(screenX, screenY, 1, 1);
+            const canvasR = imageData.data[0];
+            const canvasG = imageData.data[1];
+            const canvasB = imageData.data[2];
+            
+            // Find best template color
+            let templateColorId = 1;
+            if (state.availableColors && state.availableColors.length > 0) {
+              let minDistance = Infinity;
+              for (const color of state.availableColors) {
+                if (color.rgb && typeof color.rgb.r === 'number') {
+                  const distance = Math.sqrt(
+                    (r - color.rgb.r) ** 2 + 
+                    (g - color.rgb.g) ** 2 + 
+                    (b - color.rgb.b) ** 2
+                  );
+                  if (distance < minDistance) {
+                    minDistance = distance;
+                    templateColorId = color.id;
+                  }
+                }
+              }
+            }
+            
+            // Compare template color with canvas color
+            const colorDistance = Math.sqrt(
+              (r - canvasR) ** 2 + 
+              (g - canvasG) ** 2 + 
+              (b - canvasB) ** 2
+            );
+            
+            if (colorDistance > 30) { // Threshold for "different enough"
+              mismatched.push({
+                x: canvasX,
+                y: canvasY,
+                color: templateColorId,
+                localX: x,
+                localY: y,
+                regionX: Math.floor(canvasX / 1000),
+                regionY: Math.floor(canvasY / 1000)
+              });
+              mismatchedPixels++;
+              
+              if (sampledPixels <= 5) {
+                console.log(`🎯 SAMPLED MISMATCH: (${x},${y}) Template RGB(${r},${g},${b}) vs Canvas RGB(${canvasR},${canvasG},${canvasB}) Distance:${Math.round(colorDistance)}`);
+              }
+            } else {
+              matchedPixels++;
+              if (sampledPixels <= 5) {
+                console.log(`✅ SAMPLED MATCH: (${x},${y}) Template RGB(${r},${g},${b}) vs Canvas RGB(${canvasR},${canvasG},${canvasB}) Distance:${Math.round(colorDistance)}`);
+              }
+            }
+            
+          } catch (error) {
+            console.warn(`Failed to sample pixel at (${x},${y}):`, error);
+            // If sampling fails, assume it needs painting
+            let templateColorId = 1;
+            if (state.availableColors && state.availableColors.length > 0) {
+              let minDistance = Infinity;
+              for (const color of state.availableColors) {
+                if (color.rgb && typeof color.rgb.r === 'number') {
+                  const distance = Math.sqrt(
+                    (r - color.rgb.r) ** 2 + 
+                    (g - color.rgb.g) ** 2 + 
+                    (b - color.rgb.b) ** 2
+                  );
+                  if (distance < minDistance) {
+                    minDistance = distance;
+                    templateColorId = color.id;
+                  }
+                }
+              }
+            }
+            
+            mismatched.push({
+              x: canvasX,
+              y: canvasY,
+              color: templateColorId,
+              localX: x,
+              localY: y,
+              regionX: Math.floor(canvasX / 1000),
+              regionY: Math.floor(canvasY / 1000)
+            });
+            mismatchedPixels++;
+          }
+          
+          // Add small delay between samples to avoid overwhelming
+          if (sampledPixels % 10 === 0) {
+            await new Promise(resolve => setTimeout(resolve, 10));
+          }
+        }
+      }
+      
+      console.log(`✅ COLOR PICKER SCAN COMPLETE:`);
+      console.log(`   • Total: ${totalPixels}, Transparent: ${transparentPixels}`);
+      console.log(`   • Sampled: ${sampledPixels}, Matched: ${matchedPixels}, Need Paint: ${mismatchedPixels}`);
+      console.log(`   • Estimated accuracy: ${Math.round((sampledPixels / (totalPixels - transparentPixels)) * 100)}%`);
+      
+      return mismatched;
+    }
+
+    // Keep the simple method as backup
     getSimpleMismatchedPixels(templateData, startPosition, region) {
       const mismatched = [];
       const { width: templateWidth, height: templateHeight, pixels } = templateData;
@@ -1767,14 +1973,19 @@
             continue;
           }
           
-          const currentColorId = tile.data[localPx][localPy];
+          const currentColorHash = tile.data[localPx][localPy];
+          
+          // Convert template RGB to same hash format for comparison
+          const templateColorHash = ((r << 16) | (g << 8) | b) || 1;
+          
           if (shouldLog) {
-            console.log(`  🔍 Canvas current color ID: ${currentColorId}`);
-            console.log(`  🎨 Template wants color ID: ${templateColorId}`);
+            console.log(`  🔍 Canvas color hash: ${currentColorHash}`);
+            console.log(`  🎨 Template color hash: ${templateColorHash}`);
+            console.log(`  🎨 Template RGB: (${r},${g},${b})`);
           }
           
-          // Only add if colors don't match
-          if (templateColorId !== currentColorId) {
+          // Compare RGB hashes instead of color IDs
+          if (templateColorHash !== currentColorHash) {
             if (shouldLog) console.log(`  🎯 MISMATCH! Adding to paint list`);
             mismatched.push({
               x: canvasX,
@@ -1843,7 +2054,7 @@
         return;
       }
       
-      const mismatchedPixels = state.tileManager.getSimpleMismatchedPixels(
+      const mismatchedPixels = await state.tileManager.getColorPickerMismatchedPixels(
         state.imageData,
         state.startPosition,
         state.region
