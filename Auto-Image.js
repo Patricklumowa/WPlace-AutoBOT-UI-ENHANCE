@@ -1603,22 +1603,29 @@
             const canvasX = region.x * 1000 + startPosition.x + x;
             const canvasY = region.y * 1000 + startPosition.y + y;
             
-            // Find best template color match
+            // Find best template color match using COLOR_MAP
             let templateColorId = 1;
-            if (state.availableColors && state.availableColors.length > 0) {
-              let minDistance = Infinity;
-              for (const color of state.availableColors) {
-                if (color.rgb && typeof color.rgb.r === 'number') {
-                  const distance = Math.sqrt(
-                    (templateR - color.rgb.r) ** 2 + 
-                    (templateG - color.rgb.g) ** 2 + 
-                    (templateB - color.rgb.b) ** 2
-                  );
-                  if (distance < minDistance) {
-                    minDistance = distance;
-                    templateColorId = color.id;
-                  }
-                }
+            let minDistance = Infinity;
+            
+            // Use COLOR_MAP directly for precise RGB values
+            for (const [index, colorData] of Object.entries(CONFIG.COLOR_MAP)) {
+              if (colorData.rgb === null) continue; // Skip transparent
+              
+              // Check if user has access to this color (only if availableColors is loaded)
+              if (state.availableColors && state.availableColors.length > 0) {
+                const hasAccess = state.availableColors.some(c => c.id === colorData.id);
+                if (!hasAccess) continue;
+              }
+              
+              const distance = Math.sqrt(
+                (templateR - colorData.rgb.r) ** 2 + 
+                (templateG - colorData.rgb.g) ** 2 + 
+                (templateB - colorData.rgb.b) ** 2
+              );
+              
+              if (distance < minDistance) {
+                minDistance = distance;
+                templateColorId = colorData.id;
               }
             }
             
@@ -1642,17 +1649,30 @@
                   canvasColorFound = true;
                   testedPixels++;
                   
-                  // Compare RGB values with tolerance
-                  const colorDistance = Math.sqrt(
-                    (templateR - canvasColor.r) ** 2 + 
-                    (templateG - canvasColor.g) ** 2 + 
-                    (templateB - canvasColor.b) ** 2
-                  );
+                  // Find the closest COLOR_MAP color for the canvas pixel
+                  let canvasColorId = 0;
+                  let canvasMinDistance = Infinity;
                   
-                  canvasMatches = (colorDistance <= 30); // 30 is tolerance threshold
+                  for (const [index, colorData] of Object.entries(CONFIG.COLOR_MAP)) {
+                    if (colorData.rgb === null) continue; // Skip transparent
+                    
+                    const distance = Math.sqrt(
+                      (canvasColor.r - colorData.rgb.r) ** 2 + 
+                      (canvasColor.g - colorData.rgb.g) ** 2 + 
+                      (canvasColor.b - colorData.rgb.b) ** 2
+                    );
+                    
+                    if (distance < canvasMinDistance) {
+                      canvasMinDistance = distance;
+                      canvasColorId = colorData.id;
+                    }
+                  }
+                  
+                  // Compare color IDs for exact match
+                  canvasMatches = (templateColorId === canvasColorId);
                   
                   if (testedPixels <= 5) {
-                    console.log(`🔍 SAMPLE ${testedPixels}: (${x},${y}) Template RGB(${templateR},${templateG},${templateB}) vs Canvas RGB(${canvasColor.r},${canvasColor.g},${canvasColor.b}) Distance:${Math.round(colorDistance)} → ${canvasMatches ? 'MATCH' : 'MISMATCH'}`);
+                    console.log(`🔍 SAMPLE ${testedPixels}: (${x},${y}) Template RGB(${templateR},${templateG},${templateB}) ID:${templateColorId} vs Canvas RGB(${canvasColor.r},${canvasColor.g},${canvasColor.b}) ID:${canvasColorId} → ${canvasMatches ? 'MATCH' : 'MISMATCH'}`);
                   }
                 }
               }
@@ -1668,16 +1688,44 @@
               for (let sy = y; sy < Math.min(y + sampleRate, templateHeight); sy++) {
                 for (let sx = x; sx < Math.min(x + sampleRate, templateWidth); sx++) {
                   const subIdx = (sy * templateWidth + sx) * 4;
+                  const subR = pixels[subIdx];
+                  const subG = pixels[subIdx + 1];
+                  const subB = pixels[subIdx + 2];
                   const subAlpha = pixels[subIdx + 3];
                   
                   if (subAlpha >= 128) { // Not transparent
                     const subCanvasX = region.x * 1000 + startPosition.x + sx;
                     const subCanvasY = region.y * 1000 + startPosition.y + sy;
                     
+                    // Find best color for this specific pixel using COLOR_MAP
+                    let subTemplateColorId = 1;
+                    let subMinDistance = Infinity;
+                    
+                    for (const [index, colorData] of Object.entries(CONFIG.COLOR_MAP)) {
+                      if (colorData.rgb === null) continue; // Skip transparent
+                      
+                      // Check if user has access to this color
+                      if (state.availableColors && state.availableColors.length > 0) {
+                        const hasAccess = state.availableColors.some(c => c.id === colorData.id);
+                        if (!hasAccess) continue;
+                      }
+                      
+                      const distance = Math.sqrt(
+                        (subR - colorData.rgb.r) ** 2 + 
+                        (subG - colorData.rgb.g) ** 2 + 
+                        (subB - colorData.rgb.b) ** 2
+                      );
+                      
+                      if (distance < subMinDistance) {
+                        subMinDistance = distance;
+                        subTemplateColorId = colorData.id;
+                      }
+                    }
+                    
                     mismatched.push({
                       x: subCanvasX,
                       y: subCanvasY,
-                      color: templateColorId,
+                      color: subTemplateColorId,
                       localX: sx,
                       localY: sy,
                       regionX: Math.floor(subCanvasX / 1000),
@@ -2173,32 +2221,36 @@
   // COLOR MATCHING FUNCTION - Optimized with caching
   const colorCache = new Map()
 
-  function findClosestColor(targetRgb, availableColors) {
+  function findClosestColor(targetRgb, availableColors = null) {
     const cacheKey = `${targetRgb[0]},${targetRgb[1]},${targetRgb[2]}`
 
     if (colorCache.has(cacheKey)) {
       return colorCache.get(cacheKey)
     }
 
-    const isNearWhite = targetRgb[0] >= 250 && targetRgb[1] >= 250 && targetRgb[2] >= 250
-    if (isNearWhite) {
-      const whiteEntry = availableColors.find(c => c.rgb[0] >= 250 && c.rgb[1] >= 250 && c.rgb[2] >= 250)
-      if (whiteEntry) {
-        colorCache.set(cacheKey, whiteEntry.id)
-        return whiteEntry.id
-      }
-    }
-
     let minDistance = Number.POSITIVE_INFINITY
-    let closestColorId = availableColors[0]?.id || 1
+    let closestColorId = 1 // Default to black
 
-    for (let i = 0; i < availableColors.length; i++) {
-      const color = availableColors[i]
-      const distance = Utils.colorDistance(targetRgb, color.rgb)
+    // Use COLOR_MAP directly for precise color matching
+    for (const [index, colorData] of Object.entries(CONFIG.COLOR_MAP)) {
+      if (colorData.rgb === null) continue; // Skip transparent
+      
+      // If availableColors is provided, check if user has access
+      if (availableColors && availableColors.length > 0) {
+        const hasAccess = availableColors.some(c => c.id === colorData.id);
+        if (!hasAccess) continue;
+      }
+      
+      const distance = Math.sqrt(
+        (targetRgb[0] - colorData.rgb.r) ** 2 + 
+        (targetRgb[1] - colorData.rgb.g) ** 2 + 
+        (targetRgb[2] - colorData.rgb.b) ** 2
+      );
+      
       if (distance < minDistance) {
         minDistance = distance
-        closestColorId = color.id
-        if (distance === 0) break
+        closestColorId = colorData.id
+        if (distance === 0) break // Exact match
       }
     }
 
