@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-      title: "WPlace Auto-tes",
+      title: "WPlace Auto-Image",
       toggleOverlay: "Toggle Overlay",
       scanColors: "Scan Colors",
       uploadImage: "Upload Image",
@@ -1629,6 +1629,7 @@
     }
 
     // Keep the original method as backup
+    getMismatchedPixels(templateData, startPosition, region) {
       const mismatched = [];
       const { width: templateWidth, height: templateHeight, pixels } = templateData;
       let totalChecked = 0;
