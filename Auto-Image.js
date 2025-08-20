@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-      title: "WPlace Auto-Image",
+      title: "WPlace Auto-tes",
       toggleOverlay: "Toggle Overlay",
       scanColors: "Scan Colors",
       uploadImage: "Upload Image",
@@ -1679,27 +1679,46 @@
         return reject(new Error("Auto-CAPTCHA is disabled."));
       }
 
+      // Check if stop was pressed before starting
+      if (state.stopFlag) {
+        return reject(new Error("Auto-CAPTCHA cancelled by user."));
+      }
+
       try {
         console.log("🤖 Starting enhanced auto-CAPTCHA process...");
         
         const solvePromise = (async () => {
+          // Check stopFlag before each step
+          if (state.stopFlag) throw new Error("Auto-CAPTCHA cancelled by user.");
+          
           // Step 1: Click main paint button
           const mainPaintBtn = await Utils.waitForSelector('button.btn.btn-primary.btn-lg, button.btn-primary.sm\\:btn-xl', 200, 10000);
           if (!mainPaintBtn) throw new Error("Could not find the main paint button.");
+          if (state.stopFlag) throw new Error("Auto-CAPTCHA cancelled by user.");
+          
           console.log("✅ Found main paint button, clicking...");
           mainPaintBtn.click();
           await Utils.sleep(300);
 
+          // Check stopFlag before step 2
+          if (state.stopFlag) throw new Error("Auto-CAPTCHA cancelled by user.");
+
           // Step 2: Select transparent color (ID 0)
           const transBtn = await Utils.waitForSelector('button#color-0', 200, 5000);
           if (!transBtn) throw new Error("Could not find the transparent color button.");
+          if (state.stopFlag) throw new Error("Auto-CAPTCHA cancelled by user.");
+          
           console.log("✅ Found transparent color button, selecting...");
           transBtn.click();
           await Utils.sleep(300);
 
+          // Check stopFlag before step 3
+          if (state.stopFlag) throw new Error("Auto-CAPTCHA cancelled by user.");
+
           // Step 3: Click at center of canvas
           const canvas = await Utils.waitForSelector('canvas', 200, 5000);
           if (!canvas) throw new Error("Could not find the canvas element.");
+          if (state.stopFlag) throw new Error("Auto-CAPTCHA cancelled by user.");
           
           canvas.setAttribute('tabindex', '0');
           canvas.focus();
@@ -1714,14 +1733,20 @@
           canvas.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', code: 'Space', bubbles: true }));
           await Utils.sleep(300);
 
-          // Step 4: Keep confirming until token is captured
+          // Step 4: Keep confirming until token is captured (with stop check)
           console.log("🔄 Starting confirmation loop until token is captured...");
           let attempts = 0;
           const maxAttempts = 50; // Prevent infinite loop
           
-          while (!turnstileToken && attempts < maxAttempts) {
+          while (!turnstileToken && attempts < maxAttempts && !state.stopFlag) {
             attempts++;
             console.log(`🔄 Confirmation attempt ${attempts}/${maxAttempts}...`);
+            
+            // Check stopFlag in each iteration
+            if (state.stopFlag) {
+              console.log("🛑 Auto-CAPTCHA cancelled by user during confirmation loop");
+              throw new Error("Auto-CAPTCHA cancelled by user.");
+            }
             
             let confirmBtn = await Utils.waitForSelector('button.btn.btn-primary.btn-lg, button.btn-primary.sm\\:btn-xl', 100, 2000);
             if (!confirmBtn) {
@@ -1729,7 +1754,7 @@
               confirmBtn = allPrimary.length ? allPrimary[allPrimary.length - 1] : null;
             }
             
-            if (confirmBtn) {
+            if (confirmBtn && !state.stopFlag) {
               confirmBtn.click();
               console.log(`✅ Clicked confirmation button (attempt ${attempts})`);
             }
@@ -1744,13 +1769,24 @@
             }
           }
 
+          // Final stop check
+          if (state.stopFlag) {
+            console.log("🛑 Auto-CAPTCHA cancelled by user after confirmation loop");
+            throw new Error("Auto-CAPTCHA cancelled by user.");
+          }
+
           if (!turnstileToken) {
             throw new Error(`Failed to capture token after ${attempts} confirmation attempts`);
           }
 
           // Step 5: Wait for token promise to resolve (if not already resolved)
-          if (_resolveToken) {
+          if (_resolveToken && !state.stopFlag) {
             await tokenPromise;
+          }
+          
+          if (state.stopFlag) {
+            console.log("🛑 Auto-CAPTCHA cancelled by user before completion");
+            throw new Error("Auto-CAPTCHA cancelled by user.");
           }
           
           console.log("✅ Auto-CAPTCHA completed successfully!");
@@ -4448,6 +4484,13 @@
             if (pixelBatch && pixelBatch.pixels.length > 0) {
               let success = await sendPixelBatch(pixelBatch.pixels, pixelBatch.regionX, pixelBatch.regionY);
               
+              // Handle user cancellation
+              if (success === "stopped") {
+                console.log("🛑 Painting process stopped by user during pixel batch");
+                state.stopFlag = true;
+                break outerLoop;
+              }
+              
               // Enhanced auto-CAPTCHA handling - sendPixelBatch now handles retries internally
               if (success === "token_error") {
                 if (!CONFIG.AUTO_CAPTCHA_ENABLED) {
@@ -4482,7 +4525,21 @@
                 if (CONFIG.PAINTING_SPEED_ENABLED && state.paintingSpeed > 0 && pixelBatch.pixels.length > 0) {
                   const delayPerPixel = 1000 / state.paintingSpeed // ms per pixel
                   const totalDelay = Math.max(100, delayPerPixel * pixelBatch.pixels.length) // minimum 100ms
-                  await Utils.sleep(totalDelay)
+                  
+                  // Break the delay into smaller chunks to check stopFlag more frequently
+                  const chunkSize = 100; // Check every 100ms
+                  let remainingDelay = totalDelay;
+                  
+                  while (remainingDelay > 0 && !state.stopFlag) {
+                    const currentChunk = Math.min(chunkSize, remainingDelay);
+                    await Utils.sleep(currentChunk);
+                    remainingDelay -= currentChunk;
+                  }
+                  
+                  if (state.stopFlag) {
+                    console.log("🛑 Painting speed delay interrupted by user");
+                    break outerLoop;
+                  }
                 }
                 updateStats();
               }
@@ -4506,6 +4563,13 @@
 
           if (pixelBatch.pixels.length >= Math.floor(state.currentCharges)) {
             let success = await sendPixelBatch(pixelBatch.pixels, pixelBatch.regionX, pixelBatch.regionY);
+            
+            // Handle user cancellation
+            if (success === "stopped") {
+              console.log("🛑 Painting process stopped by user during pixel batch");
+              state.stopFlag = true;
+              break outerLoop;
+            }
             
             // Enhanced auto-CAPTCHA handling - sendPixelBatch now handles retries internally
             if (success === "token_error") {
@@ -4543,7 +4607,21 @@
               if (CONFIG.PAINTING_SPEED_ENABLED && state.paintingSpeed > 0 && pixelBatch.pixels.length > 0) {
                 const delayPerPixel = 1000 / state.paintingSpeed // ms per pixel
                 const totalDelay = Math.max(100, delayPerPixel * pixelBatch.pixels.length) // minimum 100ms
-                await Utils.sleep(totalDelay)
+                
+                // Break the delay into smaller chunks to check stopFlag more frequently
+                const chunkSize = 100; // Check every 100ms
+                let remainingDelay = totalDelay;
+                
+                while (remainingDelay > 0 && !state.stopFlag) {
+                  const currentChunk = Math.min(chunkSize, remainingDelay);
+                  await Utils.sleep(currentChunk);
+                  remainingDelay -= currentChunk;
+                }
+                
+                if (state.stopFlag) {
+                  console.log("🛑 Painting speed delay interrupted by user");
+                  break outerLoop;
+                }
               }
             }
 
@@ -4566,7 +4644,21 @@
               current: state.currentCharges
             });
             await updateStats();
-            await Utils.sleep(state.cooldown);
+            
+            // Break the cooldown wait into smaller chunks to check stopFlag more frequently
+            const chunkSize = 1000; // Check every 1 second
+            let remainingCooldown = state.cooldown;
+            
+            while (remainingCooldown > 0 && !state.stopFlag) {
+              const currentChunk = Math.min(chunkSize, remainingCooldown);
+              await Utils.sleep(currentChunk);
+              remainingCooldown -= currentChunk;
+            }
+            
+            if (state.stopFlag) {
+              console.log("🛑 Charges wait interrupted by user");
+              break;
+            }
           }
           if (state.stopFlag) break outerLoop;
 
@@ -4618,6 +4710,12 @@
       return "token_error"
     }
 
+    // Check if stop was pressed before starting
+    if (state.stopFlag) {
+      console.log("🛑 sendPixelBatch cancelled by user before starting");
+      return "stopped";
+    }
+
     const coords = new Array(pixelBatch.length * 2)
     const colors = new Array(pixelBatch.length)
     for (let i = 0; i < pixelBatch.length; i++) {
@@ -4630,8 +4728,14 @@
     let attempts = 0;
     const maxAttempts = 10; // Maximum retry attempts
 
-    while (attempts < maxAttempts) {
+    while (attempts < maxAttempts && !state.stopFlag) {
       attempts++;
+      
+      // Check stopFlag at the beginning of each attempt
+      if (state.stopFlag) {
+        console.log("🛑 sendPixelBatch cancelled by user during retry loop");
+        return "stopped";
+      }
       
       try {
         const payload = { coords, colors, t: turnstileToken }
@@ -4648,6 +4752,12 @@
           try { data = await res.json() } catch (_) { }
           console.error(`❌ 403 Forbidden on attempt ${attempts}/${maxAttempts}. Turnstile token might be invalid or expired.`)
           
+          // Check stopFlag before attempting auto-CAPTCHA
+          if (state.stopFlag) {
+            console.log("🛑 sendPixelBatch cancelled by user before auto-CAPTCHA attempt");
+            return "stopped";
+          }
+          
           // Reset token and attempt auto-CAPTCHA if enabled
           turnstileToken = null
           tokenPromise = new Promise((resolve) => { _resolveToken = resolve })
@@ -4658,11 +4768,24 @@
             
             try {
               await handleCaptcha();
+              
+              // Check stopFlag after auto-CAPTCHA completes
+              if (state.stopFlag) {
+                console.log("🛑 sendPixelBatch cancelled by user after auto-CAPTCHA");
+                return "stopped";
+              }
+              
               console.log(`✅ Auto-CAPTCHA successful on attempt ${attempts}, retrying painting...`);
               // Continue the loop to retry with new token
               continue;
             } catch (captchaError) {
               console.error(`❌ Auto-CAPTCHA failed on attempt ${attempts}:`, captchaError);
+              
+              // Check if error was due to user cancellation
+              if (captchaError.message.includes("cancelled by user") || state.stopFlag) {
+                console.log("🛑 Auto-CAPTCHA cancelled by user");
+                return "stopped";
+              }
               
               if (attempts >= maxAttempts) {
                 console.error("❌ Max auto-CAPTCHA attempts reached, giving up");
@@ -4670,8 +4793,14 @@
                 return "token_error";
               }
               
-              // Wait a bit before retrying
-              await Utils.sleep(1000);
+              // Wait a bit before retrying (with stop check)
+              for (let i = 0; i < 10 && !state.stopFlag; i++) {
+                await Utils.sleep(100);
+              }
+              if (state.stopFlag) {
+                console.log("🛑 sendPixelBatch cancelled by user during retry delay");
+                return "stopped";
+              }
               continue;
             }
           } else {
@@ -4694,14 +4823,30 @@
       } catch (e) {
         console.error(`❌ Batch paint request failed on attempt ${attempts}:`, e);
         
+        if (state.stopFlag) {
+          console.log("🛑 sendPixelBatch cancelled by user during network error handling");
+          return "stopped";
+        }
+        
         if (attempts >= maxAttempts) {
           console.error("❌ Max retry attempts reached for network error");
           return false;
         }
         
-        // Wait before retrying network errors
-        await Utils.sleep(1000);
+        // Wait before retrying network errors (with stop check)
+        for (let i = 0; i < 10 && !state.stopFlag; i++) {
+          await Utils.sleep(100);
+        }
+        if (state.stopFlag) {
+          console.log("🛑 sendPixelBatch cancelled by user during network error delay");
+          return "stopped";
+        }
       }
+    }
+
+    if (state.stopFlag) {
+      console.log("🛑 sendPixelBatch cancelled by user - loop ended due to stopFlag");
+      return "stopped";
     }
 
     console.error("❌ All retry attempts exhausted");
