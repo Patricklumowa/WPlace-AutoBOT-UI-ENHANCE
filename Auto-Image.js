@@ -211,7 +211,7 @@
   // BILINGUAL TEXT STRINGS
   const TEXT = {
     en: {
-      title: "WPlace Auto-i give up",
+      title: "WPlace Auto-Image",
       toggleOverlay: "Toggle Overlay",
       scanColors: "Scan Colors",
       uploadImage: "Upload Image",
@@ -229,9 +229,7 @@
       waitingPosition: "👆 Waiting for you to paint the reference pixel...",
       positionSet: "✅ Position set successfully!",
       positionTimeout: "❌ Timeout for position selection",
-      scanComplete: "🔍 Scan complete! Total: {total}, Need painting: {needPainting}, Already correct: {alreadyCorrect} ({efficiency}% efficiency)",
-      scanFailed: "⚠️ Auto-scan failed, will paint all pixels",
-      startPaintingMsg: "🎨 Starting smart painting - only painting needed pixels...",
+      startPaintingMsg: "🎨 Starting painting...",
       paintingProgress: "🧱 Progress: {painted}/{total} pixels...",
       noCharges: "⌛ No charges. Waiting {time}...",
       paintingStopped: "⏹️ Painting stopped by user",
@@ -282,8 +280,6 @@
       captchaFailed: "❌ Auto-CAPTCHA failed. Paint a pixel manually.",
       automation: "Automation",
       noChargesThreshold: "⌛ Waiting for charges to reach {threshold}. Currently {current}. Next in {time}...",
-      smartDetection: "🧠 Smart detection - only painting different pixels",
-      analyzingCanvas: "🔍 Analyzing canvas to find pixels that need painting...",
     },
     ru: {
       title: "WPlace Авто-Изображение",
@@ -303,8 +299,6 @@
       waitingPosition: "👆 Ожидание, пока вы нарисуете опорный пиксель...",
       positionSet: "✅ Позиция успешно установлена!",
       positionTimeout: "❌ Время ожидания выбора позиции истекло",
-      scanComplete: "🔍 Сканирование завершено! Всего: {total}, Нужно покрасить: {needPainting}, Уже правильно: {alreadyCorrect} ({efficiency}% эффективность)",
-      scanFailed: "⚠️ Авто-сканирование не удалось, будем красить все пиксели",
       startPaintingMsg: "🎨 Начинаем рисование...",
       paintingProgress: "🧱 Прогресс: {painted}/{total} пикселей...",
       noCharges: "⌛ Нет зарядов. Ожидание {time}...",
@@ -375,8 +369,6 @@
       waitingPosition: "👆 Aguardando você pintar o pixel de referência...",
       positionSet: "✅ Posição definida com sucesso!",
       positionTimeout: "❌ Tempo esgotado para selecionar posição",
-      scanComplete: "🔍 Varredura completa! Total: {total}, Precisa pintar: {needPainting}, Já correto: {alreadyCorrect} ({efficiency}% eficiência)",
-      scanFailed: "⚠️ Auto-varredura falhou, pintará todos os pixels",
       startPaintingMsg: "🎨 Iniciando pintura...",
       paintingProgress: "🧱 Progresso: {painted}/{total} pixels...",
       noCharges: "⌛ Sem cargas. Aguardando {time}...",
@@ -447,9 +439,7 @@
       waitingPosition: "👆 Đang chờ bạn vẽ pixel tham chiếu...",
       positionSet: "✅ Đã đặt vị trí thành công!",
       positionTimeout: "❌ Hết thời gian chọn vị trí",
-      scanComplete: "🔍 Quét hoàn tất! Tổng: {total}, Cần vẽ: {needPainting}, Đã đúng: {alreadyCorrect} ({efficiency}% hiệu quả)",
-      scanFailed: "⚠️ Tự động quét thất bại, sẽ vẽ tất cả pixel",
-      startPaintingMsg: "🎨 Bắt đầu vẽ thông minh - chỉ vẽ pixel cần thiết...",
+      startPaintingMsg: "🎨 Bắt đầu vẽ...",
       paintingProgress: "🧱 Tiến trình: {painted}/{total} pixel...",
       noCharges: "⌛ Không có điện tích. Đang chờ {time}...",
       paintingStopped: "⏹️ Người dùng đã dừng vẽ",
@@ -500,8 +490,6 @@
       captchaFailed: "❌ Giải CAPTCHA tự động thất bại. Vui lòng vẽ một pixel thủ công.",
       automation: "Tự động hóa",
       noChargesThreshold: "⌛ Đang chờ số lần sạc đạt {threshold}. Hiện tại {current}. Lần tiếp theo trong {time}...",
-      smartDetection: "🧠 Phát hiện thông minh - chỉ vẽ pixel khác biệt",
-      analyzingCanvas: "🔍 Đang phân tích canvas để tìm pixel cần vẽ...",
     },
     fr: {
       title: "WPlace Auto-Image",
@@ -521,8 +509,6 @@
       waitingPosition: "👆 En attente que vous peigniez le pixel de référence...",
       positionSet: "✅ Position définie avec succès!",
       positionTimeout: "❌ Délai d'attente pour la sélection de position",
-      scanComplete: "🔍 Scan terminé! Total: {total}, À peindre: {needPainting}, Déjà correct: {alreadyCorrect} ({efficiency}% d'efficacité)",
-      scanFailed: "⚠️ Scan automatique échoué, peindra tous les pixels",
       startPaintingMsg: "🎨 Début de la peinture...",
       paintingProgress: "🧱 Progrès: {painted}/{total} pixels...",
       noCharges: "⌛ Aucune charge. En attente {time}...",
@@ -593,8 +579,6 @@
       waitingPosition: "👆 Menunggu Anda melukis piksel referensi...",
       positionSet: "✅ Posisi berhasil diatur!",
       positionTimeout: "❌ Waktu habis untuk memilih posisi",
-      scanComplete: "🔍 Pemindaian selesai! Total: {total}, Perlu dicat: {needPainting}, Sudah benar: {alreadyCorrect} ({efficiency}% efisiensi)",
-      scanFailed: "⚠️ Pemindaian otomatis gagal, akan melukis semua piksel",
       startPaintingMsg: "🎨 Mulai melukis...",
       paintingProgress: "🧱 Progres: {painted}/{total} piksel...",
       noCharges: "⌛ Tidak ada muatan. Menunggu {time}...",
@@ -675,11 +659,7 @@
     paintingSpeed: CONFIG.PAINTING_SPEED.DEFAULT, // pixels per second
     cooldownChargeThreshold: CONFIG.COOLDOWN_CHARGE_THRESHOLD,
     overlayOpacity: CONFIG.OVERLAY.OPACITY_DEFAULT,
-    overlayEnabled: false, // Start with overlay OFF for accurate color picking
     blueMarbleEnabled: CONFIG.OVERLAY.BLUE_MARBLE_DEFAULT,
-    tileManager: null, // Will be initialized in createUI
-    lastScanTime: null, // Timestamp of last auto-scan
-    cachedMismatchedPixels: null, // Cached scan results
   }
 
   // Placeholder for the resize preview update function
@@ -1403,703 +1383,6 @@
     },
   }
 
-  // TILE MANAGER CLASS - For checking current canvas state
-  class TileManager {
-    constructor() {
-      this.tiles = new Map(); // Map<"tileX,tileY", {width, height, data}>
-      this.pallete = { ...CONFIG.COLOR_MAP }; // Use our color map
-    }
-
-    // Convert RGB string to color ID
-    rgbToColorId(r, g, b) {
-      // Check if we have available colors loaded
-      if (!state.availableColors || state.availableColors.length === 0) {
-        console.warn("No available colors loaded for RGB conversion");
-        return 0;
-      }
-      
-      // First try to find exact match in available colors
-      for (const color of state.availableColors) {
-        if (color.rgb && color.rgb.r === r && color.rgb.g === g && color.rgb.b === b) {
-          console.log(`    🎨 RGB(${r},${g},${b}) -> Color ID ${color.id} (exact match)`);
-          return color.id;
-        }
-      }
-      
-      // Fallback: use the same logic as findClosestColor but for exact matches
-      const targetRgb = [r, g, b];
-      for (const color of state.availableColors) {
-        if (color.rgb) {
-          const colorRgb = [color.rgb.r, color.rgb.g, color.rgb.b];
-          if (colorRgb[0] === targetRgb[0] && colorRgb[1] === targetRgb[1] && colorRgb[2] === targetRgb[2]) {
-            console.log(`    🎨 RGB(${r},${g},${b}) -> Color ID ${color.id} (fallback match)`);
-            return color.id;
-          }
-        }
-      }
-      
-      console.log(`    ❌ RGB(${r},${g},${b}) -> No matching color found, returning 0`);
-      return 0; // Transparent/unknown
-    }
-
-    // Check if user has access to a specific color
-    hasColor(colorId) {
-      // For basic colors (IDs 1-31), always available
-      if (colorId >= 1 && colorId <= 31) return true;
-      
-      // For premium colors, check if user owns them
-      // This is a simplified check - in reality we'd need to get user info from the API
-      // For now, assume user has access to colors they've selected in available colors
-      return state.availableColors.some(color => color.id === colorId);
-    }
-
-    // Load tiles covering the template area
-    async loadTiles(startPosition, region, templateWidth, templateHeight) {
-      this.tiles.clear();
-      
-      // region contains the tile coordinates (e.g. 1734, 1015)
-      // startPosition contains local coordinates within that tile (e.g. 4, 442)
-      // Convert to absolute canvas coordinates
-      const startAbsX = region.x * 1000 + startPosition.x;
-      const startAbsY = region.y * 1000 + startPosition.y;
-      const endAbsX = startAbsX + templateWidth - 1;
-      const endAbsY = startAbsY + templateHeight - 1;
-      
-      // Determine which tiles are needed
-      const startTx = Math.floor(startAbsX / 1000);
-      const startTy = Math.floor(startAbsY / 1000);
-      const endTx = Math.floor(endAbsX / 1000);
-      const endTy = Math.floor(endAbsY / 1000);
-
-      console.log(`📦 Converting local pos (${startPosition.x},${startPosition.y}) in tile (${region.x},${region.y}) to absolute (${startAbsX},${startAbsY})`);
-      console.log(`📦 Template area: (${startAbsX},${startAbsY}) to (${endAbsX},${endAbsY})`);
-      console.log(`📦 Tile range: (${startTx},${startTy}) to (${endTx},${endTy})`);
-      
-      const tilePromises = [];
-      let totalTiles = 0;
-      
-      for (let currentTx = startTx; currentTx <= endTx; currentTx++) {
-        for (let currentTy = startTy; currentTy <= endTy; currentTy++) {
-          const tileKey = `${currentTx}_${currentTy}`;
-          const tileUrl = `https://backend.wplace.live/files/s0/tiles/${currentTx}/${currentTy}.png`;
-          
-          const promise = this.loadSingleTile(tileUrl, tileKey);
-          tilePromises.push(promise);
-          totalTiles++;
-        }
-      }
-      
-      await Promise.all(tilePromises);
-      const loadedTiles = this.tiles.size;
-      
-      console.log(`📊 Tile loading result: ${loadedTiles}/${totalTiles} tiles loaded successfully`);
-      
-      if (loadedTiles === 0) {
-        console.error("❌ No tiles could be loaded!");
-        return false;
-      }
-      
-      return true;
-    }
-
-    // Load a single tile and convert to RGB color data
-    async loadSingleTile(tileUrl, tileKey) {
-      try {
-        const response = await fetch(tileUrl);
-        if (!response.ok) {
-          console.warn(`Failed to fetch tile ${tileKey}: ${response.status} ${response.statusText}`);
-          return;
-        }
-        
-        const blob = await response.blob();
-        const imageBitmap = await createImageBitmap(blob);
-        
-        const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(imageBitmap, 0, 0);
-        
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const tileData = {
-          width: canvas.width,
-          height: canvas.height,
-          data: Array.from({ length: canvas.width }, () => new Array(canvas.height))
-        };
-        
-        // Store actual RGB values for accurate comparison
-        for (let x = 0; x < canvas.width; x++) {
-          for (let y = 0; y < canvas.height; y++) {
-            const i = (y * canvas.width + x) * 4;
-            const r = imageData.data[i];
-            const g = imageData.data[i + 1]; 
-            const b = imageData.data[i + 2];
-            const a = imageData.data[i + 3];
-            
-            if (a === 255) {
-              // Store as RGB object for accurate comparison
-              tileData.data[x][y] = { r, g, b };
-            } else {
-              tileData.data[x][y] = null; // Transparent
-            }
-          }
-        }
-        
-        this.tiles.set(tileKey, tileData);
-        console.log(`✅ Loaded tile ${tileKey} (${canvas.width}x${canvas.height}) with RGB data`);
-        
-      } catch (error) {
-        console.warn(`❌ Failed to load tile ${tileKey}:`, error);
-      }
-    }
-
-    // Get mismatched pixels that need to be painted
-    // NEW: Use better approach with proper coordinate handling
-    async getColorPickerMismatchedPixels(templateData, startPosition, region) {
-      const mismatched = [];
-      const { width: templateWidth, height: templateHeight, pixels } = templateData;
-      
-      console.log(`🎨 IMPROVED COLOR SCAN: ${templateWidth}x${templateHeight} template`);
-      console.log(`📍 Position: (${startPosition.x}, ${startPosition.y}) Region: (${region.x}, ${region.y})`);
-      
-      let totalPixels = 0;
-      let transparentPixels = 0;
-      let sampledPixels = 0;
-      let testedPixels = 0;
-      let matchedPixels = 0;
-      let mismatchedPixels = 0;
-      
-      // Temporarily disable overlay for accurate scanning
-      const overlayWasEnabled = state.overlayEnabled;
-      if (overlayWasEnabled) {
-        console.log(`👻 Temporarily disabling overlay for accurate scanning...`);
-        overlayManager.disable();
-        state.overlayEnabled = false;
-        await new Promise(resolve => setTimeout(resolve, 100)); // Brief pause
-      }
-      
-      try {
-        // Sample every 20th pixel for performance (5% sampling rate)
-        const sampleRate = Math.max(1, Math.floor(Math.sqrt(templateWidth * templateHeight) / 10));
-        console.log(`📊 Using sample rate: every ${sampleRate} pixels`);
-        
-        for (let y = 0; y < templateHeight; y += sampleRate) {
-          for (let x = 0; x < templateWidth; x += sampleRate) {
-            const idx = (y * templateWidth + x) * 4;
-            const templateR = pixels[idx];
-            const templateG = pixels[idx + 1]; 
-            const templateB = pixels[idx + 2];
-            const alpha = pixels[idx + 3];
-            
-            totalPixels++;
-            
-            // Skip transparent pixels
-            if (alpha < 128) {
-              transparentPixels++;
-              continue;
-            }
-            
-            sampledPixels++;
-            
-            // Calculate actual canvas coordinates
-            const canvasX = region.x * 1000 + startPosition.x + x;
-            const canvasY = region.y * 1000 + startPosition.y + y;
-            
-            // Find best template color match using COLOR_MAP
-            let templateColorId = 1;
-            let minDistance = Infinity;
-            
-            // Use COLOR_MAP directly for precise RGB values
-            for (const [index, colorData] of Object.entries(CONFIG.COLOR_MAP)) {
-              if (colorData.rgb === null) continue; // Skip transparent
-              
-              // Check if user has access to this color (only if availableColors is loaded)
-              if (state.availableColors && state.availableColors.length > 0) {
-                const hasAccess = state.availableColors.some(c => c.id === colorData.id);
-                if (!hasAccess) continue;
-              }
-              
-              const distance = Math.sqrt(
-                (templateR - colorData.rgb.r) ** 2 + 
-                (templateG - colorData.rgb.g) ** 2 + 
-                (templateB - colorData.rgb.b) ** 2
-              );
-              
-              if (distance < minDistance) {
-                minDistance = distance;
-                templateColorId = colorData.id;
-              }
-            }
-            
-            // Try to get the current canvas color using tile data
-            let canvasColorFound = false;
-            let canvasMatches = false;
-            
-            try {
-              // Get tile coordinates
-              const tileX = Math.floor(canvasX / 1000);
-              const tileY = Math.floor(canvasY / 1000);
-              const localX = canvasX % 1000;
-              const localY = canvasY % 1000;
-              const tileKey = `${tileX}_${tileY}`;
-              
-              const tile = this.tiles.get(tileKey);
-              if (tile && tile.data && localX < tile.width && localY < tile.height && tile.data[localX] && tile.data[localX][localY] !== undefined) {
-                const canvasColor = tile.data[localX][localY];
-                
-                if (canvasColor !== null) { // Not transparent
-                  canvasColorFound = true;
-                  testedPixels++;
-                  
-                  // Find the closest COLOR_MAP color for the canvas pixel
-                  let canvasColorId = 0;
-                  let canvasMinDistance = Infinity;
-                  
-                  for (const [index, colorData] of Object.entries(CONFIG.COLOR_MAP)) {
-                    if (colorData.rgb === null) continue; // Skip transparent
-                    
-                    const distance = Math.sqrt(
-                      (canvasColor.r - colorData.rgb.r) ** 2 + 
-                      (canvasColor.g - colorData.rgb.g) ** 2 + 
-                      (canvasColor.b - colorData.rgb.b) ** 2
-                    );
-                    
-                    if (distance < canvasMinDistance) {
-                      canvasMinDistance = distance;
-                      canvasColorId = colorData.id;
-                    }
-                  }
-                  
-                  // Compare color IDs for exact match
-                  canvasMatches = (templateColorId === canvasColorId);
-                  
-                  if (testedPixels <= 5) {
-                    console.log(`🔍 SAMPLE ${testedPixels}: (${x},${y}) Template RGB(${templateR},${templateG},${templateB}) ID:${templateColorId} vs Canvas RGB(${canvasColor.r},${canvasColor.g},${canvasColor.b}) ID:${canvasColorId} → ${canvasMatches ? 'MATCH' : 'MISMATCH'}`);
-                  }
-                }
-              }
-            } catch (error) {
-              if (testedPixels <= 5) {
-                console.warn(`Failed to check tile data for pixel (${x},${y}):`, error);
-              }
-            }
-            
-            // If we can't verify the canvas color, or it doesn't match, add to paint list
-            if (!canvasColorFound || !canvasMatches) {
-              // Add all pixels in the sampled area, not just the sample
-              for (let sy = y; sy < Math.min(y + sampleRate, templateHeight); sy++) {
-                for (let sx = x; sx < Math.min(x + sampleRate, templateWidth); sx++) {
-                  const subIdx = (sy * templateWidth + sx) * 4;
-                  const subR = pixels[subIdx];
-                  const subG = pixels[subIdx + 1];
-                  const subB = pixels[subIdx + 2];
-                  const subAlpha = pixels[subIdx + 3];
-                  
-                  if (subAlpha >= 128) { // Not transparent
-                    const subCanvasX = region.x * 1000 + startPosition.x + sx;
-                    const subCanvasY = region.y * 1000 + startPosition.y + sy;
-                    
-                    // Find best color for this specific pixel using COLOR_MAP
-                    let subTemplateColorId = 1;
-                    let subMinDistance = Infinity;
-                    
-                    for (const [index, colorData] of Object.entries(CONFIG.COLOR_MAP)) {
-                      if (colorData.rgb === null) continue; // Skip transparent
-                      
-                      // Check if user has access to this color
-                      if (state.availableColors && state.availableColors.length > 0) {
-                        const hasAccess = state.availableColors.some(c => c.id === colorData.id);
-                        if (!hasAccess) continue;
-                      }
-                      
-                      const distance = Math.sqrt(
-                        (subR - colorData.rgb.r) ** 2 + 
-                        (subG - colorData.rgb.g) ** 2 + 
-                        (subB - colorData.rgb.b) ** 2
-                      );
-                      
-                      if (distance < subMinDistance) {
-                        subMinDistance = distance;
-                        subTemplateColorId = colorData.id;
-                      }
-                    }
-                    
-                    mismatched.push({
-                      x: subCanvasX,
-                      y: subCanvasY,
-                      color: subTemplateColorId,
-                      localX: sx,
-                      localY: sy,
-                      regionX: Math.floor(subCanvasX / 1000),
-                      regionY: Math.floor(subCanvasY / 1000)
-                    });
-                    mismatchedPixels++;
-                  }
-                }
-              }
-            } else {
-              matchedPixels++;
-            }
-            
-            // Small delay to prevent browser lag
-            if (sampledPixels % 50 === 0) {
-              await new Promise(resolve => setTimeout(resolve, 5));
-            }
-          }
-        }
-        
-      } finally {
-        // Restore overlay state
-        if (overlayWasEnabled) {
-          console.log(`👻 Restoring overlay state...`);
-          overlayManager.enable();
-          state.overlayEnabled = true;
-        }
-      }
-      
-      console.log(`✅ IMPROVED COLOR SCAN COMPLETE:`);
-      console.log(`   • Total pixels: ${totalPixels}, Transparent: ${transparentPixels}`);
-      console.log(`   • Sampled: ${sampledPixels}, Tested: ${testedPixels}, Matched: ${matchedPixels}`);
-      console.log(`   • Pixels needing paint: ${mismatchedPixels}`);
-      console.log(`   • Sample rate: every ${sampleRate} pixels (${Math.round((sampledPixels / totalPixels) * 100)}% coverage)`);
-      
-      return mismatched;
-    }
-
-    // Keep the simple method as backup
-    getSimpleMismatchedPixels(templateData, startPosition, region) {
-      const mismatched = [];
-      const { width: templateWidth, height: templateHeight, pixels } = templateData;
-      
-      console.log(`🚀 SIMPLE SCAN: ${templateWidth}x${templateHeight} template`);
-      console.log(`📍 Position: (${startPosition.x}, ${startPosition.y}) Region: (${region.x}, ${region.y})`);
-      console.log(`🎨 Available colors: ${state.availableColors ? state.availableColors.length : 0}`);
-      
-      let totalPixels = 0;
-      let transparentPixels = 0;
-      let mismatchedPixels = 0;
-      
-      for (let y = 0; y < templateHeight; y++) {
-        for (let x = 0; x < templateWidth; x++) {
-          const idx = (y * templateWidth + x) * 4;
-          const r = pixels[idx];
-          const g = pixels[idx + 1]; 
-          const b = pixels[idx + 2];
-          const alpha = pixels[idx + 3];
-          
-          totalPixels++;
-          
-          // Skip transparent pixels (alpha < 128)
-          if (alpha < 128) {
-            transparentPixels++;
-            continue;
-          }
-          
-          // Calculate canvas position
-          const canvasX = region.x * 1000 + startPosition.x + x;
-          const canvasY = region.y * 1000 + startPosition.y + y;
-          
-          // Find best color match from available colors
-          let bestColorId = 1; // Default color
-          let minDistance = Infinity;
-          
-          if (state.availableColors && state.availableColors.length > 0) {
-            for (const color of state.availableColors) {
-              const distance = Math.sqrt(
-                (r - color.rgb.r) ** 2 + 
-                (g - color.rgb.g) ** 2 + 
-                (b - color.rgb.b) ** 2
-              );
-              if (distance < minDistance) {
-                minDistance = distance;
-                bestColorId = color.id;
-              }
-            }
-          }
-          
-          // Add to paint list (assume everything needs painting for now)
-          mismatched.push({
-            x: canvasX,
-            y: canvasY,
-            color: bestColorId,
-            localX: x,
-            localY: y,
-            regionX: Math.floor(canvasX / 1000),
-            regionY: Math.floor(canvasY / 1000)
-          });
-          mismatchedPixels++;
-          
-          // Log first few for debugging
-          if (mismatchedPixels <= 3) {
-            console.log(`🎯 Pixel ${mismatchedPixels}: (${x},${y}) RGB(${r},${g},${b}) → Color${bestColorId} at Canvas(${canvasX},${canvasY})`);
-          }
-        }
-      }
-      
-      console.log(`✅ SIMPLE SCAN COMPLETE:`);
-      console.log(`   • Total: ${totalPixels}, Transparent: ${transparentPixels}, Need Paint: ${mismatchedPixels}`);
-      
-      return mismatched;
-    }
-
-    // Keep the original method as backup
-    getMismatchedPixels(templateData, startPosition, region) {
-      const mismatched = [];
-      const { width: templateWidth, height: templateHeight, pixels } = templateData;
-      let totalChecked = 0;
-      let skippedTransparent = 0;
-      let skippedWhite = 0;
-      let skippedNoColor = 0;
-      let tileErrors = 0;
-      let detailedLogCount = 0;
-      const MAX_DETAILED_LOGS = 25; // Limit detailed logging to prevent console spam
-      
-      console.log(`🔍 Starting pixel analysis for ${templateWidth}x${templateHeight} template`);
-      console.log(`📝 Detailed pixel logging enabled for first ${MAX_DETAILED_LOGS} pixels`);
-      console.log(`📍 Start Position: (${startPosition.x}, ${startPosition.y})`);
-      console.log(`🗺️ Region: (${region.x}, ${region.y})`);
-      
-      // Debug available colors
-      console.log(`🎨 Available colors debug:`);
-      console.log(`   • Available colors count: ${state.availableColors ? state.availableColors.length : 'undefined'}`);
-      if (state.availableColors && state.availableColors.length > 0) {
-        console.log(`   • First 3 available colors:`);
-        for (let i = 0; i < Math.min(3, state.availableColors.length); i++) {
-          const color = state.availableColors[i];
-          console.log(`     Color ${i}: ID ${color.id} RGB(${color.rgb.r},${color.rgb.g},${color.rgb.b})`);
-        }
-      } else {
-        console.log(`   ⚠️ NO AVAILABLE COLORS LOADED!`);
-      }
-      
-      // Log first few pixels of template data for debugging
-      console.log(`📊 Template data debug:`);
-      console.log(`   • Total pixels in template: ${pixels.length / 4}`);
-      console.log(`   • First 5 pixels (RGBA):`);
-      for (let i = 0; i < Math.min(20, pixels.length); i += 4) {
-        const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2], a = pixels[i + 3];
-        console.log(`     Pixel ${i/4}: RGB(${r},${g},${b}) Alpha:${a}`);
-      }
-      
-      // Log tile information
-      console.log(`📦 Loaded tiles information:`);
-      for (const [tileKey, tile] of this.tiles.entries()) {
-        console.log(`  - Tile ${tileKey}: ${tile.width}x${tile.height} pixels`);
-      }
-      
-      for (let y = 0; y < templateHeight; y++) {
-        for (let x = 0; x < templateWidth; x++) {
-          const idx = (y * templateWidth + x) * 4;
-          const r = pixels[idx];
-          const g = pixels[idx + 1];
-          const b = pixels[idx + 2];
-          const alpha = pixels[idx + 3];
-          
-          totalChecked++;
-          
-          const shouldLog = detailedLogCount < MAX_DETAILED_LOGS;
-          
-          // Calculate absolute canvas coordinates from local position + tile coordinates
-          const canvasX = region.x * 1000 + startPosition.x + x;
-          const canvasY = region.y * 1000 + startPosition.y + y;
-          const targetTx = Math.floor(canvasX / 1000);
-          const targetTy = Math.floor(canvasY / 1000);
-          const localPx = canvasX % 1000;
-          const localPy = canvasY % 1000;
-          
-          if (shouldLog) {
-            console.log(`🔸 Pixel (${x},${y}) -> Canvas(${canvasX},${canvasY}) -> Tile(${targetTx},${targetTy}) -> Local(${localPx},${localPy}) RGB(${r},${g},${b}) Alpha:${alpha}`);
-            if (startPosition.x <= 3999 && startPosition.y <= 3999) {
-              // Fixed: Removed broken regional coordinate log
-            } else {
-              // Fixed: Removed broken absolute coordinate log
-            }
-            detailedLogCount++;
-          }
-          
-          // Skip transparent pixels
-          if (alpha < CONFIG.TRANSPARENCY_THRESHOLD) {
-            if (shouldLog) console.log(`  ⏭️ SKIPPED: Transparent (alpha ${alpha} < ${CONFIG.TRANSPARENCY_THRESHOLD})`);
-            skippedTransparent++;
-            continue;
-          }
-          
-          // Skip white pixels if disabled
-          if (!state.paintWhitePixels && Utils.isWhitePixel(r, g, b)) {
-            if (shouldLog) console.log(`  ⏭️ SKIPPED: White pixel (paintWhitePixels disabled)`);
-            skippedWhite++;
-            continue;
-          }
-          
-          // Get template color ID
-          const templateColorId = findClosestColor([r, g, b], state.availableColors);
-          if (shouldLog) {
-            console.log(`  🎨 Template color ID: ${templateColorId}`);
-            console.log(`  🎨 Available colors count: ${state.availableColors ? state.availableColors.length : 'undefined'}`);
-            console.log(`  🎨 Has color access: ${this.hasColor(templateColorId)}`);
-            if (state.availableColors && state.availableColors.length > 0) {
-              console.log(`  🎨 First available color: ID ${state.availableColors[0].id} RGB(${state.availableColors[0].rgb.r},${state.availableColors[0].rgb.g},${state.availableColors[0].rgb.b})`);
-            }
-          }
-          
-          if (!templateColorId || !this.hasColor(templateColorId)) {
-            if (shouldLog) {
-              console.log(`  ⏭️ SKIPPED: No valid color ID or user doesn't have access`);
-              console.log(`    - templateColorId: ${templateColorId}`);
-              console.log(`    - hasColor result: ${this.hasColor(templateColorId)}`);
-              console.log(`    - availableColors length: ${state.availableColors ? state.availableColors.length : 'undefined'}`);
-            }
-            skippedNoColor++;
-            continue;
-          }
-          
-          // Get current tile color
-          const tileKey = `${targetTx}_${targetTy}`;
-          const tile = this.tiles.get(tileKey);
-          
-          if (!tile || !tile.data || localPx >= tile.width || localPy >= tile.height || !tile.data[localPx]) {
-            // If we can't load the tile or access the pixel, assume it needs painting
-            if (shouldLog) {
-              console.log(`  ❌ TILE ERROR: Cannot access tile ${tileKey} at local position (${localPx},${localPy})`);
-              console.log(`    - Tile exists: ${!!tile}`);
-              console.log(`    - Tile data exists: ${!!(tile && tile.data)}`);
-              console.log(`    - Tile dimensions: ${tile ? tile.width + 'x' + tile.height : 'N/A'}`);
-              console.log(`    - Local bounds check: ${localPx} < ${tile ? tile.width : 'N/A'} && ${localPy} < ${tile ? tile.height : 'N/A'}`);
-              console.log(`    - Data array exists: ${!!(tile && tile.data && tile.data[localPx])}`);
-            }
-            tileErrors++;
-            mismatched.push({
-              x: canvasX,
-              y: canvasY,
-              color: templateColorId,
-              localX: x,
-              localY: y,
-              regionX: targetTx,
-              regionY: targetTy
-            });
-            if (shouldLog) console.log(`  🎯 ADDED TO PAINT LIST (tile error)`);
-            continue;
-          }
-          
-          const currentColorHash = tile.data[localPx][localPy];
-          
-          // Convert template RGB to same hash format for comparison
-          const templateColorHash = ((r << 16) | (g << 8) | b) || 1;
-          
-          if (shouldLog) {
-            console.log(`  🔍 Canvas color hash: ${currentColorHash}`);
-            console.log(`  🎨 Template color hash: ${templateColorHash}`);
-            console.log(`  🎨 Template RGB: (${r},${g},${b})`);
-          }
-          
-          // Compare RGB hashes instead of color IDs
-          if (templateColorHash !== currentColorHash) {
-            if (shouldLog) console.log(`  🎯 MISMATCH! Adding to paint list`);
-            mismatched.push({
-              x: canvasX,
-              y: canvasY,
-              color: templateColorId,
-              localX: x,
-              localY: y,
-              regionX: targetTx,
-              regionY: targetTy
-            });
-          } else {
-            if (shouldLog) console.log(`  ✅ MATCH! Pixel already correct`);
-          }
-        }
-      }
-      
-      console.log(`📊 Pixel analysis complete:`);
-      console.log(`   • Total pixels checked: ${totalChecked}`);
-      console.log(`   • Skipped transparent: ${skippedTransparent}`);
-      console.log(`   • Skipped white: ${skippedWhite}`);
-      console.log(`   • Skipped no color: ${skippedNoColor}`);
-      console.log(`   • Tile access errors: ${tileErrors}`);
-      console.log(`   • Mismatched pixels: ${mismatched.length}`);
-      console.log(`   • Detailed logs shown: ${Math.min(detailedLogCount, MAX_DETAILED_LOGS)}/${totalChecked} pixels`);
-      if (detailedLogCount >= MAX_DETAILED_LOGS) {
-        console.log(`   ⚠️ Detailed logging was limited to ${MAX_DETAILED_LOGS} pixels to prevent console spam`);
-      }
-      
-      return mismatched;
-    }
-  }
-
-  // AUTO SCAN FUNCTIONALITY
-  async function performAutoScan() {
-    if (!state.imageLoaded || !state.startPosition || !state.region) {
-      console.warn("Cannot perform auto-scan: Missing requirements", {
-        imageLoaded: state.imageLoaded,
-        startPosition: !!state.startPosition,
-        region: !!state.region
-      });
-      return;
-    }
-
-    // Check if colors have been scanned
-    if (!state.colorsChecked || !state.availableColors || state.availableColors.length === 0) {
-      console.warn("Colors not scanned yet. Please scan colors first.");
-      updateUI("noColorsFound", "warning");
-      return;
-    }
-
-    try {
-      updateUI("loadingImage", "default");
-      console.log("🔍 Auto-scanning canvas for correct pixels...");
-      
-      const { width, height } = state.imageData;
-      console.log(`📏 Template size: ${width}x${height} pixels`);
-      console.log(`📍 Start position: (${state.startPosition.x}, ${state.startPosition.y})`);
-      console.log(`🗺️ Region: (${state.region.x}, ${state.region.y})`);
-      console.log(`🎨 Available colors: ${state.availableColors.length}`);
-      
-      // Load tiles with better error handling
-      const tilesLoaded = await state.tileManager.loadTiles(state.startPosition, state.region, width, height);
-      if (!tilesLoaded) {
-        console.warn("Failed to load tiles for scanning");
-        updateUI("scanFailed", "warning");
-        return;
-      }
-      
-      const mismatchedPixels = await state.tileManager.getColorPickerMismatchedPixels(
-        state.imageData,
-        state.startPosition,
-        state.region
-      );
-      
-      const totalPixels = width * height;
-      const alreadyCorrect = totalPixels - mismatchedPixels.length;
-      const efficiencyGain = Math.round((alreadyCorrect / totalPixels) * 100);
-      
-      // Update state with corrected pixel counts
-      state.totalPixels = mismatchedPixels.length; // Only count pixels that need painting
-      state.paintedPixels = 0; // Reset painted count
-      
-      // Cache the results for processImage function
-      state.cachedMismatchedPixels = mismatchedPixels;
-      state.lastScanTime = Date.now();
-      
-      console.log(`📊 Auto-scan complete:`);
-      console.log(`   • Total template pixels: ${totalPixels}`);
-      console.log(`   • Pixels needing paint: ${mismatchedPixels.length}`);
-      console.log(`   • Pixels already correct: ${alreadyCorrect}`);
-      console.log(`   • Efficiency gain: ${efficiencyGain}%`);
-      
-      updateUI("scanComplete", "success", { 
-        total: totalPixels,
-        needPainting: mismatchedPixels.length,
-        alreadyCorrect: alreadyCorrect,
-        efficiency: efficiencyGain
-      });
-      
-      // Update the progress display
-      updateStats();
-      
-    } catch (error) {
-      console.warn("Auto-scan failed:", error);
-      updateUI("scanFailed", "warning");
-    }
-  }
-
   // IMAGE PROCESSOR CLASS
   class ImageProcessor {
     constructor(imageSrc) {
@@ -2221,36 +1504,32 @@
   // COLOR MATCHING FUNCTION - Optimized with caching
   const colorCache = new Map()
 
-  function findClosestColor(targetRgb, availableColors = null) {
+  function findClosestColor(targetRgb, availableColors) {
     const cacheKey = `${targetRgb[0]},${targetRgb[1]},${targetRgb[2]}`
 
     if (colorCache.has(cacheKey)) {
       return colorCache.get(cacheKey)
     }
 
-    let minDistance = Number.POSITIVE_INFINITY
-    let closestColorId = 1 // Default to black
-
-    // Use COLOR_MAP directly for precise color matching
-    for (const [index, colorData] of Object.entries(CONFIG.COLOR_MAP)) {
-      if (colorData.rgb === null) continue; // Skip transparent
-      
-      // If availableColors is provided, check if user has access
-      if (availableColors && availableColors.length > 0) {
-        const hasAccess = availableColors.some(c => c.id === colorData.id);
-        if (!hasAccess) continue;
+    const isNearWhite = targetRgb[0] >= 250 && targetRgb[1] >= 250 && targetRgb[2] >= 250
+    if (isNearWhite) {
+      const whiteEntry = availableColors.find(c => c.rgb[0] >= 250 && c.rgb[1] >= 250 && c.rgb[2] >= 250)
+      if (whiteEntry) {
+        colorCache.set(cacheKey, whiteEntry.id)
+        return whiteEntry.id
       }
-      
-      const distance = Math.sqrt(
-        (targetRgb[0] - colorData.rgb.r) ** 2 + 
-        (targetRgb[1] - colorData.rgb.g) ** 2 + 
-        (targetRgb[2] - colorData.rgb.b) ** 2
-      );
-      
+    }
+
+    let minDistance = Number.POSITIVE_INFINITY
+    let closestColorId = availableColors[0]?.id || 1
+
+    for (let i = 0; i < availableColors.length; i++) {
+      const color = availableColors[i]
+      const distance = Utils.colorDistance(targetRgb, color.rgb)
       if (distance < minDistance) {
         minDistance = distance
-        closestColorId = colorData.id
-        if (distance === 0) break // Exact match
+        closestColorId = color.id
+        if (distance === 0) break
       }
     }
 
@@ -2401,50 +1680,88 @@
       }
 
       try {
-        const timeoutPromise = Utils.sleep(20000).then(() => reject(new Error("Auto-CAPTCHA timed out.")));
-
+        console.log("🤖 Starting enhanced auto-CAPTCHA process...");
+        
         const solvePromise = (async () => {
+          // Step 1: Click main paint button
           const mainPaintBtn = await Utils.waitForSelector('button.btn.btn-primary.btn-lg, button.btn-primary.sm\\:btn-xl', 200, 10000);
           if (!mainPaintBtn) throw new Error("Could not find the main paint button.");
+          console.log("✅ Found main paint button, clicking...");
           mainPaintBtn.click();
-          await Utils.sleep(500);
+          await Utils.sleep(300);
 
+          // Step 2: Select transparent color (ID 0)
           const transBtn = await Utils.waitForSelector('button#color-0', 200, 5000);
           if (!transBtn) throw new Error("Could not find the transparent color button.");
+          console.log("✅ Found transparent color button, selecting...");
           transBtn.click();
-          await Utils.sleep(500);
+          await Utils.sleep(300);
 
+          // Step 3: Click at center of canvas
           const canvas = await Utils.waitForSelector('canvas', 200, 5000);
           if (!canvas) throw new Error("Could not find the canvas element.");
-
+          
           canvas.setAttribute('tabindex', '0');
           canvas.focus();
           const rect = canvas.getBoundingClientRect();
           const centerX = Math.round(rect.left + rect.width / 2);
           const centerY = Math.round(rect.top + rect.height / 2);
 
+          console.log(`✅ Clicking canvas at center (${centerX}, ${centerY})...`);
           canvas.dispatchEvent(new MouseEvent('mousemove', { clientX: centerX, clientY: centerY, bubbles: true }));
           canvas.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', code: 'Space', bubbles: true }));
           await Utils.sleep(50);
           canvas.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', code: 'Space', bubbles: true }));
-          await Utils.sleep(500);
+          await Utils.sleep(300);
 
-          let confirmBtn = await Utils.waitForSelector('button.btn.btn-primary.btn-lg, button.btn.btn-primary.sm\\:btn-xl');
-          if (!confirmBtn) {
-            const allPrimary = Array.from(document.querySelectorAll('button.btn-primary'));
-            confirmBtn = allPrimary.length ? allPrimary[allPrimary.length - 1] : null;
+          // Step 4: Keep confirming until token is captured
+          console.log("🔄 Starting confirmation loop until token is captured...");
+          let attempts = 0;
+          const maxAttempts = 50; // Prevent infinite loop
+          
+          while (!turnstileToken && attempts < maxAttempts) {
+            attempts++;
+            console.log(`🔄 Confirmation attempt ${attempts}/${maxAttempts}...`);
+            
+            let confirmBtn = await Utils.waitForSelector('button.btn.btn-primary.btn-lg, button.btn-primary.sm\\:btn-xl', 100, 2000);
+            if (!confirmBtn) {
+              const allPrimary = Array.from(document.querySelectorAll('button.btn-primary'));
+              confirmBtn = allPrimary.length ? allPrimary[allPrimary.length - 1] : null;
+            }
+            
+            if (confirmBtn) {
+              confirmBtn.click();
+              console.log(`✅ Clicked confirmation button (attempt ${attempts})`);
+            }
+            
+            // Wait a bit before checking token or trying again
+            await Utils.sleep(500);
+            
+            // Check if token was captured
+            if (turnstileToken) {
+              console.log("🎉 Token captured successfully!");
+              break;
+            }
           }
-          if (!confirmBtn) throw new Error("Could not find the confirmation button.");
-          confirmBtn.click();
 
-          await tokenPromise;
+          if (!turnstileToken) {
+            throw new Error(`Failed to capture token after ${attempts} confirmation attempts`);
+          }
+
+          // Step 5: Wait for token promise to resolve (if not already resolved)
+          if (_resolveToken) {
+            await tokenPromise;
+          }
+          
+          console.log("✅ Auto-CAPTCHA completed successfully!");
           resolve();
         })();
 
-        await Promise.race([solvePromise, timeoutPromise]);
+        // No timeout - keep trying until success or manual intervention
+        await solvePromise;
 
       } catch (error) {
-        console.error("Auto-CAPTCHA process failed:", error);
+        console.error("❌ Auto-CAPTCHA process failed:", error);
         reject(error);
       }
     });
@@ -2453,11 +1770,6 @@
 
   async function createUI() {
     await detectLanguage()
-
-    // Initialize tile manager for smart pixel detection
-    if (!state.tileManager) {
-      state.tileManager = new TileManager();
-    }
 
     const existingContainer = document.getElementById("wplace-image-bot-container")
     const existingStats = document.getElementById("wplace-stats-container")
@@ -3690,14 +3002,10 @@
                 <span>${Utils.t("stopPainting")}</span>
               </button>
             </div>
-            <div class="wplace-row">
+            <div class="wplace-row single">
                 <button id="toggleOverlayBtn" class="wplace-btn wplace-btn-overlay" disabled>
                     <i class="fas fa-eye"></i>
                     <span>${Utils.t("toggleOverlay")}</span>
-                </button>
-                <button id="refreshCanvasBtn" class="wplace-btn wplace-btn-primary" disabled>
-                    <i class="fas fa-sync"></i>
-                    <span>Refresh Canvas</span>
                 </button>
             </div>
           </div>
@@ -4163,7 +3471,6 @@
     const compactBtn = container.querySelector("#compactBtn")
     const statsBtn = container.querySelector("#statsBtn")
     const toggleOverlayBtn = container.querySelector("#toggleOverlayBtn");
-    const refreshCanvasBtn = container.querySelector("#refreshCanvasBtn");
     const statusText = container.querySelector("#statusText")
     const progressBar = container.querySelector("#progressBar")
     const statsArea = statsContainer.querySelector("#statsArea")
@@ -4446,55 +3753,6 @@
         const isEnabled = overlayManager.toggle();
         toggleOverlayBtn.classList.toggle('active', isEnabled);
         Utils.showAlert(`Overlay ${isEnabled ? 'enabled' : 'disabled'}.`, 'info');
-      });
-    }
-
-    if (refreshCanvasBtn) {
-      refreshCanvasBtn.addEventListener('click', async () => {
-        if (!state.imageLoaded || !state.startPosition || !state.region) {
-          Utils.showAlert("Please upload an image and select position first.", "warning");
-          return;
-        }
-
-        refreshCanvasBtn.disabled = true;
-        refreshCanvasBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Loading...</span>';
-        
-        try {
-          const { width, height } = state.imageData;
-          await state.tileManager.loadTiles(state.startPosition, state.region, width, height);
-          
-          const mismatchedPixels = state.tileManager.getMismatchedPixels(
-            state.imageData,
-            state.startPosition,
-            state.region
-          );
-          
-          const alreadyCorrect = (width * height) - mismatchedPixels.length;
-          const efficiencyGain = Math.round((alreadyCorrect / (width * height)) * 100);
-          
-          // Update state with fresh scan results
-          state.totalPixels = mismatchedPixels.length;
-          state.paintedPixels = 0;
-          state.cachedMismatchedPixels = mismatchedPixels;
-          state.lastScanTime = Date.now();
-          
-          Utils.showAlert(
-            `Canvas analysis complete!\n\n` +
-            `• Total pixels: ${width * height}\n` +
-            `• Need painting: ${mismatchedPixels.length}\n` +
-            `• Already correct: ${alreadyCorrect}\n` +
-            `• Efficiency gain: ${efficiencyGain}%`,
-            "success"
-          );
-          
-          updateStats();
-        } catch (error) {
-          console.error("Failed to refresh canvas:", error);
-          Utils.showAlert("Failed to refresh canvas state. Check console for details.", "error");
-        } finally {
-          refreshCanvasBtn.disabled = false;
-          refreshCanvasBtn.innerHTML = '<i class="fas fa-sync"></i><span>Refresh Canvas</span>';
-        }
       });
     }
 
@@ -4917,17 +4175,17 @@
           toggleOverlayBtn.disabled = false;
           toggleOverlayBtn.classList.add('active');
 
-      // Only enable resize button if colors have also been captured
-      if (state.colorsChecked) {
-        resizeBtn.disabled = false;
-      }
-      // Enable refresh canvas button
-      refreshCanvasBtn.disabled = false;
-      saveBtn.disabled = false
+          // Only enable resize button if colors have also been captured
+          if (state.colorsChecked) {
+            resizeBtn.disabled = false;
+          }
+          saveBtn.disabled = false
 
-      if (state.startPosition) {
-        startBtn.disabled = false
-      }          updateStats()
+          if (state.startPosition) {
+            startBtn.disabled = false
+          }
+
+          updateStats()
           updateDataButtons()
           updateUI("imageLoaded", "success", { count: totalValidPixels })
         } catch {
@@ -4980,62 +4238,16 @@
 
                 const payload = JSON.parse(options.body)
                 if (payload?.coords && Array.isArray(payload.coords)) {
-                  const paintedX = payload.coords[0];
-                  const paintedY = payload.coords[1];
-                  
                   state.startPosition = {
-                    x: paintedX,
-                    y: paintedY,
+                    x: payload.coords[0],
+                    y: payload.coords[1],
                   }
-                  console.log(`🎯 Position detected from paint: (${paintedX}, ${paintedY})`);
-                  console.log(`🗺️ Current region: (${state.region.x}, ${state.region.y})`);
-                  
-                  // Check if these are regional coordinates (0-3999) or absolute coordinates
-                  if (paintedX <= 3999 && paintedY <= 3999) {
-                    console.log(`📍 These appear to be REGIONAL coordinates (0-3999 range)`);
-                    
-                    // Convert regional coordinates to local tile coordinates by removing first digit
-                    const localTileX = paintedX % 1000;
-                    const localTileY = paintedY % 1000;
-                    
-                    console.log(`🔢 Regional coord ${paintedX} → Local tile coord ${localTileX}`);
-                    console.log(`🔢 Regional coord ${paintedY} → Local tile coord ${localTileY}`);
-                    
-                    // Determine which tile within the region based on regional coords
-                    const tileXInRegion = Math.floor(paintedX / 1000);
-                    const tileYInRegion = Math.floor(paintedY / 1000);
-                    console.log(`🗺️ Tile within region: (${tileXInRegion}, ${tileYInRegion})`);
-                    
-                    // Map to global tile coordinates
-                    const globalTileX = state.region.x * 2 + tileXInRegion;
-                    const globalTileY = state.region.y * 2 + tileYInRegion;
-                    console.log(`🌍 Global tile coordinates: (${globalTileX}, ${globalTileY})`);
-                    
-                  } else {
-                    console.log(`📍 These appear to be ABSOLUTE coordinates (>3999)`);
-                    
-                    // Original absolute coordinate logic
-                    const extractedTileX = Math.floor(paintedX / 1000);
-                    const extractedTileY = Math.floor(paintedY / 1000);
-                    const localPosX = paintedX % 1000;
-                    const localPosY = paintedY % 1000;
-                    
-                    console.log(`📐 Tile extraction: floor(${paintedX}/1000) = ${extractedTileX}, floor(${paintedY}/1000) = ${extractedTileY}`);
-                    console.log(`📍 Local position: ${paintedX}%1000 = ${localPosX}, ${paintedY}%1000 = ${localPosY}`);
-                  }
-                  
                   state.lastPosition = { x: 0, y: 0 }
 
                   await overlayManager.setPosition(state.startPosition, state.region);
 
                   if (state.imageLoaded) {
                     startBtn.disabled = false
-                    refreshCanvasBtn.disabled = false
-                    
-                    // Auto-scan for correct pixels when position is set
-                    setTimeout(() => {
-                      performAutoScan();
-                    }, 500); // Small delay to ensure UI is updated
                   }
 
                   window.fetch = originalFetch
@@ -5071,8 +4283,23 @@
         updateUI("missingRequirements", "error")
         return false
       }
-      await ensureToken()
-      if (!turnstileToken) return false
+
+      // Auto-CAPTCHA: Try to get token immediately when starting painting
+      if (CONFIG.AUTO_CAPTCHA_ENABLED && !turnstileToken) {
+        updateUI("captchaSolving", "warning");
+        try {
+          await handleCaptcha();
+          console.log("✅ Initial auto-CAPTCHA completed, starting painting...");
+        } catch (e) {
+          console.error("❌ Initial auto-CAPTCHA failed:", e);
+          updateUI("captchaFailed", "error");
+          Utils.showAlert("Initial auto-CAPTCHA failed. Please paint a pixel manually to get a token.", "error");
+          return false;
+        }
+      } else if (!turnstileToken) {
+        await ensureToken()
+        if (!turnstileToken) return false
+      }
 
       state.running = true
       state.stopFlag = false
@@ -5081,7 +4308,6 @@
       uploadBtn.disabled = true
       selectPosBtn.disabled = true
       resizeBtn.disabled = true
-      refreshCanvasBtn.disabled = true
       saveBtn.disabled = true
       toggleOverlayBtn.disabled = true;
 
@@ -5103,7 +4329,6 @@
           uploadBtn.disabled = false
           selectPosBtn.disabled = false
           resizeBtn.disabled = false
-          refreshCanvasBtn.disabled = false
         } else {
           startBtn.disabled = false
         }
@@ -5164,256 +4389,218 @@
     const { x: startX, y: startY } = state.startPosition
     const { x: regionX, y: regionY } = state.region
 
-    // Step 1: Load current canvas tiles for comparison (if not already done)
-    console.log("🔍 Checking for recent scan results...");
-    
-    let mismatchedPixels;
-    const currentTime = Date.now();
-    
-    // Check if we have recent scan results (within last 30 seconds)
-    if (state.lastScanTime && (currentTime - state.lastScanTime) < 30000 && 
-        state.cachedMismatchedPixels && state.cachedMismatchedPixels.length >= 0) {
-      
-      console.log("📋 Using cached scan results from auto-scan");
-      mismatchedPixels = state.cachedMismatchedPixels;
-      
-    } else {
-      // Perform fresh scan
-      updateUI("loadingImage", "default");
-      console.log("🔍 Loading current canvas tiles for smart pixel detection...");
-      
-      try {
-        await state.tileManager.loadTiles(state.startPosition, state.region, width, height);
-      } catch (error) {
-        console.warn("Failed to load tiles, proceeding with blind painting:", error);
-        Utils.showAlert("Warning: Could not load canvas state. Painting blindly.", "warning");
-      }
+    const startRow = state.lastPosition.y || 0
+    const startCol = state.lastPosition.x || 0
 
-      // Step 2: Get only mismatched pixels that need painting
-      updateUI("checkingColors", "default");
-      console.log("🎯 Analyzing pixels to find mismatches...");
-      
-      mismatchedPixels = state.tileManager.getMismatchedPixels(
-        { width, height, pixels }, 
-        state.startPosition, 
-        state.region
-      );
-      
-      // Cache the results
-      state.cachedMismatchedPixels = mismatchedPixels;
-      state.lastScanTime = currentTime;
+    if (!state.paintedMap) {
+      state.paintedMap = Array(height)
+        .fill()
+        .map(() => Array(width).fill(false))
     }
 
-    if (mismatchedPixels.length === 0) {
-      updateUI("paintingComplete", "success", { count: 0 });
-      Utils.showAlert("🎉 Image is already complete! No pixels need painting.", "success");
-      return;
-    }
-
-    // Update total pixels to reflect actual work needed
-    state.totalPixels = mismatchedPixels.length;
-    state.paintedPixels = 0;
-    
-    console.log(`📊 Smart analysis complete:`);
-    console.log(`   • Total template pixels: ${width * height}`);
-    console.log(`   • Pixels needing paint: ${mismatchedPixels.length}`);
-    console.log(`   • Pixels already correct: ${(width * height) - mismatchedPixels.length}`);
-    console.log(`   • Efficiency gain: ${Math.round(((width * height - mismatchedPixels.length) / (width * height)) * 100)}%`);
-
-    updateUI("startPaintingMsg", "success");
-    updateStats();
-
-    // Step 3: Process only mismatched pixels
-    let currentPixelIndex = 0;
     let pixelBatch = null;
 
     try {
-      outerLoop: for (let i = 0; i < mismatchedPixels.length; i++) {
-        if (state.stopFlag) {
-          if (pixelBatch && pixelBatch.pixels.length > 0) {
-            await sendPixelBatch(pixelBatch.pixels, pixelBatch.regionX, pixelBatch.regionY);
+      outerLoop: for (let y = startRow; y < height; y++) {
+        for (let x = y === startRow ? startCol : 0; x < width; x++) {
+          if (state.stopFlag) {
+            if (pixelBatch && pixelBatch.pixels.length > 0) {
+              await sendPixelBatch(pixelBatch.pixels, pixelBatch.regionX, pixelBatch.regionY);
+            }
+            state.lastPosition = { x, y }
+            updateUI("paintingPaused", "warning", { x, y })
+            break outerLoop
           }
-          updateUI("paintingPaused", "warning", { 
-            x: mismatchedPixels[i]?.localX || 0, 
-            y: mismatchedPixels[i]?.localY || 0 
-          });
-          break outerLoop;
-        }
 
-        const pixel = mismatchedPixels[i];
-        currentPixelIndex = i;
+          if (state.paintedMap[y][x]) continue
 
-        // Group pixels by region for batch sending
-        if (!pixelBatch || 
-            pixelBatch.regionX !== pixel.regionX || 
-            pixelBatch.regionY !== pixel.regionY) {
-          
-          // Send previous batch if exists
-          if (pixelBatch && pixelBatch.pixels.length > 0) {
-            let success = await sendPixelBatch(pixelBatch.pixels, pixelBatch.regionX, pixelBatch.regionY);
-            if (success === "token_error") {
-              if (CONFIG.AUTO_CAPTCHA_ENABLED) {
-                updateUI("captchaSolving", "warning");
-                try {
-                  await handleCaptcha();
-                  success = await sendPixelBatch(pixelBatch.pixels, pixelBatch.regionX, pixelBatch.regionY);
-                  if (success === "token_error") {
-                    updateUI("captchaFailed", "error");
-                    state.stopFlag = true;
-                    break outerLoop;
-                  }
-                } catch (e) {
+          const idx = (y * width + x) * 4
+          const r = pixels[idx]
+          const g = pixels[idx + 1]
+          const b = pixels[idx + 2]
+          const alpha = pixels[idx + 3]
+
+          if (alpha < CONFIG.TRANSPARENCY_THRESHOLD || (!state.paintWhitePixels && Utils.isWhitePixel(r, g, b))) {
+            continue;
+          }
+
+          let targetRgb;
+          if (Utils.isWhitePixel(r, g, b)) {
+            targetRgb = [255, 255, 255];
+          } else {
+            targetRgb = Utils.findClosestPaletteColor(r, g, b, state.activeColorPalette);
+          }
+
+          const colorId = findClosestColor([r, g, b], state.availableColors);
+
+          let absX = startX + x;
+          let absY = startY + y;
+
+          let adderX = Math.floor(absX / 1000);
+          let adderY = Math.floor(absY / 1000);
+          let pixelX = absX % 1000;
+          let pixelY = absY % 1000;
+
+          if (!pixelBatch ||
+            pixelBatch.regionX !== regionX + adderX ||
+            pixelBatch.regionY !== regionY + adderY) {
+
+            if (pixelBatch && pixelBatch.pixels.length > 0) {
+              let success = await sendPixelBatch(pixelBatch.pixels, pixelBatch.regionX, pixelBatch.regionY);
+              
+              // Enhanced auto-CAPTCHA handling - sendPixelBatch now handles retries internally
+              if (success === "token_error") {
+                if (!CONFIG.AUTO_CAPTCHA_ENABLED) {
+                  updateUI("captchaNeeded", "error");
+                  Utils.showAlert(Utils.t("captchaNeeded"), "error");
+                  state.stopFlag = true;
+                  break outerLoop;
+                } else {
+                  // sendPixelBatch already handled the auto-CAPTCHA retries
+                  console.log("❌ Auto-CAPTCHA retries exhausted in sendPixelBatch");
                   updateUI("captchaFailed", "error");
                   state.stopFlag = true;
                   break outerLoop;
                 }
-              } else {
+              }
+              
+              if (success) {
+                pixelBatch.pixels.forEach((p) => {
+                  state.paintedMap[p.localY][p.localX] = true;
+                  state.paintedPixels++;
+                });
+                state.currentCharges -= pixelBatch.pixels.length;
+                updateUI("paintingProgress", "default", {
+                  painted: state.paintedPixels,
+                  total: state.totalPixels,
+                })
+
+                if (state.paintedPixels % 50 === 0) {
+                  Utils.saveProgress()
+                }
+
+                if (CONFIG.PAINTING_SPEED_ENABLED && state.paintingSpeed > 0 && pixelBatch.pixels.length > 0) {
+                  const delayPerPixel = 1000 / state.paintingSpeed // ms per pixel
+                  const totalDelay = Math.max(100, delayPerPixel * pixelBatch.pixels.length) // minimum 100ms
+                  await Utils.sleep(totalDelay)
+                }
+                updateStats();
+              }
+
+            }
+
+            pixelBatch = {
+              regionX: regionX + adderX,
+              regionY: regionY + adderY,
+              pixels: []
+            };
+          }
+
+          pixelBatch.pixels.push({
+            x: pixelX,
+            y: pixelY,
+            color: colorId,
+            localX: x,
+            localY: y,
+          });
+
+          if (pixelBatch.pixels.length >= Math.floor(state.currentCharges)) {
+            let success = await sendPixelBatch(pixelBatch.pixels, pixelBatch.regionX, pixelBatch.regionY);
+            
+            // Enhanced auto-CAPTCHA handling - sendPixelBatch now handles retries internally
+            if (success === "token_error") {
+              if (!CONFIG.AUTO_CAPTCHA_ENABLED) {
                 updateUI("captchaNeeded", "error");
                 Utils.showAlert(Utils.t("captchaNeeded"), "error");
                 state.stopFlag = true;
                 break outerLoop;
-              }
-            }
-            
-            if (success) {
-              state.paintedPixels += pixelBatch.pixels.length;
-              state.currentCharges -= pixelBatch.pixels.length;
-              
-              updateUI("paintingProgress", "default", {
-                painted: state.paintedPixels,
-                total: state.totalPixels,
-              });
-
-              if (state.paintedPixels % 50 === 0) {
-                Utils.saveProgress();
-              }
-
-              if (CONFIG.PAINTING_SPEED_ENABLED && state.paintingSpeed > 0 && pixelBatch.pixels.length > 0) {
-                const delayPerPixel = 1000 / state.paintingSpeed;
-                const totalDelay = Math.max(100, delayPerPixel * pixelBatch.pixels.length);
-                await Utils.sleep(totalDelay);
-              }
-              updateStats();
-            }
-          }
-
-          // Start new batch for this region
-          pixelBatch = {
-            regionX: pixel.regionX,
-            regionY: pixel.regionY,
-            pixels: []
-          };
-        }
-
-        // Add pixel to current batch
-        pixelBatch.pixels.push({
-          x: pixel.x,
-          y: pixel.y,
-          color: pixel.color,
-          localX: pixel.localX,
-          localY: pixel.localY,
-        });
-
-        // Send batch when full or we have enough charges
-        if (pixelBatch.pixels.length >= Math.floor(state.currentCharges)) {
-          let success = await sendPixelBatch(pixelBatch.pixels, pixelBatch.regionX, pixelBatch.regionY);
-          if (success === "token_error") {
-            if (CONFIG.AUTO_CAPTCHA_ENABLED) {
-              updateUI("captchaSolving", "warning");
-              try {
-                await handleCaptcha();
-                success = await sendPixelBatch(pixelBatch.pixels, pixelBatch.regionX, pixelBatch.regionY);
-                if (success === "token_error") {
-                  updateUI("captchaFailed", "error");
-                  state.stopFlag = true;
-                  break outerLoop;
-                }
-              } catch (e) {
+              } else {
+                // sendPixelBatch already handled the auto-CAPTCHA retries
+                console.log("❌ Auto-CAPTCHA retries exhausted in sendPixelBatch");
                 updateUI("captchaFailed", "error");
                 state.stopFlag = true;
                 break outerLoop;
               }
-            } else {
-              updateUI("captchaNeeded", "error");
-              Utils.showAlert(Utils.t("captchaNeeded"), "error");
-              state.stopFlag = true;
-              break outerLoop;
             }
+
+            if (success) {
+              pixelBatch.pixels.forEach((pixel) => {
+                state.paintedMap[pixel.localY][pixel.localX] = true;
+                state.paintedPixels++;
+              })
+
+              state.currentCharges -= pixelBatch.pixels.length;
+              updateStats()
+              updateUI("paintingProgress", "default", {
+                painted: state.paintedPixels,
+                total: state.totalPixels,
+              })
+
+              if (state.paintedPixels % 50 === 0) {
+                Utils.saveProgress()
+              }
+
+              if (CONFIG.PAINTING_SPEED_ENABLED && state.paintingSpeed > 0 && pixelBatch.pixels.length > 0) {
+                const delayPerPixel = 1000 / state.paintingSpeed // ms per pixel
+                const totalDelay = Math.max(100, delayPerPixel * pixelBatch.pixels.length) // minimum 100ms
+                await Utils.sleep(totalDelay)
+              }
+            }
+
+            pixelBatch.pixels = [];
           }
 
-          if (success) {
-            state.paintedPixels += pixelBatch.pixels.length;
-            state.currentCharges -= pixelBatch.pixels.length;
-            
-            updateStats();
-            updateUI("paintingProgress", "default", {
-              painted: state.paintedPixels,
-              total: state.totalPixels,
+          while (state.currentCharges < state.cooldownChargeThreshold && !state.stopFlag) {
+            const { charges, cooldown } = await WPlaceService.getCharges();
+            state.currentCharges = Math.floor(charges);
+            state.cooldown = cooldown;
+
+            if (state.currentCharges >= state.cooldownChargeThreshold) {
+              updateStats();
+              break;
+            }
+
+            updateUI("noChargesThreshold", "warning", {
+              time: Utils.formatTime(state.cooldown),
+              threshold: state.cooldownChargeThreshold,
+              current: state.currentCharges
             });
-
-            if (state.paintedPixels % 50 === 0) {
-              Utils.saveProgress();
-            }
-
-            if (CONFIG.PAINTING_SPEED_ENABLED && state.paintingSpeed > 0 && pixelBatch.pixels.length > 0) {
-              const delayPerPixel = 1000 / state.paintingSpeed;
-              const totalDelay = Math.max(100, delayPerPixel * pixelBatch.pixels.length);
-              await Utils.sleep(totalDelay);
-            }
+            await updateStats();
+            await Utils.sleep(state.cooldown);
           }
+          if (state.stopFlag) break outerLoop;
 
-          pixelBatch.pixels = [];
         }
-
-        // Wait for charges if needed
-        while (state.currentCharges < state.cooldownChargeThreshold && !state.stopFlag) {
-          const { charges, cooldown } = await WPlaceService.getCharges();
-          state.currentCharges = Math.floor(charges);
-          state.cooldown = cooldown;
-
-          if (state.currentCharges >= state.cooldownChargeThreshold) {
-            updateStats();
-            break;
-          }
-
-          updateUI("noChargesThreshold", "warning", {
-            time: Utils.formatTime(state.cooldown),
-            threshold: state.cooldownChargeThreshold,
-            current: state.currentCharges
-          });
-          await updateStats();
-          await Utils.sleep(state.cooldown);
-        }
-        if (state.stopFlag) break outerLoop;
       }
 
-      // Send remaining pixels in batch
       if (pixelBatch && pixelBatch.pixels.length > 0 && !state.stopFlag) {
         const success = await sendPixelBatch(pixelBatch.pixels, pixelBatch.regionX, pixelBatch.regionY);
         if (success) {
-          state.paintedPixels += pixelBatch.pixels.length;
+          pixelBatch.pixels.forEach((pixel) => {
+            state.paintedMap[pixel.localY][pixel.localX] = true
+            state.paintedPixels++
+          })
           state.currentCharges -= pixelBatch.pixels.length;
-          
           if (CONFIG.PAINTING_SPEED_ENABLED && state.paintingSpeed > 0 && pixelBatch.pixels.length > 0) {
-            const delayPerPixel = 1000 / state.paintingSpeed;
-            const totalDelay = Math.max(100, delayPerPixel * pixelBatch.pixels.length);
-            await Utils.sleep(totalDelay);
+            const delayPerPixel = 1000 / state.paintingSpeed // ms per pixel
+            const totalDelay = Math.max(100, delayPerPixel * pixelBatch.pixels.length) // minimum 100ms
+            await Utils.sleep(totalDelay)
           }
         }
       }
     } finally {
-      if (window._chargesInterval) clearInterval(window._chargesInterval);
-      window._chargesInterval = null;
+      if (window._chargesInterval) clearInterval(window._chargesInterval)
+      window._chargesInterval = null
     }
 
     if (state.stopFlag) {
-      updateUI("paintingStopped", "warning");
-      Utils.saveProgress();
+      updateUI("paintingStopped", "warning")
+      Utils.saveProgress()
     } else {
-      updateUI("paintingComplete", "success", { count: state.paintedPixels });
-      state.lastPosition = { x: 0, y: 0 };
-      state.paintedMap = null;
-      Utils.clearProgress();
+      updateUI("paintingComplete", "success", { count: state.paintedPixels })
+      state.lastPosition = { x: 0, y: 0 }
+      state.paintedMap = null
+      Utils.clearProgress()
       overlayManager.clear();
       const toggleOverlayBtn = document.getElementById('toggleOverlayBtn');
       if (toggleOverlayBtn) {
@@ -5422,7 +4609,7 @@
       }
     }
 
-    updateStats();
+    updateStats()
   }
 
   async function sendPixelBatch(pixelBatch, regionX, regionY) {
@@ -5440,30 +4627,85 @@
       colors[i] = pixel.color
     }
 
-    try {
-      const payload = { coords, colors, t: turnstileToken }
+    let attempts = 0;
+    const maxAttempts = 10; // Maximum retry attempts
 
-      const res = await fetch(`https://backend.wplace.live/s0/pixel/${regionX}/${regionY}`, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=UTF-8" },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      })
+    while (attempts < maxAttempts) {
+      attempts++;
+      
+      try {
+        const payload = { coords, colors, t: turnstileToken }
 
-      if (res.status === 403) {
-        let data = null
-        try { data = await res.json() } catch (_) { }
-        console.error("❌ 403 Forbidden. Turnstile token might be invalid or expired.")
-        turnstileToken = null
-        tokenPromise = new Promise((resolve) => { _resolveToken = resolve })
-        return "token_error"
+        const res = await fetch(`https://backend.wplace.live/s0/pixel/${regionX}/${regionY}`, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=UTF-8" },
+          credentials: "include",
+          body: JSON.stringify(payload),
+        })
+
+        if (res.status === 403) {
+          let data = null
+          try { data = await res.json() } catch (_) { }
+          console.error(`❌ 403 Forbidden on attempt ${attempts}/${maxAttempts}. Turnstile token might be invalid or expired.`)
+          
+          // Reset token and attempt auto-CAPTCHA if enabled
+          turnstileToken = null
+          tokenPromise = new Promise((resolve) => { _resolveToken = resolve })
+          
+          if (CONFIG.AUTO_CAPTCHA_ENABLED) {
+            console.log(`🤖 Attempting auto-CAPTCHA to resolve 403 error (attempt ${attempts}/${maxAttempts})...`);
+            updateUI("captchaSolving", "warning");
+            
+            try {
+              await handleCaptcha();
+              console.log(`✅ Auto-CAPTCHA successful on attempt ${attempts}, retrying painting...`);
+              // Continue the loop to retry with new token
+              continue;
+            } catch (captchaError) {
+              console.error(`❌ Auto-CAPTCHA failed on attempt ${attempts}:`, captchaError);
+              
+              if (attempts >= maxAttempts) {
+                console.error("❌ Max auto-CAPTCHA attempts reached, giving up");
+                updateUI("captchaFailed", "error");
+                return "token_error";
+              }
+              
+              // Wait a bit before retrying
+              await Utils.sleep(1000);
+              continue;
+            }
+          } else {
+            return "token_error"
+          }
+        }
+
+        // If we get here, the request was successful or had a different error
+        const data = await res.json()
+        const success = data?.painted === pixelBatch.length;
+        
+        if (success) {
+          console.log(`✅ Successfully painted ${pixelBatch.length} pixels on attempt ${attempts}`);
+          return true;
+        } else {
+          console.warn(`⚠️ Painting partially successful or failed. Expected: ${pixelBatch.length}, Actual: ${data?.painted || 0}`);
+          return false;
+        }
+
+      } catch (e) {
+        console.error(`❌ Batch paint request failed on attempt ${attempts}:`, e);
+        
+        if (attempts >= maxAttempts) {
+          console.error("❌ Max retry attempts reached for network error");
+          return false;
+        }
+        
+        // Wait before retrying network errors
+        await Utils.sleep(1000);
       }
-      const data = await res.json()
-      return data?.painted === pixelBatch.length
-    } catch (e) {
-      console.error("Batch paint request failed:", e)
-      return false
     }
+
+    console.error("❌ All retry attempts exhausted");
+    return false;
   }
 
   function saveBotSettings() {
