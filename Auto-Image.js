@@ -1552,7 +1552,83 @@
     }
 
     // Get mismatched pixels that need to be painted
-    getMismatchedPixels(templateData, startPosition, region) {
+    // NEW: Simple and reliable pixel scanning method
+    getSimpleMismatchedPixels(templateData, startPosition, region) {
+      const mismatched = [];
+      const { width: templateWidth, height: templateHeight, pixels } = templateData;
+      
+      console.log(`🚀 SIMPLE SCAN: ${templateWidth}x${templateHeight} template`);
+      console.log(`📍 Position: (${startPosition.x}, ${startPosition.y}) Region: (${region.x}, ${region.y})`);
+      console.log(`🎨 Available colors: ${state.availableColors ? state.availableColors.length : 0}`);
+      
+      let totalPixels = 0;
+      let transparentPixels = 0;
+      let mismatchedPixels = 0;
+      
+      for (let y = 0; y < templateHeight; y++) {
+        for (let x = 0; x < templateWidth; x++) {
+          const idx = (y * templateWidth + x) * 4;
+          const r = pixels[idx];
+          const g = pixels[idx + 1]; 
+          const b = pixels[idx + 2];
+          const alpha = pixels[idx + 3];
+          
+          totalPixels++;
+          
+          // Skip transparent pixels (alpha < 128)
+          if (alpha < 128) {
+            transparentPixels++;
+            continue;
+          }
+          
+          // Calculate canvas position
+          const canvasX = region.x * 1000 + startPosition.x + x;
+          const canvasY = region.y * 1000 + startPosition.y + y;
+          
+          // Find best color match from available colors
+          let bestColorId = 1; // Default color
+          let minDistance = Infinity;
+          
+          if (state.availableColors && state.availableColors.length > 0) {
+            for (const color of state.availableColors) {
+              const distance = Math.sqrt(
+                (r - color.rgb.r) ** 2 + 
+                (g - color.rgb.g) ** 2 + 
+                (b - color.rgb.b) ** 2
+              );
+              if (distance < minDistance) {
+                minDistance = distance;
+                bestColorId = color.id;
+              }
+            }
+          }
+          
+          // Add to paint list (assume everything needs painting for now)
+          mismatched.push({
+            x: canvasX,
+            y: canvasY,
+            color: bestColorId,
+            localX: x,
+            localY: y,
+            regionX: Math.floor(canvasX / 1000),
+            regionY: Math.floor(canvasY / 1000)
+          });
+          mismatchedPixels++;
+          
+          // Log first few for debugging
+          if (mismatchedPixels <= 3) {
+            console.log(`🎯 Pixel ${mismatchedPixels}: (${x},${y}) RGB(${r},${g},${b}) → Color${bestColorId} at Canvas(${canvasX},${canvasY})`);
+          }
+        }
+      }
+      
+      console.log(`✅ SIMPLE SCAN COMPLETE:`);
+      console.log(`   • Total: ${totalPixels}, Transparent: ${transparentPixels}, Need Paint: ${mismatchedPixels}`);
+      
+      return mismatched;
+    }
+
+    // Keep the original method as backup
       const mismatched = [];
       const { width: templateWidth, height: templateHeight, pixels } = templateData;
       let totalChecked = 0;
@@ -1766,7 +1842,7 @@
         return;
       }
       
-      const mismatchedPixels = state.tileManager.getMismatchedPixels(
+      const mismatchedPixels = state.tileManager.getSimpleMismatchedPixels(
         state.imageData,
         state.startPosition,
         state.region
